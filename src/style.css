@@ -94,6 +94,7 @@ body {
 .signinButton:hover {
   background: #d6044e;
 }
+
 button,
 input[type="submit"],
 .button {
@@ -175,19 +176,17 @@ label {
   border: none;
   margin-top: 20px;
   padding: 20px;
+  font-size: 16px;
+  letter-spacing: 10px;
   display: block;
   appearance: none;
   border-radius: 4px;
   width: 100%;
+  font-weight: lighter;
   transition: 0.3s all;
   max-width: 600px;
   cursor: pointer;
-  font-family: Poppins;
-  font-size: 24;
-  font-weight: 500;
-  line-height: 21px;
-  letter-spacing: 0.45em;
-  text-align: center;
+  transition: 0.3s all;
 }
 .submitButton:hover {
   background: #d6044e;
