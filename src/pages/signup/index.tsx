@@ -1,15 +1,16 @@
 import * as React from "react";
-import { useState} from "react";
+import { useState } from "react";
 import GenericForm from "../../components/GenericForm";
 import Ajv, { JSONSchemaType } from "ajv";
 import Grid from "@mui/material/Grid";
 import { Box, Button } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import Paper from "@mui/material/Paper";
-import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { Link } from "react-router-dom";
-import { styled } from "@mui/material/styles";
 import signupImage from "../../imgs/signupPage.svg";
+import { User } from "../../components/models/user";
+import ajvErrors from "ajv-errors";
+import { useNavigate } from "react-router-dom";
 
 function getAsyncData(key: string) {
   const myPromise: Promise<string> = new Promise((resolve) => {
@@ -21,7 +22,7 @@ function getAsyncData(key: string) {
   return myPromise;
 }
 
-function setAsyncData(key: string, value: UserData[]) {
+function setAsyncData(key: string, value: User[]) {
   return new Promise((resolve) => {
     setTimeout(() => {
       localStorage.setItem(key, JSON.stringify(value));
@@ -31,6 +32,7 @@ function setAsyncData(key: string, value: UserData[]) {
 }
 
 const ajv = new Ajv({ allErrors: true, $data: true });
+ajvErrors(ajv);
 
 const generateUniqueId = () => {
   return "_" + Math.random().toString(36).substr(2, 9);
@@ -109,33 +111,8 @@ const fields = [
     ],
   },
 ];
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
 
-type UserData = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  birthDate: string;
-  hobbies: string[];
-  email: string;
-  password: string;
-  avatarUrl: string;
-  gender: string;
-  accountType: string;
-  role: string;
-};
-
-const schema: JSONSchemaType<UserData> = {
+const schema: JSONSchemaType<User> = {
   type: "object",
   properties: {
     id: { type: "string" },
@@ -145,10 +122,11 @@ const schema: JSONSchemaType<UserData> = {
     email: { type: "string", pattern: "[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,}$" },
     password: { type: "string", minLength: 6 },
     birthDate: { type: "string", minLength: 1 },
-    avatarUrl: { type: "string" },
+    avatarUrl: { type: "string", minLength: 1 },
     gender: { type: "string", enum: ["Male", "Female"] },
     accountType: { type: "string", enum: ["Business", "Personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
+    balance: { type: "integer" },
   },
   required: [
     "id",
@@ -162,12 +140,21 @@ const schema: JSONSchemaType<UserData> = {
     "avatarUrl",
   ],
   additionalProperties: false,
+  errorMessage: {
+    properties: {
+      email: "Entered Email Is Invalid.",
+      password: "Entered Password Is Invalid.",
+    },
+  },
 };
 
 const validate = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
-  const [avatarImgURL, setAvatarImgURL] = useState("");
+  const navigate = useNavigate();
+  const [avatarImgURL, setAvatarImgURL] = useState(
+    "https://static.thenounproject.com/png/765938-200.png"
+  );
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -176,86 +163,89 @@ const SignUpPage: React.FC = () => {
       setAvatarImgURL(imageUrl);
     }
   };
-  const signUpFunction = async (data: Record<string, string>) => {
-    data.id = generateUniqueId();
-    data.role = "customer";
-    data.email = data.email.toLowerCase();
-    data.avatarUrl = avatarImgURL;
-    if (validate(data)) {
+
+  const signUp = async (data: Partial<any>) => {
+    const newUser = {
+      ...data,
+      id: generateUniqueId(),
+      role: "customer",
+      email: data.email.toLowerCase(),
+      avatarUrl:
+        avatarImgURL === "https://static.thenounproject.com/png/765938-200.png"
+          ? "https://icon-library.com/images/no-user-image-icon/no-user-image-icon-26.jpg"
+          : avatarImgURL,
+      balance: 0,
+    };
+    if (validate(newUser)) {
       const users = await getAsyncData("users");
-      const updatedUsers = Array.isArray(users) ? [...users, data] : [data];
-      setAsyncData("users", updatedUsers).then(function () {
-        window.location.href = "/signin";
-      });
+      const updatedUsers = Array.isArray(users) ? [...users, newUser] : [newUser];
+      await setAsyncData("users", updatedUsers);
+      navigate("/signin");
     }
   };
 
   return (
     <div
-      style={{ boxShadow: "0px 4px 10px 0px #5a5354da", borderRadius: "15px" }}
     >
-      <Grid container component="main" sx={{ height: "9" }}>
+      <Grid container component="main" sx={{ height: "100%" }}>
         <CssBaseline />
         <Grid
           item
-          xs={false}
-          sm={5}
           md={6}
-          my={4.8}
           sx={{
             backgroundImage: `url(${signupImage})`,
             backgroundRepeat: "no-repeat",
-            backgroundSize: "120%",
-            backgroundPosition: "bottom left",
+            backgroundSize: "100%",
+            backgroundPosition: "center",
           }}
         />
         <Grid
           item
-          xs={4}
-          sm={6}
           md={5}
           component={Paper}
-          elevation={8}
+          elevation={12}
           square={false}
           borderRadius={5}
         >
-          <Box
-            sx={{
-              my: 7,
-              mx: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          ></Box>
-
           <Box sx={{ mt: 1 }}>
             <Grid container spacing={1}>
-              {/*  */}
-              <Grid item ml={12} my={-6}>
+              <Grid item ml={12} my={2}>
                 <h1 className="firstTitle">CREATE ACCOUNT</h1>
               </Grid>
-              <Grid item ml={12} sm={12} my={0}>
+              <Grid item ml={12} sm={12} my={-6}>
                 <h2 className="secondTitle">
                   Welcome! Please fill out the details below
                 </h2>
               </Grid>
-              {/*  */}
-              <Grid item mx={44} my={4} style={{ textAlign: "center" }}>
+              <Grid item mx={42} my={4} style={{ textAlign: "center" }}>
                 <Button
                   style={{
                     fontSize: "2rem",
-                    padding: "20px",
-                    borderRadius: "50%",
+                    padding: "50px",
+                    borderRadius: "100%",
                     backgroundColor: "#F1F1F1",
+                    backgroundSize: "100%",
+                    backgroundImage: `url(${avatarImgURL})`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
                   }}
                   component="label"
                 >
-                  <AddAPhotoIcon sx={{ color: "#212121" }} />
-                  <VisuallyHiddenInput
+                  <input
                     type="file"
                     onChange={handleImageUpload}
                     required
+                    style={{
+                      clip: "rect(0 0 0 0)",
+                      clipPath: "inset(50%)",
+                      height: 1,
+                      overflow: "hidden",
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      whiteSpace: "nowrap",
+                      width: 1,
+                    }}
                   />
                 </Button>
               </Grid>
@@ -268,13 +258,13 @@ const SignUpPage: React.FC = () => {
               <Grid item xs={8} sm={6} my={5} mx={-3}>
                 <GenericForm
                   fields={fields}
-                  customSubmitFunction={signUpFunction}
-                  submitButtonName="Sign In"
+                  customSubmitAction={signUp}
+                  submitButtonName="Sign Up"
                   schema={schema}
                 />
               </Grid>
               <Grid container justifyContent="flex-start">
-                <Grid item mx={7} my={1}>
+                <Grid item mx={7}>
                   <Link to="/signin" className="existingUserButton">
                     Already got a user?
                   </Link>
