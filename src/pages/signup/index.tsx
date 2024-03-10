@@ -3,7 +3,7 @@ import { useState} from "react";
 import GenericForm from "../../components/GenericForm";
 import Ajv, { JSONSchemaType } from "ajv";
 import Grid from "@mui/material/Grid";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import Paper from "@mui/material/Paper";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
@@ -33,7 +33,7 @@ function setAsyncData(key: string, value: UserData[]) {
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 const generateUniqueId = () => {
-  return "_" + Math.random().toString(36).substr(2, 9);
+  return "_" + Math.random().toString(36).substring(2, 9);
 };
 
 const fields = [
@@ -183,23 +183,21 @@ const SignUpPage: React.FC = () => {
     data.avatarUrl = avatarImgURL;
     if (validate(data)) {
       const users = await getAsyncData("users");
-      const updatedUsers = Array.isArray(users) ? [...users, data] : [data];
-      setAsyncData("users", updatedUsers).then(function () {
-        window.location.href = "/signin";
-      });
+      const updatedUsers = Array.isArray(users)
+        ? [...users, newUser]
+        : [newUser];
+      await setAsyncData("users", updatedUsers);
+      navigate("/signin");
     }
   };
 
   return (
-    <div
-      style={{ boxShadow: "0px 4px 10px 0px #5a5354da", borderRadius: "15px" }}
-    >
-      <Grid container component="main" sx={{ height: "9" }}>
+    <div>
+      <Grid container component="main" sx={{ height: "100%" }}>
         <CssBaseline />
         <Grid
           item
-          xs={false}
-          sm={5}
+          xs={12}
           md={6}
           my={4.8}
           sx={{
@@ -211,9 +209,8 @@ const SignUpPage: React.FC = () => {
         />
         <Grid
           item
-          xs={4}
-          sm={6}
-          md={5}
+          xs={12}
+          md={6}
           component={Paper}
           elevation={8}
           square={false}
@@ -231,17 +228,25 @@ const SignUpPage: React.FC = () => {
 
           <Box sx={{ mt: 1 }}>
             <Grid container spacing={1}>
-              {/*  */}
-              <Grid item ml={12} my={-6}>
-                <h1 className="firstTitle">CREATE ACCOUNT</h1>
+              <Grid item ml={12} my={2}>
+              <Typography variant="h2" className={"firstTitle"} >CREATE ACCOUNT</Typography>
               </Grid>
               <Grid item ml={12} sm={12} my={0}>
                 <h2 className="secondTitle">
                   Welcome! Please fill out the details below
                 </h2>
               </Grid>
-              {/*  */}
-              <Grid item mx={44} my={4} style={{ textAlign: "center" }}>
+              <Grid
+                item
+                xs={12}
+                md={6}
+                lg={4}
+                my={4}
+                mx="auto"
+                textAlign="center"
+              >
+                {" "}
+                {/* Added Grid item properties */}
                 <Button
                   style={{
                     fontSize: "2rem",
@@ -258,27 +263,16 @@ const SignUpPage: React.FC = () => {
                     required
                   />
                 </Button>
-              </Grid>
-              <Grid item xl={12} my={-6} mx={35}>
                 <h4 className="addAvatarText">Upload profile image</h4>
-              </Grid>
-              {/*  */}
-
-              <Grid item ml={5} sm={2} mx={6} my={3}></Grid>
-              <Grid item xs={8} sm={6} my={5} mx={-3}>
                 <GenericForm
                   fields={fields}
                   customSubmitFunction={signUpFunction}
                   submitButtonName="Sign In"
                   schema={schema}
                 />
-              </Grid>
-              <Grid container justifyContent="flex-start">
-                <Grid item mx={7} my={1}>
-                  <Link to="/signin" className="existingUserButton">
-                    Already got a user?
-                  </Link>
-                </Grid>
+                <Link to="/signin" className="existingUserButton">
+                  Already got a user?
+                </Link>
               </Grid>
             </Grid>
           </Box>

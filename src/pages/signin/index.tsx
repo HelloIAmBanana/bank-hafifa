@@ -9,9 +9,21 @@ import loginImage from "../../imgs/loginPage.svg";
 import { useEffect } from "react";
 import Checkbox from "@mui/material/Checkbox";
 import GenericForm from "../../components/GenericForm";
+<<<<<<< Updated upstream
 const ajv = new Ajv({ allErrors: true });
 
 require("ajv-errors")(ajv);
+=======
+import ajvErrors from "ajv-errors";
+import { User } from "../../components/models/user";
+import { useNavigate } from "react-router-dom";
+import AuthService from "../../components/AuthService";
+import Login from "./login";
+import { Typography } from "@mui/material";
+const ajv = new Ajv({ allErrors: true, $data: true });
+
+ajvErrors(ajv);
+>>>>>>> Stashed changes
 
 function getAsyncData(key: string) {
   const myPromise: Promise<UserData[]> = new Promise((resolve) => {
@@ -22,6 +34,7 @@ function getAsyncData(key: string) {
   });
   return myPromise;
 }
+<<<<<<< Updated upstream
 function getAsyncCurrentUser(key: string) {
   const myPromise: Promise<UserData> = new Promise((resolve) => {
     setTimeout(() => {
@@ -64,6 +77,16 @@ type UserData = {
   role: string;
 };
 const schema: JSONSchemaType<UserData> = {
+=======
+
+function getCurrentUser(key: string) {
+  const data = localStorage.getItem(key);
+  const currentUser = data ? JSON.parse(data) : [];
+  return currentUser;
+}
+
+const schema: JSONSchemaType<User> = {
+>>>>>>> Stashed changes
   type: "object",
   properties: {
     id: { type: "string" },
@@ -83,7 +106,11 @@ const schema: JSONSchemaType<UserData> = {
   errorMessage: {
     properties: {
       email: "Entered Email Is Invalid.",
+<<<<<<< Updated upstream
       password: "Entered Password Is Invalid.",
+=======
+      lastName: "Entered Password Is Invalid.",
+>>>>>>> Stashed changes
     },
     _: 'data should have properties "foo" and "bar" only',
   },
@@ -116,18 +143,30 @@ const [rememberMe, setRememberMe] = React.useState(false);
   ];
 
   useEffect(() => {
+<<<<<<< Updated upstream
     const isUserRemembered = async () => {
       const usernameName = await getAsyncCurrentUser("currentUser");
       if (usernameName.firstName !== undefined) {
         await setCurrentUser("currentUser", usernameName).then(function () {
           window.location.href = "/welcome";
         });
+=======
+    const isUserRemembered = () => {
+      const rememberedUser = getCurrentUser("rememberedUser");
+      if (rememberedUser.firstName !== undefined) {
+        sessionStorage.setItem(
+          "currentUser",
+          JSON.stringify(AuthService.generateToken(rememberedUser))
+        );
+        navigate("/welcome");
+>>>>>>> Stashed changes
       }
     };
     isUserRemembered();
   }, []);
 
   const loginCheck = async (data: Record<string, any>) => {
+<<<<<<< Updated upstream
     const users = await getAsyncData("users"); //change to map
     let realUser: boolean = false;
     if (validate(data)) {
@@ -154,7 +193,16 @@ const [rememberMe, setRememberMe] = React.useState(false);
       }
     } else {
       alert("User Not Real");
+=======
+    if (validate(data)) {
+      if (await Login(data, rememberMe)) {
+        navigate("/welcome");
+      } else {
+        alert("User Not Real");
+      }
+>>>>>>> Stashed changes
     }
+    alert("Not all fields were filled!");
   };
 
   const handleRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,8 +210,14 @@ const [rememberMe, setRememberMe] = React.useState(false);
   };
 
   return (
+<<<<<<< Updated upstream
     <Grid container component="main" sx={{ height: "90vh" }}>
       <CssBaseline />
+=======
+
+    <Grid container component="main" sx={{ height: "90vh", display: "flex" }}>
+            <CssBaseline />
+>>>>>>> Stashed changes
       <Grid
         item
         xs={false}
@@ -200,14 +254,18 @@ const [rememberMe, setRememberMe] = React.useState(false);
         ></Box>
 
         <Grid container spacing={1}>
+<<<<<<< Updated upstream
           {/*  */}
+=======
+
+>>>>>>> Stashed changes
           <Grid item my={5} mx={25} lineHeight={50} spacing={54}>
-            <h1 className="firstTitle" style={{ lineHeight: "1" }}>
+            <Typography variant="h2" className="firstTitle" style={{ lineHeight: "1" }}>
               Welcome back
-            </h1>
+            </Typography>
           </Grid>
-          <Grid item ml={12} sm={12} my={-10} mx={0}>
-            <h2 className="secondTitle">Please enter your details.</h2>
+          <Grid item ml={12} sm={12} my={-5} mx={0}>
+            <Typography variant="h4" className="secondTitle">Please enter your details.</Typography>
           </Grid>
           {/*  */}
           <Grid item ml={12} sm={12} my={5} mx={12}>
@@ -226,7 +284,11 @@ const [rememberMe, setRememberMe] = React.useState(false);
               ></Checkbox>
               Remember Me
             </Grid>
+<<<<<<< Updated upstream
             <Grid item mx={17.8} my={-3}>
+=======
+            <Grid item my={-3} sx={{ marginLeft: "auto" }}>
+>>>>>>> Stashed changes
               <Link to="/" className="existingUserButton">
                 Forgot password?
               </Link>

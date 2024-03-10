@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect } from "react";
 
 function getAsyncData(key: string) {
@@ -8,6 +9,24 @@ function getAsyncData(key: string) {
     }, 1000);
   });
   return myPromise;
+=======
+import * as React from 'react';
+import Box from '@mui/material/Box';
+
+import NavBar from '../../components/navigationBar/navBar';
+const navigationItems = [
+  {
+      role: "admin"
+  }
+]
+
+export default function ClippedDrawer() {
+  
+ 
+  return (
+    <Box>{NavBar()}</Box>
+  );
+>>>>>>> Stashed changes
 }
 
 type UserData = {

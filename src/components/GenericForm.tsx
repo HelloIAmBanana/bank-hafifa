@@ -1,12 +1,34 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Box } from "@mui/material";
+import { Box, MenuItem, Typography } from "@mui/material";
 import FormHelperText from "@mui/material/FormHelperText";
-import Ajv, { JSONSchemaType, Schema } from "ajv";
+import Ajv, { Schema } from "ajv";
+import Button, { ButtonProps } from "@mui/material/Button";
+import { styled } from "@mui/material/styles";
 import ajvErrors from "ajv-errors";
+import { ContactPageSharp } from "@mui/icons-material";
+import fieldsRegistry from "./models/fieldTypes";
+const ajv = new Ajv({ allErrors: true, $data: true });
 
-const ajv = new Ajv({ allErrors: true });
-require("ajv-errors")(ajv);
+ajvErrors(ajv);
+
+const generateUniqueId = () => {
+  return "_" + Math.random().toString(36).substring(2, 9);
+};
+
+const CustomButton = styled(Button)<ButtonProps>(({ theme }) => ({
+  width: "100%",
+  borderRadius: "50px",
+  fontFamily: "Poppins",
+  letterSpacing: "0.4em",
+  fontSize: "25px",
+  fontWeight: "bold",
+  backgroundColor: "#f50057",
+  color: "white",
+  "&:hover": {
+    backgroundColor: "#d6044e",
+  },
+}));
 
 interface Field {
   id: string;
@@ -47,14 +69,11 @@ const GenericForm: React.FC<Props> = ({
     formState: { errors },
   } = useForm();
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = event.target;
-    setFormData({ ...formData, [id]: value });
+  const customErrors = errors as Record<string, { message?: string }>;
+  const onChange = () => {
+    clearErrors();
   };
 
-  const onChange = () => {
-    setCurrentLabelStyle("signinLabelNormal");
-  };
   const validateForm = (data: Record<string, any>) => {
     fields.map((field) => (field.errorMsgVisibility = true)); //Reset Error Messages
     validate(data);
@@ -86,51 +105,23 @@ const GenericForm: React.FC<Props> = ({
     >
       {fieldsData.map((field) => (
         <Box key={field.id}>
-          <h4>{field.label}</h4>
-          {field.type !== "select" ? (
-          <input
-            type={field.type}
-            id={field.id}
-            {...register(field.id)}
-            required={field.required}
-            onChange={handleInputChange}
-            placeholder={
-              currentLabelStyle === "signinLabelNormal"
-                ? field.placeholder
-                : "Incorrect Credentials"
-            }
-            style={{
-              borderColor:
-                currentLabelStyle === "signinLabelNormal"
-                  ? "#181818"
-                  : "#d10000",
-            }}
-          />
-          ):(
-          <select
-          id={field.id}
-          {...register(field.id)}
-          required={field.required}
-          style={{
-            borderColor:
-              currentLabelStyle === "signinLabelNormal"
-                ? "#181818"
-                : "#d10000",
-          }}
-          >
-            {field.options?.map((option) => (
-                <option key={option.value} value={option.value}>
+          <Typography variant="h6" className="signinLabelNormal">{field.label}</Typography>
+          <div className="formLabel">
+            {React.createElement(fieldsRegistry[field.type], {
+              type: field.type,
+              id: field.id,
+              ...register(field.id),
+              required: field.required,
+              placeholder: field.placeholder,
+              children: field.options?.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
                   {option.label}
-                </option>
-              ))}
-
-        </select>)}
-          <FormHelperText
-            id="component-error-text"
-            hidden={field.errorMsgVisibility}
-            style={{ color: "red" }}
-          >
-            {field.errorMsg}
+                </MenuItem>
+              )),
+            })}
+          </div>
+          <FormHelperText id="component-error-text" style={{ color: "red" }}>
+            {customErrors[field.id]?.message}
           </FormHelperText>
         </Box>
       ))}
