@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
-import { Box, MenuItem, Typography } from "@mui/material";
+import { Box, MenuItem } from "@mui/material";
 import FormHelperText from "@mui/material/FormHelperText";
 import Ajv, { Schema } from "ajv";
 import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import ajvErrors from "ajv-errors";
 import { ContactPageSharp } from "@mui/icons-material";
+import { useState} from "react";
+import { Typography } from "@mui/material";
 import fieldsRegistry from "./models/fieldTypes";
+
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
@@ -66,6 +69,7 @@ const GenericForm: React.FC<Props> = ({
     register,
     handleSubmit,
     setValue,
+    clearErrors,
     formState: { errors },
   } = useForm();
 

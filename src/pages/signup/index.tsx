@@ -10,6 +10,8 @@ import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { Link } from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import signupImage from "../../imgs/signupPage.svg";
+import { User } from "../../components/models/user"
+import { useNavigate } from "react-router-dom";
 
 function getAsyncData(key: string) {
   const myPromise: Promise<string> = new Promise((resolve) => {
@@ -21,7 +23,7 @@ function getAsyncData(key: string) {
   return myPromise;
 }
 
-function setAsyncData(key: string, value: UserData[]) {
+function setAsyncData(key: string, value: User[]) {
   return new Promise((resolve) => {
     setTimeout(() => {
       localStorage.setItem(key, JSON.stringify(value));
@@ -121,21 +123,8 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-type UserData = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  birthDate: string;
-  hobbies: string[];
-  email: string;
-  password: string;
-  avatarUrl: string;
-  gender: string;
-  accountType: string;
-  role: string;
-};
 
-const schema: JSONSchemaType<UserData> = {
+const schema: JSONSchemaType<User> = {
   type: "object",
   properties: {
     id: { type: "string" },
@@ -167,6 +156,7 @@ const schema: JSONSchemaType<UserData> = {
 const validate = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
+  const navigate= useNavigate()
   const [avatarImgURL, setAvatarImgURL] = useState("");
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -177,10 +167,13 @@ const SignUpPage: React.FC = () => {
     }
   };
   const signUpFunction = async (data: Record<string, string>) => {
-    data.id = generateUniqueId();
-    data.role = "customer";
-    data.email = data.email.toLowerCase();
-    data.avatarUrl = avatarImgURL;
+    const newUser = {
+      ...data,
+      id: generateUniqueId(),
+      role: "customer",
+      email: data.email.toLowerCase(),
+      avatarUrl: avatarImgURL,
+    };
     if (validate(data)) {
       const users = await getAsyncData("users");
       const updatedUsers = Array.isArray(users)
@@ -246,7 +239,6 @@ const SignUpPage: React.FC = () => {
                 textAlign="center"
               >
                 {" "}
-                {/* Added Grid item properties */}
                 <Button
                   style={{
                     fontSize: "2rem",

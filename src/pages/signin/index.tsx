@@ -9,13 +9,8 @@ import loginImage from "../../imgs/loginPage.svg";
 import { useEffect } from "react";
 import Checkbox from "@mui/material/Checkbox";
 import GenericForm from "../../components/GenericForm";
-<<<<<<< Updated upstream
-const ajv = new Ajv({ allErrors: true });
-
-require("ajv-errors")(ajv);
-=======
 import ajvErrors from "ajv-errors";
-import { User } from "../../components/models/user";
+import { User } from "../../components/models/user"
 import { useNavigate } from "react-router-dom";
 import AuthService from "../../components/AuthService";
 import Login from "./login";
@@ -23,10 +18,10 @@ import { Typography } from "@mui/material";
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
->>>>>>> Stashed changes
+
 
 function getAsyncData(key: string) {
-  const myPromise: Promise<UserData[]> = new Promise((resolve) => {
+  const myPromise: Promise<User[]> = new Promise((resolve) => {
     setTimeout(() => {
       const data = localStorage.getItem(key);
       resolve(data ? JSON.parse(data) : []);
@@ -34,9 +29,8 @@ function getAsyncData(key: string) {
   });
   return myPromise;
 }
-<<<<<<< Updated upstream
 function getAsyncCurrentUser(key: string) {
-  const myPromise: Promise<UserData> = new Promise((resolve) => {
+  const myPromise: Promise<User> = new Promise((resolve) => {
     setTimeout(() => {
       const data = localStorage.getItem(key);
       resolve(data ? JSON.parse(data) : []);
@@ -45,7 +39,7 @@ function getAsyncCurrentUser(key: string) {
   return myPromise;
 }
 
-function setCurrentUser(key: string, value: UserData) {
+function setCurrentUser(key: string, value: User) {
   return new Promise((resolve) => {
     setTimeout(() => {
       sessionStorage.setItem(key, JSON.stringify(value));
@@ -53,7 +47,7 @@ function setCurrentUser(key: string, value: UserData) {
     }, 1000);
   });
 }
-function setRememberedUser(key: string, value: UserData) {
+function setRememberedUser(key: string, value: User) {
   return new Promise((resolve) => {
     setTimeout(() => {
       localStorage.setItem(key, JSON.stringify(value));
@@ -63,22 +57,6 @@ function setRememberedUser(key: string, value: UserData) {
   });
 }
 
-type UserData = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  birthDate: string;
-  hobbies: string[];
-  email: string;
-  password: string;
-  avatarUrl: string;
-  gender: string;
-  accountType: string;
-  role: string;
-};
-const schema: JSONSchemaType<UserData> = {
-=======
-
 function getCurrentUser(key: string) {
   const data = localStorage.getItem(key);
   const currentUser = data ? JSON.parse(data) : [];
@@ -86,7 +64,6 @@ function getCurrentUser(key: string) {
 }
 
 const schema: JSONSchemaType<User> = {
->>>>>>> Stashed changes
   type: "object",
   properties: {
     id: { type: "string" },
@@ -106,18 +83,14 @@ const schema: JSONSchemaType<User> = {
   errorMessage: {
     properties: {
       email: "Entered Email Is Invalid.",
-<<<<<<< Updated upstream
       password: "Entered Password Is Invalid.",
-=======
-      lastName: "Entered Password Is Invalid.",
->>>>>>> Stashed changes
     },
-    _: 'data should have properties "foo" and "bar" only',
   },
 };
 
 const validate = ajv.compile(schema);
 const SignInPage: React.FC = () => {
+  const navigate =useNavigate();
 const [rememberMe, setRememberMe] = React.useState(false);
 
 
@@ -143,14 +116,6 @@ const [rememberMe, setRememberMe] = React.useState(false);
   ];
 
   useEffect(() => {
-<<<<<<< Updated upstream
-    const isUserRemembered = async () => {
-      const usernameName = await getAsyncCurrentUser("currentUser");
-      if (usernameName.firstName !== undefined) {
-        await setCurrentUser("currentUser", usernameName).then(function () {
-          window.location.href = "/welcome";
-        });
-=======
     const isUserRemembered = () => {
       const rememberedUser = getCurrentUser("rememberedUser");
       if (rememberedUser.firstName !== undefined) {
@@ -159,48 +124,21 @@ const [rememberMe, setRememberMe] = React.useState(false);
           JSON.stringify(AuthService.generateToken(rememberedUser))
         );
         navigate("/welcome");
->>>>>>> Stashed changes
       }
     };
     isUserRemembered();
   }, []);
 
   const loginCheck = async (data: Record<string, any>) => {
-<<<<<<< Updated upstream
+
     const users = await getAsyncData("users"); //change to map
-    let realUser: boolean = false;
-    if (validate(data)) {
-      for (let i = 0; i < users.length; i++) {
-        const currentUser = users[i];
-        if (
-          currentUser.email.includes(`${data.email}`) &&
-          currentUser.email.length == data.email.length
-        ) {
-          if (
-            currentUser.password.includes(`${data.password}`) &&
-            currentUser.password.length == data.password.length
-          ) {
-            console.log(currentUser);
-            if (rememberMe) {
-              await setRememberedUser("currentUser", currentUser);
-            } else {
-              await setCurrentUser("currentUser", currentUser);
-            }
-            realUser = true;
-            window.location.href = "/welcome";
-          }
-        }
-      }
-    } else {
-      alert("User Not Real");
-=======
     if (validate(data)) {
       if (await Login(data, rememberMe)) {
         navigate("/welcome");
       } else {
         alert("User Not Real");
       }
->>>>>>> Stashed changes
+
     }
     alert("Not all fields were filled!");
   };
@@ -210,14 +148,8 @@ const [rememberMe, setRememberMe] = React.useState(false);
   };
 
   return (
-<<<<<<< Updated upstream
     <Grid container component="main" sx={{ height: "90vh" }}>
       <CssBaseline />
-=======
-
-    <Grid container component="main" sx={{ height: "90vh", display: "flex" }}>
-            <CssBaseline />
->>>>>>> Stashed changes
       <Grid
         item
         xs={false}
@@ -254,11 +186,6 @@ const [rememberMe, setRememberMe] = React.useState(false);
         ></Box>
 
         <Grid container spacing={1}>
-<<<<<<< Updated upstream
-          {/*  */}
-=======
-
->>>>>>> Stashed changes
           <Grid item my={5} mx={25} lineHeight={50} spacing={54}>
             <Typography variant="h2" className="firstTitle" style={{ lineHeight: "1" }}>
               Welcome back
@@ -284,11 +211,7 @@ const [rememberMe, setRememberMe] = React.useState(false);
               ></Checkbox>
               Remember Me
             </Grid>
-<<<<<<< Updated upstream
-            <Grid item mx={17.8} my={-3}>
-=======
             <Grid item my={-3} sx={{ marginLeft: "auto" }}>
->>>>>>> Stashed changes
               <Link to="/" className="existingUserButton">
                 Forgot password?
               </Link>
