@@ -19,25 +19,22 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useState, useEffect } from "react";
 import { User } from "../../components/models/user";
 import AuthService from "../../components/AuthService";
-import { useEventCallback } from "@mui/material";
+import { Container, useEventCallback } from "@mui/material";
+import { AdsClick } from "@mui/icons-material";
 
 function getCurrentUser() {
-    const data = sessionStorage.getItem("currentUser");
-    return data ? JSON.parse(data) : [];
+  const data = sessionStorage.getItem("currentUser");
+  return data ? JSON.parse(data) : [];
 }
 const navigationItems = [
   {
     role: "admin",
   },
 ];
-function getUserName() {
-
-}
 const drawerWidth = 240;
 export default function NavBar() {
   const [timeGreetings, setTimeGreetings] = useState("");
   const [fullName, setFullName] = useState("");
-
   const icons = [
     <HomeIcon />,
     <RequestQuoteIcon />,
@@ -47,34 +44,40 @@ export default function NavBar() {
   ];
   const time = new Date().getHours();
   useEffect(() => {
-    if(time<12&&time>6){
-    setTimeGreetings("Good morning, ");
+    if (time < 12 && time > 6) {
+      setTimeGreetings("Good morning, ");
+    } else if (time < 18 && time > 12) {
+      setTimeGreetings("Good afternoon, ");
+    } else if (time < 24 && time > 18) {
+      setTimeGreetings("Good evening, ");
+    } else if (time < 6 && time > 24) {
+      setTimeGreetings("Good night, ");
+    }
+  },[time]);
+
+
+  async function getFullName() {
+    const user = (await AuthService.getUserFromStorage(
+      AuthService.getUserID()
+    )) as User;
+    setFullName(
+      user.firstName[0].toUpperCase() +
+        user.firstName.substring(1).toLowerCase() +
+        " " +
+        user.lastName[0].toUpperCase() +
+        user.lastName.substring(1).toLowerCase()
+    );
   }
-  else if (time<18&&time>12){
-    setTimeGreetings("Good afternoon, ");
-  }
-  else if(time<24&&time>18){
-    setTimeGreetings("Good evening, ");
-  }
-  else if(time<6&&time>24){
-    setTimeGreetings("Good night, ");
-  }})
-  async function getFullName(){
-    const user = await AuthService.getUserFromToken(AuthService.getToken()) as User;
-    setFullName(user.firstName[0].toUpperCase() +
-    user.firstName.substring(1).toLowerCase() +
-    " " +
-    user.lastName[0].toUpperCase() +
-    user.lastName.substring(1).toLowerCase())
-  }
-  getFullName()
+  getFullName();
   return (
+    <>
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
       <AppBar
         position="fixed"
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
+
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
             {timeGreetings} {fullName}
@@ -92,6 +95,7 @@ export default function NavBar() {
           },
         }}
       >
+
         <Toolbar />
         <Box sx={{ overflow: "auto" }}>
           <List>
@@ -105,11 +109,14 @@ export default function NavBar() {
                 </ListItem>
               )
             )}
-            
           </List>
           <Divider />
         </Box>
       </Drawer>
     </Box>
+    <div>
+      <h1>fdsaasd</h1>
+    </div>
+    </>
   );
 }

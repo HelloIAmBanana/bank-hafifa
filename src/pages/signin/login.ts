@@ -1,7 +1,8 @@
 import { User } from "../../components/models/user";
 import AuthService from "../../components/AuthService";
-export default async function Login(data: User, rememberMe: boolean) {
-    const users= await AuthService.getAsyncUsers();
+import CRUDLocalStorage from "../../components/CRUDLocalStorage";
+export default async function login(data: User, rememberMe: boolean) {
+  const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
   users.map((currentUser) => {
     if (
       currentUser.email.includes(`${data.email}`) &&
@@ -15,7 +16,7 @@ export default async function Login(data: User, rememberMe: boolean) {
         if (rememberMe) {
           localStorage.setItem("rememberedUser", JSON.stringify(currentUser));
         }
-        AuthService.generateToken(currentUser);
+        AuthService.storeUserToStorage(currentUser);
         return true;
       }
     }

@@ -10,4 +10,5 @@ export type User = {
     gender: string;
     accountType: string;
     role: string;
+    balance: number;
   };

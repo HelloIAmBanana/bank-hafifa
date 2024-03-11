@@ -1,37 +1,18 @@
 import * as React from "react";
-import { useState} from "react";
+import { useState } from "react";
 import GenericForm from "../../components/GenericForm";
 import Ajv, { JSONSchemaType } from "ajv";
 import Grid from "@mui/material/Grid";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Hidden, Input, Typography } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import Paper from "@mui/material/Paper";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { Link } from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import signupImage from "../../imgs/signupPage.svg";
-import { User } from "../../components/models/user"
+import { User } from "../../components/models/user";
 import { useNavigate } from "react-router-dom";
-
-function getAsyncData(key: string) {
-  const myPromise: Promise<string> = new Promise((resolve) => {
-    setTimeout(() => {
-      const data = localStorage.getItem(key);
-      resolve(data ? JSON.parse(data) : []);
-    }, 1000);
-  });
-  return myPromise;
-}
-
-function setAsyncData(key: string, value: User[]) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      localStorage.setItem(key, JSON.stringify(value));
-      resolve(value);
-    }, 1000);
-  });
-}
-
+import CRUDLocalStorage from "../../components/CRUDLocalStorage";
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 const generateUniqueId = () => {
@@ -111,17 +92,6 @@ const fields = [
     ],
   },
 ];
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
 
 
 const schema: JSONSchemaType<User> = {
@@ -138,6 +108,7 @@ const schema: JSONSchemaType<User> = {
     gender: { type: "string", enum: ["Male", "Female"] },
     accountType: { type: "string", enum: ["Business", "Personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
+    balance: { type: "number" },
   },
   required: [
     "id",
@@ -156,8 +127,8 @@ const schema: JSONSchemaType<User> = {
 const validate = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
-  const navigate= useNavigate()
-  const [avatarImgURL, setAvatarImgURL] = useState("");
+  const navigate = useNavigate();
+  const [avatarImgURL, setAvatarImgURL] = useState("https://static.thenounproject.com/png/765938-200.png");
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -166,20 +137,23 @@ const SignUpPage: React.FC = () => {
       setAvatarImgURL(imageUrl);
     }
   };
-  const signUpFunction = async (data: Record<string, string>) => {
+
+  const signUp = async (data: Partial<any>) => {
     const newUser = {
       ...data,
       id: generateUniqueId(),
       role: "customer",
       email: data.email.toLowerCase(),
-      avatarUrl: avatarImgURL,
+      avatarUrl:
+        avatarImgURL === "https://static.thenounproject.com/png/765938-200.png"
+          ? "https://icon-library.com/images/no-user-image-icon/no-user-image-icon-26.jpg"
+          : avatarImgURL,
+      balance: 0,
     };
-    if (validate(data)) {
-      const users = await getAsyncData("users");
-      const updatedUsers = Array.isArray(users)
-        ? [...users, newUser]
-        : [newUser];
-      await setAsyncData("users", updatedUsers);
+    if (validate(newUser)) {
+      const users = await CRUDLocalStorage.getAsyncData("users");
+      const updatedUsers = Array.isArray(users) ? [...users, newUser] : [newUser];
+      await CRUDLocalStorage.setAsyncData("users", updatedUsers);
       navigate("/signin");
     }
   };
@@ -222,7 +196,9 @@ const SignUpPage: React.FC = () => {
           <Box sx={{ mt: 1 }}>
             <Grid container spacing={1}>
               <Grid item ml={12} my={2}>
-              <Typography variant="h2" className={"firstTitle"} >CREATE ACCOUNT</Typography>
+                <Typography variant="h2" className={"firstTitle"}>
+                  CREATE ACCOUNT
+                </Typography>
               </Grid>
               <Grid item ml={12} sm={12} my={0}>
                 <h2 className="secondTitle">
@@ -242,24 +218,38 @@ const SignUpPage: React.FC = () => {
                 <Button
                   style={{
                     fontSize: "2rem",
-                    padding: "20px",
-                    borderRadius: "50%",
+                    padding: "50px",
+                    borderRadius: "100%",
                     backgroundColor: "#F1F1F1",
+                    backgroundSize: "100%",
+                    backgroundImage: `url(${avatarImgURL})`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
                   }}
                   component="label"
                 >
-                  <AddAPhotoIcon sx={{ color: "#212121" }} />
-                  <VisuallyHiddenInput
+                  <input
                     type="file"
                     onChange={handleImageUpload}
                     required
+                    style={{
+                      clip: "rect(0 0 0 0)",
+                      clipPath: "inset(50%)",
+                      height: 1,
+                      overflow: "hidden",
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      whiteSpace: "nowrap",
+                      width: 1,
+                    }}
                   />
                 </Button>
                 <h4 className="addAvatarText">Upload profile image</h4>
                 <GenericForm
                   fields={fields}
-                  customSubmitFunction={signUpFunction}
-                  submitButtonName="Sign In"
+                  customSubmitFunction={signUp}
+                  submitButtonName="Sign Up"
                   schema={schema}
                 />
                 <Link to="/signin" className="existingUserButton">

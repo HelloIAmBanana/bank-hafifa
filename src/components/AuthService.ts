@@ -1,29 +1,21 @@
 import { User } from "./models/user";
+import CRUDLocalStorage from "./CRUDLocalStorage";
 class AuthService {
-  static generateToken(user: User) {
+  static storeUserToStorage(user: User) {
     sessionStorage.setItem("currentUser", JSON.stringify(user.id));
   }
-  static async getUserFromToken(id: string) {
-    const users= await this.getAsyncUsers() as User[];
+  static async getUserFromStorage(id: string) {
+    const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
     try {
-      const decoded = users.filter((user) => user.id == id);
+      const decoded = users.filter((user) => user.id === id);
       return decoded[0] as User;
     } catch (error) {
       return null;
     }
   }
-  static getToken(){
+  static getUserID() {
     const user = sessionStorage.getItem("currentUser");
-    return (user? JSON.parse(user):undefined);
-  }
-  static getAsyncUsers() {
-    const myPromise: Promise<User[]> = new Promise((resolve) => {
-      setTimeout(() => {
-        const data = localStorage.getItem("users");
-        resolve(data ? JSON.parse(data) : []);
-      }, 1000);
-    });
-    return myPromise;
+    return user ? JSON.parse(user) : undefined;
   }
 }
 

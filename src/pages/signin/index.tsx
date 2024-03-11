@@ -15,47 +15,12 @@ import { useNavigate } from "react-router-dom";
 import AuthService from "../../components/AuthService";
 import Login from "./login";
 import { Typography } from "@mui/material";
+import CRUDLocalStorage from "../../components/CRUDLocalStorage";
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
 
 
-function getAsyncData(key: string) {
-  const myPromise: Promise<User[]> = new Promise((resolve) => {
-    setTimeout(() => {
-      const data = localStorage.getItem(key);
-      resolve(data ? JSON.parse(data) : []);
-    }, 1000);
-  });
-  return myPromise;
-}
-function getAsyncCurrentUser(key: string) {
-  const myPromise: Promise<User> = new Promise((resolve) => {
-    setTimeout(() => {
-      const data = localStorage.getItem(key);
-      resolve(data ? JSON.parse(data) : []);
-    }, 1000);
-  });
-  return myPromise;
-}
-
-function setCurrentUser(key: string, value: User) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      sessionStorage.setItem(key, JSON.stringify(value));
-      resolve(value);
-    }, 1000);
-  });
-}
-function setRememberedUser(key: string, value: User) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      localStorage.setItem(key, JSON.stringify(value));
-      sessionStorage.setItem(key, JSON.stringify(value));
-      resolve(value);
-    }, 1000);
-  });
-}
 
 function getCurrentUser(key: string) {
   const data = localStorage.getItem(key);
@@ -77,6 +42,7 @@ const schema: JSONSchemaType<User> = {
     gender: { type: "string", enum: ["male", "female"] },
     accountType: { type: "string", enum: ["business", "personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
+    balance: {type: "number"},
   },
   required: ["email", "password"],
   additionalProperties: false,
@@ -90,7 +56,7 @@ const schema: JSONSchemaType<User> = {
 
 const validate = ajv.compile(schema);
 const SignInPage: React.FC = () => {
-  const navigate =useNavigate();
+  const navigate = useNavigate();
 const [rememberMe, setRememberMe] = React.useState(false);
 
 
@@ -121,7 +87,7 @@ const [rememberMe, setRememberMe] = React.useState(false);
       if (rememberedUser.firstName !== undefined) {
         sessionStorage.setItem(
           "currentUser",
-          JSON.stringify(AuthService.generateToken(rememberedUser))
+          JSON.stringify(AuthService.storeUserToStorage(rememberedUser))
         );
         navigate("/welcome");
       }
@@ -130,10 +96,10 @@ const [rememberMe, setRememberMe] = React.useState(false);
   }, []);
 
   const loginCheck = async (data: Record<string, any>) => {
-
-    const users = await getAsyncData("users"); //change to map
-    if (validate(data)) {
+    console.log(validate(data))
+  if (validate(data)) {    
       if (await Login(data, rememberMe)) {
+        console.log("BLAAAA"+   await Login(data, rememberMe))
         navigate("/welcome");
       } else {
         alert("User Not Real");
