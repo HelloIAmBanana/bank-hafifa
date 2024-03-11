@@ -1,57 +1,38 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
 import { useState, useEffect } from "react";
-import NavBar from "../../components/navigationBar/navBar";
-import { Button, Divider, Grid, Paper, Typography } from "@mui/material";
 import AuthService from "../../components/AuthService";
 import { User } from "../../components/models/user";
 
 const WelcomePage: React.FC = () => {
-  const [userBalance, setUserBalance] = useState(0);
-  const [currentUser, setCurrentUser] = useState<User>();
-
-  const getCurrentUser = async () => {
-    setCurrentUser(
-      (await AuthService.getUserFromStorage(AuthService.getUserID()) as User)
-    );
-  };
+  const [timeGreetings, setTimeGreetings] = useState("");
+  const [fullName, setFullName] = useState("");
+  const time = new Date().getHours();
   useEffect(() => {
-    getCurrentUser();
-  }, []);
+    if (time < 12 && time > 6) {
+      setTimeGreetings("Good morning, ");
+    } else if (time < 18 && time > 12) {
+      setTimeGreetings("Good afternoon, ");
+    } else if (time < 24 && time > 18) {
+      setTimeGreetings("Good evening, ");
+    } else if (time < 6 && time > 24) {
+      setTimeGreetings("Good night, ");
+    }
+  }, [time]);
 
-  const onClick = () => {
-    setUserBalance(userBalance+50)
-    const updatedUser = {
-      ...currentUser,
-      balance: userBalance
-    } as User;
-    setCurrentUser(updatedUser)
-    alert(currentUser?.firstName);
-  };
-  return (
-    <>
-      <Box>
-        <NavBar />
+  async function getFullName() {
+    const user = (await AuthService.getUserFromStorage(
+      AuthService.getUserID()
+    )) as User;
+    setFullName(
+      user.firstName[0].toUpperCase() +
+        user.firstName.substring(1).toLowerCase() +
+        " " +
+        user.lastName[0].toUpperCase() +
+        user.lastName.substring(1).toLowerCase()
+    );
+  }
+  getFullName();
 
-        <Grid item xs={12} md={4} lg={3}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              marginLeft: "auto",
-              height: 240,
-              width: 500,
-            }}
-          >
-            <Typography component="p" variant="h4" sx={{ marginLeft: "auto" }}>
-              {userBalance}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Button onClick={onClick}>fadsj</Button>
-      </Box>
-    </>
-  );
+  return <>{timeGreetings} {fullName}</>;
 };
 export default WelcomePage;
