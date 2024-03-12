@@ -59,9 +59,6 @@ const WelcomePage: React.FC = () => {
     }
   };
 
-  const onClick = () => {
-    updateBalance(currentUser as User, 50);
-  };
   const handleOpenModal = () => {
     setOpenModal(true);
   };
@@ -90,7 +87,7 @@ const WelcomePage: React.FC = () => {
     <>
       <NavBar />
       <Box mx={30} sx={{ paddingTop: 8 }}>
-        {isLoading ? ( // Render CircularProgress if isLoading is true
+        {(isLoading||!currentUser) ? ( // Render CircularProgress if isLoading is true
           <Box
             sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}
           >
