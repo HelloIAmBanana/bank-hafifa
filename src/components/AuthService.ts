@@ -7,13 +7,22 @@ class AuthService {
   static async getUserFromStorage(id: string) {
     const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
     try {
-      const decoded = users.filter((user) => user.id === id);
-      return decoded[0] as User;
+      const user = users.find((user) => user.id === id);
+      return user as User;
     } catch (error) {
       return null;
     }
   }
-  static getUserID() {
+  static async getUserID(inputUser:User) {
+    const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
+console.log("ID: ")
+      const user = users.find((user) => user.id === inputUser.id);
+      console.log("Blaaa: ",user)
+      return user ? JSON.parse(user.id) : undefined;
+    
+  }
+  
+  static getCurrentUserID() {
     const user = sessionStorage.getItem("currentUser");
     return user ? JSON.parse(user) : undefined;
   }

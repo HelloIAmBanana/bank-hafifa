@@ -1,7 +1,7 @@
 import { User } from "../../components/models/user";
 import AuthService from "../../components/AuthService";
 import CRUDLocalStorage from "../../components/CRUDLocalStorage";
-export default async function login(data: User, rememberMe: boolean) {
+export default async function loginValidate(data: User, rememberMe: boolean) {
   const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
   users.map((currentUser) => {
     if (

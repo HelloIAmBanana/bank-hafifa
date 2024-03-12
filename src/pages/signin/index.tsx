@@ -10,17 +10,15 @@ import { useEffect } from "react";
 import Checkbox from "@mui/material/Checkbox";
 import GenericForm from "../../components/GenericForm";
 import ajvErrors from "ajv-errors";
-import { User } from "../../components/models/user"
+import { User } from "../../components/models/user";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../../components/AuthService";
-import Login from "./login";
 import { Typography } from "@mui/material";
-import CRUDLocalStorage from "../../components/CRUDLocalStorage";
+import loginValidate from "./login";
+
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
-
-
 
 function getCurrentUser(key: string) {
   const data = localStorage.getItem(key);
@@ -42,7 +40,7 @@ const schema: JSONSchemaType<User> = {
     gender: { type: "string", enum: ["male", "female"] },
     accountType: { type: "string", enum: ["business", "personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
-    balance: {type: "number"},
+    balance: { type: "number" },
   },
   required: ["email", "password"],
   additionalProperties: false,
@@ -57,8 +55,7 @@ const schema: JSONSchemaType<User> = {
 const validate = ajv.compile(schema);
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
-const [rememberMe, setRememberMe] = React.useState(false);
-
+  const [rememberMe, setRememberMe] = React.useState(false);
 
   const fields = [
     {
@@ -85,26 +82,21 @@ const [rememberMe, setRememberMe] = React.useState(false);
     const isUserRemembered = () => {
       const rememberedUser = getCurrentUser("rememberedUser");
       if (rememberedUser.firstName !== undefined) {
-        sessionStorage.setItem(
-          "currentUser",
-          JSON.stringify(AuthService.storeUserToStorage(rememberedUser))
-        );
+        AuthService.storeUserToStorage(rememberedUser);
         navigate("/welcome");
       }
     };
     isUserRemembered();
-  }, []);
+  },);
 
-  const loginCheck = async (data: Record<string, any>) => {
-    console.log(validate(data))
-  if (validate(data)) {    
-      if (await Login(data, rememberMe)) {
-        console.log("BLAAAA"+   await Login(data, rememberMe))
+  const login = async (data: Record<string, any>) => {
+    console.log(validate(data));
+    if (validate(data)) {
+      if (await loginValidate(data, rememberMe)) {
         navigate("/welcome");
       } else {
         alert("User Not Real");
       }
-
     }
     alert("Not all fields were filled!");
   };
@@ -153,18 +145,24 @@ const [rememberMe, setRememberMe] = React.useState(false);
 
         <Grid container spacing={1}>
           <Grid item my={5} mx={25} lineHeight={50} spacing={54}>
-            <Typography variant="h2" className="firstTitle" style={{ lineHeight: "1" }}>
+            <Typography
+              variant="h2"
+              className="firstTitle"
+              style={{ lineHeight: "1" }}
+            >
               Welcome back
             </Typography>
           </Grid>
           <Grid item ml={12} sm={12} my={-5} mx={0}>
-            <Typography variant="h4" className="secondTitle">Please enter your details.</Typography>
+            <Typography variant="h4" className="secondTitle">
+              Please enter your details.
+            </Typography>
           </Grid>
           {/*  */}
           <Grid item ml={12} sm={12} my={5} mx={12}>
             <GenericForm
               fields={fields}
-              customSubmitFunction={loginCheck}
+              customSubmitFunction={login}
               submitButtonName="Sign In"
               schema={schema}
             />

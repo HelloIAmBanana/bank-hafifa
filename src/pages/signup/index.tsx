@@ -3,21 +3,16 @@ import { useState } from "react";
 import GenericForm from "../../components/GenericForm";
 import Ajv, { JSONSchemaType } from "ajv";
 import Grid from "@mui/material/Grid";
-import { Box, Button, Hidden, Input, Typography } from "@mui/material";
+import { Box, Button, Input, Typography } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import Paper from "@mui/material/Paper";
-import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { Link } from "react-router-dom";
-import { styled } from "@mui/material/styles";
 import signupImage from "../../imgs/signupPage.svg";
 import { User } from "../../components/models/user";
 import { useNavigate } from "react-router-dom";
 import CRUDLocalStorage from "../../components/CRUDLocalStorage";
+import AppUtilities from "../../components/utils";
 const ajv = new Ajv({ allErrors: true, $data: true });
-
-const generateUniqueId = () => {
-  return "_" + Math.random().toString(36).substring(2, 9);
-};
 
 const fields = [
   {
@@ -128,7 +123,7 @@ const validate = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
-  const [avatarImgURL, setAvatarImgURL] = useState("https://static.thenounproject.com/png/765938-200.png");
+  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -141,17 +136,14 @@ const SignUpPage: React.FC = () => {
   const signUp = async (data: Partial<any>) => {
     const newUser = {
       ...data,
-      id: generateUniqueId(),
+      id: AppUtilities.generateUniqueId(),
       role: "customer",
       email: data.email.toLowerCase(),
-      avatarUrl:
-        avatarImgURL === "https://static.thenounproject.com/png/765938-200.png"
-          ? "https://icon-library.com/images/no-user-image-icon/no-user-image-icon-26.jpg"
-          : avatarImgURL,
+      avatarUrl: avatarImgURL,
       balance: 0,
     };
     if (validate(newUser)) {
-      const users = await CRUDLocalStorage.getAsyncData("users");
+      const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
       const updatedUsers = Array.isArray(users) ? [...users, newUser] : [newUser];
       await CRUDLocalStorage.setAsyncData("users", updatedUsers);
       navigate("/signin");
@@ -222,13 +214,13 @@ const SignUpPage: React.FC = () => {
                     borderRadius: "100%",
                     backgroundColor: "#F1F1F1",
                     backgroundSize: "100%",
-                    backgroundImage: `url(${avatarImgURL})`,
+                    backgroundImage: `url(${avatarImgURL?avatarImgURL:"https://static.thenounproject.com/png/765938-200.png"})`,
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "center",
                   }}
                   component="label"
                 >
-                  <input
+                  <Input
                     type="file"
                     onChange={handleImageUpload}
                     required
