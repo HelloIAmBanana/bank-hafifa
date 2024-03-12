@@ -87,7 +87,7 @@ const SignInPage: React.FC = () => {
       }
     };
     isUserRemembered();
-  },);
+  });
 
   const login = async (data: Record<string, any>) => {
     console.log(validate(data));
@@ -167,8 +167,9 @@ const SignInPage: React.FC = () => {
               schema={schema}
             />
           </Grid>
-          <Grid container justifyContent="flex-start">
-            <Grid item mx={12} my={-4} className="existingUserButton">
+
+          <Grid container>
+            <Grid item my={-4} className="existingUserButton">
               <Checkbox
                 onChange={handleRememberMe}
                 title="Remember me"
@@ -181,7 +182,6 @@ const SignInPage: React.FC = () => {
               </Link>
             </Grid>
           </Grid>
-          <Grid style={{ width: "30" }}></Grid>
         </Grid>
       </Grid>
     </Grid>
