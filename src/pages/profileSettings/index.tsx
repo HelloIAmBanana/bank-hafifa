@@ -1,11 +1,10 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import NavBar from "../../components/navigationBar/navBar";
 import {
   Button,
   Grid,
-  Paper,
   Typography,
   Modal,
   TextField,
@@ -14,14 +13,17 @@ import {
 import AuthService from "../../components/AuthService";
 import { User } from "../../components/models/user";
 import CRUDLocalStorage from "../../components/CRUDLocalStorage";
+import { useNavigate } from "react-router-dom";
 
-const WelcomePage: React.FC = () => {
+const ProfileSettingsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
+  const [nameModal, setNameModal] = useState(false);
+  const [passwordModal, setPasswordModal] = useState(false);
   const [currentBalance, setCurrentBalance] = useState<number>();
-  const [accountId, setAccountId] = useState("");
-  const [amount, setAmount] = useState(0);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [transferReason, setTransferReason] = useState("");
 
   const storeCurrentUser = async () => {
@@ -31,9 +33,7 @@ const WelcomePage: React.FC = () => {
       )) as User
     );
   };
-  const getUserBalance = () => {
-    return currentUser ? currentUser.balance : 0;
-  };
+
   useEffect(() => {
     storeCurrentUser();
   }, [currentBalance, currentUser]);
@@ -59,40 +59,30 @@ const WelcomePage: React.FC = () => {
     }
   };
 
-  const handleOpenModal = () => {
-    setOpenModal(true);
-    setAccountId("");
-    setAmount(0);
-    setTransferReason("");
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-
+  const handleNameModal = () => {
+    setNameModal(!nameModal);
+    if (nameModal) {
+      setFirstName(currentUser?.firstName as string);
+      setLastName(currentUser?.lastName as string);
+    }
   };
 
   const handleSubmitTransaction = async () => {
-    handleCloseModal();
+    handleNameModal();
     setIsLoading(true);
-    const receivingUser = await AuthService.getUserFromStorage(accountId);
-    if (receivingUser != null) {
-      await updateBalance(receivingUser as User, amount);
-      await updateBalance(currentUser as User, -amount);
-      setIsLoading(false);
-    } else {
-      setIsLoading(false);
-      alert("ID WRONG");
-    }
-    console.log("Account ID:", accountId);
-    console.log("Amount:", amount);
-    console.log("Transfer Reason:", transferReason);
-
+    const updatedUser: User = {
+      ...(currentUser as User),
+      firstName: firstName as string,
+      lastName: lastName as string,
+    };
+    await updateUser(updatedUser);
+    navigate("/home")
   };
   return (
     <>
       <NavBar />
       <Box mx={30} sx={{ paddingTop: 8 }}>
-        {(isLoading||!currentUser) ? ( // Render CircularProgress if isLoading is true
+        {isLoading || !currentUser ? ( // Render CircularProgress if isLoading is true
           <Box
             sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}
           >
@@ -101,39 +91,8 @@ const WelcomePage: React.FC = () => {
         ) : (
           <Grid container spacing={3} justifyContent="center">
             <Grid item xs={12} md={6}>
-              <Paper
-                sx={{
-                  padding: 2,
-                  width: 250,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  backgroundColor: "#FAFBFF",
-                  borderRadius: 2,
-                }}
-              >
-                <Typography
-                  variant="h5"
-                  component="h2"
-                  gutterBottom
-                  sx={{ fontFamily: "Poppins", fontSize: 18 }}
-                >
-                  Your Balance
-                </Typography>
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontFamily: "Poppins",
-                    fontWeight: "bold",
-                    marginTop: 2,
-                    fontSize: 18,
-                  }}
-                >
-                  {getUserBalance()} $
-                </Typography>
-              </Paper>
               <Button
-                onClick={handleOpenModal}
+                onClick={handleNameModal}
                 sx={{
                   width: 250,
                   fontWeight: "bold",
@@ -141,14 +100,14 @@ const WelcomePage: React.FC = () => {
                   fontSize: 18,
                 }}
               >
-                Make A Payment
+                Change Name
               </Button>
             </Grid>
           </Grid>
         )}
         <Modal
-          open={openModal}
-          onClose={handleCloseModal}
+          open={nameModal}
+          onClose={handleNameModal}
           aria-labelledby="modal-title"
           aria-describedby="modal-description"
           sx={{
@@ -171,31 +130,24 @@ const WelcomePage: React.FC = () => {
               component="h2"
               gutterBottom
             >
-              Create Transaction
+              Change Name
             </Typography>
             <TextField
+            required
               fullWidth
-              label="Account ID"
+              label="First Name"
               variant="outlined"
-              value={accountId}
-              onChange={(e) => setAccountId(e.target.value)}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
               sx={{ mt: 2 }}
             />
             <TextField
               fullWidth
-              type="number"
-              label="Amount"
+              required
+              label="Last Name"
               variant="outlined"
-              value={amount}
-              onChange={(e) => setAmount(parseFloat(e.target.value))}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Transfer Reason"
-              variant="outlined"
-              value={transferReason}
-              onChange={(e) => setTransferReason(e.target.value)}
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
               sx={{ mt: 2 }}
             />
             <Button
@@ -212,4 +164,4 @@ const WelcomePage: React.FC = () => {
   );
 };
 
-export default WelcomePage;
+export default ProfileSettingsPage;

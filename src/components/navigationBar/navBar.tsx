@@ -61,9 +61,7 @@ export default function NavBar() {
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     storeUserProfileImage();
     setFullName(
-      ` ${timeMessage} ${capitalize(user.firstName)} ${capitalize(
-        user.lastName
-      )}`
+      `${capitalize(user.firstName)} ${capitalize(user.lastName)}`
     );
   }
 
@@ -91,7 +89,7 @@ export default function NavBar() {
           <Toolbar>
             <Avatar src={profilePicture} />
             <Typography variant="h6" noWrap component="div">
-              {fullName}
+            {timeMessage} {fullName}
             </Typography>
           </Toolbar>
         </AppBar>
