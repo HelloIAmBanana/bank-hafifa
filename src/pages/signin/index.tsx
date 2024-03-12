@@ -6,7 +6,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Paper from "@mui/material/Paper";
 import { Link } from "react-router-dom";
 import loginImage from "../../imgs/loginPage.svg";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Checkbox from "@mui/material/Checkbox";
 import GenericForm from "../../components/GenericForm";
 import ajvErrors from "ajv-errors";
@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import AuthService from "../../components/AuthService";
 import { Typography } from "@mui/material";
 import loginValidate from "./login";
+import { FlashOnOutlined } from "@mui/icons-material";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 
@@ -55,8 +56,8 @@ const schema: JSONSchemaType<User> = {
 const validate = ajv.compile(schema);
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
-  const [rememberMe, setRememberMe] = React.useState(false);
-
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isValid, setIsValid] = useState(false);
   const fields = [
     {
       id: "email",
@@ -77,23 +78,25 @@ const SignInPage: React.FC = () => {
       errorMsgVisibility: true,
     },
   ];
-
+  const isUserRemembered = () => {
+    const rememberedUser = getCurrentUser("rememberedUser");
+    if (rememberedUser.firstName !== undefined) {
+      AuthService.storeUserToStorage(rememberedUser);
+      navigate("/welcome");
+    }
+    if (AuthService.getCurrentUserID() !== undefined) {
+      navigate("/welcome");
+    }
+  };
   useEffect(() => {
-    const isUserRemembered = () => {
-      const rememberedUser = getCurrentUser("rememberedUser");
-      if (rememberedUser.firstName !== undefined) {
-        AuthService.storeUserToStorage(rememberedUser);
-        navigate("/welcome");
-      }
-    };
     isUserRemembered();
-  });
+  }, [isValid]);
 
   const login = async (data: Record<string, any>) => {
-    console.log(validate(data));
     if (validate(data)) {
-      if (await loginValidate(data, rememberMe)) {
+      if (await loginValidate(data as User, rememberMe)) {
         navigate("/welcome");
+        setIsValid(true)
       } else {
         alert("User Not Real");
       }
