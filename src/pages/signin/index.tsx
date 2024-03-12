@@ -82,10 +82,10 @@ const SignInPage: React.FC = () => {
     const rememberedUser = getCurrentUser("rememberedUser");
     if (rememberedUser.firstName !== undefined) {
       AuthService.storeUserToStorage(rememberedUser);
-      navigate("/welcome");
+      navigate("/home");
     }
     if (AuthService.getCurrentUserID() !== undefined) {
-      navigate("/welcome");
+      navigate("/home");
     }
   };
   useEffect(() => {
@@ -95,7 +95,7 @@ const SignInPage: React.FC = () => {
   const login = async (data: Record<string, any>) => {
     if (validate(data)) {
       if (await loginValidate(data as User, rememberMe)) {
-        navigate("/welcome");
+        navigate("/home");
         setIsValid(true)
       } else {
         alert("User Not Real");

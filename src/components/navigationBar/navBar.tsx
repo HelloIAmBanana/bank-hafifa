@@ -20,13 +20,15 @@ import { useState, useEffect } from "react";
 import { User } from "../../components/models/user";
 import AuthService from "../../components/AuthService";
 import Avatar from "@mui/material/Avatar";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
 export default function NavBar() {
-  const [timeGreetings, setTimeGreetings] = useState("");
+  const navigate = useNavigate();
+  const [timeMessage, setTimeMessage] = useState("");
   const [fullName, setFullName] = useState("");
-  const [profilePicture, setProfilePicture]= useState("");
+  const [profilePicture, setProfilePicture] = useState("");
 
   const icons = [
     <HomeIcon />,
@@ -39,32 +41,45 @@ export default function NavBar() {
 
   useEffect(() => {
     if (time < 12 && time >= 6) {
-      setTimeGreetings("Good morning, ");
+      setTimeMessage("Good morning, ");
     } else if (time < 18 && time >= 12) {
-      setTimeGreetings("Good afternoon, ");
+      setTimeMessage("Good afternoon, ");
     } else if (time < 24 && time >= 18) {
-      setTimeGreetings("Good evening, ");
+      setTimeMessage("Good evening, ");
     } else if (time < 6 && time >= 24) {
-      setTimeGreetings("Good night, ");
-    };
-    formatFullName();
-  }, [time]);
+      setTimeMessage("Good night, ");
+    }
+    greetingsMessage();
+    storeUserProfileImage();
+  }, [fullName]);
 
-  async function formatFullName() {
+  async function greetingsMessage() {
     const user = (await AuthService.getUserFromStorage(
       AuthService.getCurrentUserID()
     )) as User;
-    const capitalize = (word : string)=> word.charAt(0).toUpperCase()+word.slice(1).toLowerCase();
-    setFullName(`${capitalize(user.firstName)} ${capitalize(user.lastName)}`);
+    const capitalize = (word: string) =>
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    storeUserProfileImage();
+    setFullName(
+      ` ${timeMessage} ${capitalize(user.firstName)} ${capitalize(
+        user.lastName
+      )}`
+    );
   }
 
   async function storeUserProfileImage() {
     const user = (await AuthService.getUserFromStorage(
       AuthService.getCurrentUserID()
     )) as User;
-    setProfilePicture("https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_square.jpg");
+    setProfilePicture(
+      "https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_square.jpg"
+    );
   }
-  storeUserProfileImage();
+
+  function onClick(route: string) {
+    navigate(`/${(route as string).toLowerCase()} `);
+    return true;
+  }
   return (
     <>
       <Box sx={{ display: "flex" }}>
@@ -76,7 +91,7 @@ export default function NavBar() {
           <Toolbar>
             <Avatar src={profilePicture} />
             <Typography variant="h6" noWrap component="div">
-                {timeGreetings} {fullName}
+              {fullName}
             </Typography>
           </Toolbar>
         </AppBar>
@@ -97,7 +112,7 @@ export default function NavBar() {
               {["Home", "Loans", "Cards", "Deposits", "Account"].map(
                 (text, index) => (
                   <ListItem key={text} disablePadding>
-                    <ListItemButton>
+                    <ListItemButton onClick={() => {onClick((text as string))}}>
                       <ListItemIcon>{icons[index]}</ListItemIcon>
                       <ListItemText primary={text} />
                     </ListItemButton>

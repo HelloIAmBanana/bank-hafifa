@@ -14,8 +14,11 @@ function App() {
         <Routes>
         <Route path="/" element={<SignUpPage />} />
         <Route path="/signin" element={<SignInPage />} />
-        <Route path="/welcome" element={<WelcomePage />} />
-
+        <Route path="/home" element={<WelcomePage />} />
+        <Route path="/loans" element={<WelcomePage />} />
+        <Route path="/cards" element={<WelcomePage />} />
+        <Route path="/deposits" element={<WelcomePage />} />
+        <Route path="/account" element={<WelcomePage />} />
         </Routes>
       </div>
     </Router>
