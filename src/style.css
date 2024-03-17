@@ -2,6 +2,7 @@ body {
   padding: 20px;
   background: #ffffff;
   color: rgb(133, 18, 18);
+  font-family: Poppins;
 }
 .secondTitle {
   font-family: Poppins;
@@ -192,10 +193,10 @@ label {
   text-align: center;
 }
 .submitButton:hover {
-  background: #d6044e;
+  background: #d6044e
 }
 button[type="button"] {
-  background: #516391;
+  background: #f50057;
   color: white;
   text-transform: none;
   padding: 10px;

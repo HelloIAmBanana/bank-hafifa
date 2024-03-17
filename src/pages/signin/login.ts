@@ -3,23 +3,23 @@ import AuthService from "../../components/AuthService";
 import CRUDLocalStorage from "../../components/CRUDLocalStorage";
 export default async function loginValidate(data: User, rememberMe: boolean) {
   const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-  users.map((currentUser) => {
+  for(let i=0; i<users.length;i++){
     if (
-      currentUser.email.includes(`${data.email}`) &&
-      currentUser.email.length === data.email.length
+      users[i].email.includes(`${data.email}`) &&
+      users[i].email.length === data.email.length
     ) {
       if (
-        currentUser.password.includes(`${data.password}`) &&
-        currentUser.password.length === data.password.length
+        users[i].password.includes(`${data.password}`) &&
+        users[i].password.length === data.password.length
       ) {
-        console.log(currentUser);
+        console.log(users[i]);
         if (rememberMe) {
-          localStorage.setItem("rememberedUser", JSON.stringify(currentUser));
+          localStorage.setItem("rememberedUser", JSON.stringify(users[i]));
         }
-        AuthService.storeUserToStorage(currentUser);
+        AuthService.storeUserToStorage(users[i]);
         return true;
       }
     }
-  });
+  }
   return false;
 }
