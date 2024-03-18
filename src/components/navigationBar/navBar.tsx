@@ -54,13 +54,13 @@ export default function NavBar() {
 
   useEffect(() => {
     if (time < 12 && time >= 6) {
-      setTimeMessage("Good morning, ");
+      setTimeMessage("Good morning☀️, ");
     } else if (time < 18 && time >= 12) {
-      setTimeMessage("Good afternoon, ");
+      setTimeMessage("Good afternoon🌇, ");
     } else if (time < 24 && time >= 18) {
-      setTimeMessage("Good evening, ");
+      setTimeMessage("Good evening🌆, ");
     } else if (time < 6 && time >= 24) {
-      setTimeMessage("Good night, ");
+      setTimeMessage("Good night🌙, ");
     }
     storeUserProfileImage();
     greetingsMessage();
