@@ -19,7 +19,7 @@ interface Field {
   required: boolean;
   placeholder?: string;
   errorMsg?: string;
-  checked?: boolean; // Add checked property for checkbox fields
+  checked?: boolean; 
 
   options?: { value: string; label: string }[];
 }
@@ -93,13 +93,13 @@ const GenericForm: React.FC<GenericFormProps> = ({
             }}
           >
             {React.createElement(fieldsRegistry[field.type], {
-              type: field.type, // Pass undefined for type if it's a checkbox field
+              type: field.type,
               sx: { fontFamily: "Poppins", width: 260 },
               id: field.id,
               ...register(field.id),
               required: field.required,
               placeholder: field.placeholder,
-              checked: field.checked, // Pass checked prop for checkbox fields
+              checked: field.checked, 
 
               children: field.options?.map((option) => (
                 <MenuItem key={option.value} value={option.value}>

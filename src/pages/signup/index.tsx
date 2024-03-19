@@ -9,10 +9,12 @@ import { Link } from "react-router-dom";
 import signupImage from "../../imgs/signupPage.svg";
 import { User } from "../../components/models/user";
 import ajvErrors from "ajv-errors";
-import "./signup.css";
 import { useNavigate } from "react-router-dom";
 import CRUDLocalStorage from "../../components/CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
+import { useRememberedUser } from "../../hooks/useRememberedUser";
+import "./signup.css";
+
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
@@ -23,7 +25,6 @@ const fields = [
     type: "text",
     required: false,
     placeholder: "Enter your first name",
-    errorMsg: "Entered First Name Is Invalid.",
   },
   {
     id: "lastName",
@@ -31,15 +32,13 @@ const fields = [
     type: "text",
     required: false,
     placeholder: "Enter your last name",
-    errorMsg: "Entered Last Name Is Invalid.",
   },
   {
     id: "email",
     label: "Email",
-    type: "email",
+    type: "text",
     required: false,
     placeholder: "Enter your email",
-    errorMsg: "Entered Email Is Invalid.",
   },
   {
     id: "password",
@@ -47,7 +46,6 @@ const fields = [
     type: "password",
     required: false,
     placeholder: "Password",
-    errorMsg: "Entered Password Is Invalid.",
   },
   {
     id: "birthDate",
@@ -55,7 +53,6 @@ const fields = [
     type: "date",
     required: false,
     placeholder: "Enter your birthday",
-    errorMsg: "Entered Date Is Invalid.",
   },
   {
     id: "gender",
@@ -63,7 +60,6 @@ const fields = [
     type: "select",
     required: true,
     placeholder: "Enter your gender",
-    errorMsg: "Entered Gender Is Invalid.",
     options: [
       { value: "Male", label: "Male" },
       { value: "Female", label: "Female" },
@@ -75,7 +71,6 @@ const fields = [
     type: "select",
     placeholder: "Enter your Account Type",
     required: true,
-    errorMsg: "Entered Account Type Is Invalid.",
     options: [
       { value: "Personal", label: "Personal" },
       { value: "Business", label: "Business" },
@@ -116,9 +111,8 @@ const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
-  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(
-    undefined
-  );
+  useRememberedUser()
+  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {

@@ -5,28 +5,21 @@ import { Box } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { Link } from "react-router-dom";
 import loginImage from "../../imgs/loginPage.svg";
-import { useEffect, useState } from "react";
-import Checkbox from "@mui/material/Checkbox";
 import GenericForm from "../../components/GenericForm";
 import ajvErrors from "ajv-errors";
 import { User } from "../../components/models/user";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../../components/AuthService";
-import validateLogin from "./login";
+import {validateLogin} from "./login";
 import { Typography } from "@mui/material";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Swal from "sweetalert2";
+import { useRememberedUser } from "../../hooks/useRememberedUser";
+
 import "./login.css";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
-
-function getUser(key: string) {
-  const data = localStorage.getItem(key);
-  const currentUser = data ? JSON.parse(data) : [];
-  return currentUser;
-}
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -45,7 +38,7 @@ const schema: JSONSchemaType<User> = {
     balance: { type: "number" },
   },
   required: ["email", "password"],
-  additionalProperties: false,
+  additionalProperties: true,
   errorMessage: {
     properties: {
       email: "Entered Email Is Invalid.",
@@ -55,10 +48,9 @@ const schema: JSONSchemaType<User> = {
 };
 
 const validateForm = ajv.compile(schema);
+
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
-  const [rememberMe, setRememberMe] = useState(false);
-  const [isValid, setIsValid] = useState(false);
 
   const fields = [
     {
@@ -67,7 +59,6 @@ const SignInPage: React.FC = () => {
       type: "email",
       required: true,
       placeholder: "Enter your email",
-      errorMsg: "Entered Email Is Invalid.",
     },
     {
       id: "password",
@@ -75,32 +66,22 @@ const SignInPage: React.FC = () => {
       type: "password",
       required: true,
       placeholder: "Password",
-      errorMsg: "Entered Password Is Invalid.",
     },
     {
-      id: "rememberMe", // ID for Remember Me field
+      id: "rememberMe", 
       label: "Remember Me",
-      type: "checkbox", // Type set to checkbox
+      type: "checkbox", 
       required: false,
     },
   ];
 
-  useEffect(() => {
-    const rememberedUser = getUser("rememberedUser");
-    if (rememberedUser.id !== undefined) {
-      AuthService.storeUserToStorage(rememberedUser);
-      navigate("/home");
-    }
-    if (AuthService.getCurrentUserID() !== undefined) {
-      navigate("/home");
-    }
-  }, [isValid, navigate]);
+  useRememberedUser()
 
   const login = async (data: Record<string, any>) => {
-    console.log(data)
     if (validateForm(data)) {
-      const validUser = await validateLogin(data as User, rememberMe);
-      console.log(validUser);
+      type UserAndRemembered= User & {rememberMe:Boolean}
+      const validUser = await validateLogin(data as UserAndRemembered);
+      console.log("Heysfadsdfa"+validUser);
       if (validUser) {
         AuthService.storeUserToStorage(validUser);
         console.log(validUser);
@@ -115,7 +96,6 @@ const SignInPage: React.FC = () => {
           timerProgressBar: true,
         });
         navigate("/home");
-        setIsValid(true);
       } else {
         Swal.fire({
           toast: true,
@@ -129,9 +109,6 @@ const SignInPage: React.FC = () => {
         });
       }
     }
-  };
-  const handleRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRememberMe(event.target.checked);
   };
 
   return (
@@ -174,10 +151,7 @@ const SignInPage: React.FC = () => {
               submitButtonLabel="Sign In"
               schema={schema}
             />
-            <FormControlLabel
-              control={<Checkbox onChange={handleRememberMe} />}
-              label="Remember me"
-            />
+
           </Grid>
           <Grid container justifyContent="flex-start">
             <Grid item sx={{ marginLeft: "auto" }}>
