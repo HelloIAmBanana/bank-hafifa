@@ -2,27 +2,27 @@ import * as React from "react";
 import Ajv, { JSONSchemaType } from "ajv";
 import Grid from "@mui/material/Grid";
 import { Box } from "@mui/material";
-import CssBaseline from "@mui/material/CssBaseline";
 import Paper from "@mui/material/Paper";
 import { Link } from "react-router-dom";
 import loginImage from "../../imgs/loginPage.svg";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Checkbox from "@mui/material/Checkbox";
 import GenericForm from "../../components/GenericForm";
 import ajvErrors from "ajv-errors";
-import { User } from "../../components/models/user"
+import { User } from "../../components/models/user";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../../components/AuthService";
-import Login from "./login";
+import validateLogin from "./login";
 import { Typography } from "@mui/material";
-import CRUDLocalStorage from "../../components/CRUDLocalStorage";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Swal from "sweetalert2";
+import "./login.css";
+
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
 
-
-
-function getCurrentUser(key: string) {
+function getUser(key: string) {
   const data = localStorage.getItem(key);
   const currentUser = data ? JSON.parse(data) : [];
   return currentUser;
@@ -42,7 +42,7 @@ const schema: JSONSchemaType<User> = {
     gender: { type: "string", enum: ["male", "female"] },
     accountType: { type: "string", enum: ["business", "personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
-    balance: {type: "number"},
+    balance: { type: "number" },
   },
   required: ["email", "password"],
   additionalProperties: false,
@@ -54,11 +54,11 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-const validate = ajv.compile(schema);
+const validateForm = ajv.compile(schema);
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
-const [rememberMe, setRememberMe] = React.useState(false);
-
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isValid, setIsValid] = useState(false);
 
   const fields = [
     {
@@ -68,7 +68,6 @@ const [rememberMe, setRememberMe] = React.useState(false);
       required: true,
       placeholder: "Enter your email",
       errorMsg: "Entered Email Is Invalid.",
-      errorMsgVisibility: true,
     },
     {
       id: "password",
@@ -77,114 +76,117 @@ const [rememberMe, setRememberMe] = React.useState(false);
       required: true,
       placeholder: "Password",
       errorMsg: "Entered Password Is Invalid.",
-      errorMsgVisibility: true,
+    },
+    {
+      id: "rememberMe", // ID for Remember Me field
+      label: "Remember Me",
+      type: "checkbox", // Type set to checkbox
+      required: false,
     },
   ];
 
   useEffect(() => {
-    const isUserRemembered = () => {
-      const rememberedUser = getCurrentUser("rememberedUser");
-      if (rememberedUser.firstName !== undefined) {
-        sessionStorage.setItem(
-          "currentUser",
-          JSON.stringify(AuthService.storeUserToStorage(rememberedUser))
-        );
-        navigate("/welcome");
-      }
-    };
-    isUserRemembered();
-  }, []);
-
-  const loginCheck = async (data: Record<string, any>) => {
-    console.log(validate(data))
-  if (validate(data)) {    
-      if (await Login(data, rememberMe)) {
-        console.log("BLAAAA"+   await Login(data, rememberMe))
-        navigate("/welcome");
-      } else {
-        alert("User Not Real");
-      }
-
+    const rememberedUser = getUser("rememberedUser");
+    if (rememberedUser.id !== undefined) {
+      AuthService.storeUserToStorage(rememberedUser);
+      navigate("/home");
     }
-    alert("Not all fields were filled!");
-  };
+    if (AuthService.getCurrentUserID() !== undefined) {
+      navigate("/home");
+    }
+  }, [isValid, navigate]);
 
+  const login = async (data: Record<string, any>) => {
+    console.log(data)
+    if (validateForm(data)) {
+      const validUser = await validateLogin(data as User, rememberMe);
+      console.log(validUser);
+      if (validUser) {
+        AuthService.storeUserToStorage(validUser);
+        console.log(validUser);
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          icon: "success",
+          color: "green",
+          title: "Signing In!",
+          showConfirmButton: false,
+          timer: 3750,
+          timerProgressBar: true,
+        });
+        navigate("/home");
+        setIsValid(true);
+      } else {
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          icon: "error",
+          color: "red",
+          title: "Wrong Credentials!",
+          showConfirmButton: false,
+          timer: 3750,
+          timerProgressBar: true,
+        });
+      }
+    }
+  };
   const handleRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRememberMe(event.target.checked);
   };
 
   return (
-    <Grid container component="main" sx={{ height: "90vh" }}>
-      <CssBaseline />
+    <Grid container component="main" sx={{ height: "85vh" }}>
       <Grid
         item
-        xs={false}
-        sm={5}
+        xs={12}
         md={6}
-        my={15}
         sx={{
           backgroundImage: `url(${loginImage})`,
           backgroundRepeat: "no-repeat",
-          backgroundSize: "65%",
+          backgroundSize: "100%",
           borderRadius: "20px",
-          backgroundPosition: "center",
+          backgroundPosition: "bottom center",
         }}
       />
       <Grid
         item
-        xs={4}
-        sm={6}
-        md={5}
-        my={5}
+        xs={12}
+        md={6}
         component={Paper}
-        elevation={8}
-        square={false}
-        borderRadius={5}
+        elevation={20}
+        borderRadius={3}
       >
-        <Box
-          sx={{
-            my: 4,
-            mx: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        ></Box>
-
-        <Grid container spacing={1}>
-          <Grid item my={5} mx={25} lineHeight={50} spacing={54}>
-            <Typography variant="h2" className="firstTitle" style={{ lineHeight: "1" }}>
-              Welcome back
-            </Typography>
+        <Box sx={{ mt: 25 }}>
+          <Grid container spacing={1}>
+            <Grid item margin={"auto"}>
+              <Typography variant="h2" className="mainTitle">
+                Welcome back
+              </Typography>
+              <Typography variant="h4" className="secondaryTitle">
+                Please enter your details.
+              </Typography>
+            </Grid>
           </Grid>
-          <Grid item ml={12} sm={12} my={-5} mx={0}>
-            <Typography variant="h4" className="secondTitle">Please enter your details.</Typography>
-          </Grid>
-          {/*  */}
-          <Grid item ml={12} sm={12} my={5} mx={12}>
+          <Grid item mx="auto" textAlign="center" mt={7}>
             <GenericForm
               fields={fields}
-              customSubmitFunction={loginCheck}
-              submitButtonName="Sign In"
+              onSubmit={login}
+              submitButtonLabel="Sign In"
               schema={schema}
+            />
+            <FormControlLabel
+              control={<Checkbox onChange={handleRememberMe} />}
+              label="Remember me"
             />
           </Grid>
           <Grid container justifyContent="flex-start">
-            <Grid item mx={12} my={-4} className="existingUserButton">
-              <Checkbox
-                onChange={handleRememberMe}
-                title="Remember me"
-              ></Checkbox>
-              Remember Me
-            </Grid>
-            <Grid item my={-3} sx={{ marginLeft: "auto" }}>
-              <Link to="/" className="existingUserButton">
+            <Grid item sx={{ marginLeft: "auto" }}>
+              <Link to="/" className="forgotPasswordButton">
                 Forgot password?
               </Link>
             </Grid>
           </Grid>
-          <Grid style={{ width: "30" }}></Grid>
-        </Grid>
+        </Box>
       </Grid>
     </Grid>
   );

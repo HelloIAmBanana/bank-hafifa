@@ -21,7 +21,7 @@ const WelcomePage: React.FC = () => {
 
   async function getFullName() {
     const user = (await AuthService.getUserFromStorage(
-      AuthService.getUserID()
+      AuthService.getCurrentUserID()
     )) as User;
     setFullName(
       user.firstName[0].toUpperCase() +

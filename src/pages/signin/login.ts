@@ -1,25 +1,24 @@
 import { User } from "../../components/models/user";
-import AuthService from "../../components/AuthService";
 import CRUDLocalStorage from "../../components/CRUDLocalStorage";
-export default async function login(data: User, rememberMe: boolean) {
+
+export async function validateLogin(userData: { email: string, password: string }, rememberMe: boolean): Promise<User | null> {
   const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-  users.map((currentUser) => {
-    if (
-      currentUser.email.includes(`${data.email}`) &&
-      currentUser.email.length === data.email.length
-    ) {
-      if (
-        currentUser.password.includes(`${data.password}`) &&
-        currentUser.password.length === data.password.length
-      ) {
-        console.log(currentUser);
-        if (rememberMe) {
-          localStorage.setItem("rememberedUser", JSON.stringify(currentUser));
-        }
-        AuthService.storeUserToStorage(currentUser);
-        return true;
-      }
+  
+  const foundUser = users.find(user =>
+    user.email === userData.email && user.password === userData.password
+  );
+
+  if (foundUser) {
+    console.log(foundUser);
+    if (rememberMe) {
+      rememberUser(foundUser.id);
     }
-  });
-  return false;
+    return foundUser;
+  }
+
+  return null;
+}
+
+function rememberUser(userId: string): void {
+  localStorage.setItem("rememberedUser", JSON.stringify(userId));
 }
