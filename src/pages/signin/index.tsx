@@ -9,11 +9,10 @@ import GenericForm from "../../components/GenericForm/GenericForm";
 import ajvErrors from "ajv-errors";
 import { User } from "../../models/user";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../../AuthService";
+import AuthService, { UserAndRemembered } from "../../AuthService";
 import { validateLogin } from "./login";
 import { Typography } from "@mui/material";
 import { useRememberedUser } from "../../hooks/useRememberedUser";
-
 import "./login.css";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 
@@ -75,13 +74,18 @@ const SignInPage: React.FC = () => {
     },
   ];
 
+  function rememberUser(userId: string): void {
+    localStorage.setItem("rememberedUser", userId);
+  }
   const login = async (data: Record<string, any>) => {
     if (validateForm(data)) {
-      type UserAndRemembered = User & { rememberMe: Boolean };
+      const isRemembered = (data as UserAndRemembered).rememberMe;
       const validUser = await validateLogin(data as UserAndRemembered);
       if (validUser) {
-        if (AuthService.getCurrentUserID()) {
-          AuthService.storeUserToStorage(validUser);
+        if (isRemembered) {
+          rememberUser(validUser.id);
+        } else {
+          AuthService.storeAuthTokenToStorage(validUser.id);
         }
         console.log(validUser);
         successAlert("Signing in!");
@@ -91,6 +95,7 @@ const SignInPage: React.FC = () => {
       }
     }
   };
+
   useRememberedUser();
 
   return (

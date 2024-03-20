@@ -5,7 +5,7 @@ import AuthService from "../AuthService";
 export function useRememberedUser() {
   const navigate = useNavigate();
   useEffect(() => {
-    if (AuthService.getCurrentUserID()) {
+    if (AuthService.getAuthToken()) {
       navigate("/home");
     }
   }, [navigate]);

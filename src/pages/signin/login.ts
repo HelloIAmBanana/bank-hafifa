@@ -1,8 +1,9 @@
 import { User } from "../../models/user";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
+import { UserAndRemembered } from "../../AuthService";
 
 export async function validateLogin(
-  userData: User & { rememberMe: Boolean }
+  userData: UserAndRemembered
 ): Promise<User | null> {
   const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
   const foundUser = users.find(
@@ -11,16 +12,9 @@ export async function validateLogin(
   );
 
   if (foundUser) {
-    if (userData.rememberMe) {
-      rememberUser(foundUser.id);
-    } else {
-      return foundUser;
-    }
+      return foundUser as UserAndRemembered;
   }
-
   return null;
 }
 
-function rememberUser(userId: string): void {
-  localStorage.setItem("rememberedUser", JSON.stringify(userId));
-}
+

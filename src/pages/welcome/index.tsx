@@ -22,7 +22,7 @@ const WelcomePage: React.FC = () => {
 
   async function getFullName() {
     const user = (await AuthService.getUserFromStorage(
-      AuthService.getCurrentUserID() as string
+      AuthService.getAuthToken() as string
     )) as User;
     console.log(user)
     setFullName(
