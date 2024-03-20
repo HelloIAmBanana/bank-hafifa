@@ -5,17 +5,17 @@ import { Box } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { Link } from "react-router-dom";
 import loginImage from "../../imgs/loginPage.svg";
-import GenericForm from "../../components/GenericForm";
+import GenericForm from "../../components/GenericForm/GenericForm";
 import ajvErrors from "ajv-errors";
-import { User } from "../../components/models/user";
+import { User } from "../../models/user";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../../components/AuthService";
-import {validateLogin} from "./login";
+import AuthService from "../../AuthService";
+import { validateLogin } from "./login";
 import { Typography } from "@mui/material";
-import Swal from "sweetalert2";
 import { useRememberedUser } from "../../hooks/useRememberedUser";
 
 import "./login.css";
+import { errorAlert, successAlert } from "../../utils/swalAlerts";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 
@@ -68,48 +68,30 @@ const SignInPage: React.FC = () => {
       placeholder: "Password",
     },
     {
-      id: "rememberMe", 
+      id: "rememberMe",
       label: "Remember Me",
-      type: "checkbox", 
+      type: "checkbox",
       required: false,
     },
   ];
 
-  useRememberedUser()
-
   const login = async (data: Record<string, any>) => {
     if (validateForm(data)) {
-      type UserAndRemembered= User & {rememberMe:Boolean}
+      type UserAndRemembered = User & { rememberMe: Boolean };
       const validUser = await validateLogin(data as UserAndRemembered);
-      console.log("Heysfadsdfa"+validUser);
       if (validUser) {
-        AuthService.storeUserToStorage(validUser);
+        if (AuthService.getCurrentUserID()) {
+          AuthService.storeUserToStorage(validUser);
+        }
         console.log(validUser);
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "success",
-          color: "green",
-          title: "Signing In!",
-          showConfirmButton: false,
-          timer: 3750,
-          timerProgressBar: true,
-        });
+        successAlert("Signing in!");
         navigate("/home");
       } else {
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "error",
-          color: "red",
-          title: "Wrong Credentials!",
-          showConfirmButton: false,
-          timer: 3750,
-          timerProgressBar: true,
-        });
+        errorAlert("Wrong Credentials!");
       }
     }
   };
+  useRememberedUser();
 
   return (
     <Grid container component="main" sx={{ height: "85vh" }}>
@@ -151,7 +133,6 @@ const SignInPage: React.FC = () => {
               submitButtonLabel="Sign In"
               schema={schema}
             />
-
           </Grid>
           <Grid container justifyContent="flex-start">
             <Grid item sx={{ marginLeft: "auto" }}>

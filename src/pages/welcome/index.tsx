@@ -1,7 +1,8 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import AuthService from "../../components/AuthService";
-import { User } from "../../components/models/user";
+import AuthService from "../../AuthService";
+import { User } from "../../models/user";
+import { Box } from "@mui/material";
 
 const WelcomePage: React.FC = () => {
   const [timeGreetings, setTimeGreetings] = useState("");
@@ -21,8 +22,9 @@ const WelcomePage: React.FC = () => {
 
   async function getFullName() {
     const user = (await AuthService.getUserFromStorage(
-      AuthService.getCurrentUserID()
+      AuthService.getCurrentUserID() as string
     )) as User;
+    console.log(user)
     setFullName(
       user.firstName[0].toUpperCase() +
         user.firstName.substring(1).toLowerCase() +
@@ -33,6 +35,10 @@ const WelcomePage: React.FC = () => {
   }
   getFullName();
 
-  return <>{timeGreetings} {fullName}</>;
+  return (
+    <Box>
+      {timeGreetings} {fullName}
+    </Box>
+  );
 };
 export default WelcomePage;

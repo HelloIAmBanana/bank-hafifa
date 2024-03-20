@@ -6,8 +6,8 @@ import Ajv, { Schema } from "ajv";
 import Button from "@mui/material/Button";
 import ajvErrors from "ajv-errors";
 import { Typography } from "@mui/material";
-import fieldsRegistry from "./models/fieldTypes";
-
+import fieldsRegistry from "../../models/fieldTypes";
+import "./style.css";
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
@@ -18,8 +18,7 @@ interface Field {
   type: string;
   required: boolean;
   placeholder?: string;
-  errorMsg?: string;
-  checked?: boolean; 
+  checked?: boolean;
 
   options?: { value: string; label: string }[];
 }
@@ -74,48 +73,51 @@ const GenericForm: React.FC<GenericFormProps> = ({
       onSubmit={handleSubmit(internalHandleSubmit)}
       sx={{ mt: 1 }}
     >
-      {fields.map((field) => (
-        <Box key={field.id}>
-          <Typography
-            variant="h6"
-            className="signinLabelNormal"
-            sx={{ fontFamily: "Poppins" }}
-          >
-            {field.label}
-          </Typography>
-          <Box
-            className="formLabel"
-            sx={{
-              width: "auto",
-              border: "hidden",
-              margin: "auto",
-              textAlign: "auto",
-            }}
-          >
-            {React.createElement(fieldsRegistry[field.type], {
-              type: field.type,
-              sx: { fontFamily: "Poppins", width: 260 },
-              id: field.id,
-              ...register(field.id),
-              required: field.required,
-              placeholder: field.placeholder,
-              checked: field.checked, 
-
-              children: field.options?.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              )),
-            })}
+      {fields.map((field) => {
+        const FieldComponent = fieldsRegistry[field.type];
+        return (
+          <Box key={field.id}>
+            <Typography
+              variant="h6"
+              className="signinLabelNormal"
+              sx={{ fontFamily: "Poppins" }}
+            >
+              {field.label}
+            </Typography>
+            <Box
+              className="formLabel"
+              sx={{
+                width: "auto",
+                border: "hidden",
+                margin: "auto",
+                textAlign: "auto",
+              }}
+            >
+              <FieldComponent
+                {...field}
+                {...register(field.id)}
+                sx={{ fontFamily: "Poppins", width: 260 }}
+              >
+                {field.options?.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </FieldComponent>
+            </Box>
+            <FormHelperText
+              id="component-error-text"
+              style={{
+                color: "red",
+                fontFamily: "Poppins",
+                alignItems: "center",
+              }}
+            >
+              {customErrors[field.id]?.message}
+            </FormHelperText>
           </Box>
-          <FormHelperText
-            id="component-error-text"
-            style={{ color: "red", fontFamily: "Poppins", alignItems:"center" }}
-          >
-            {customErrors[field.id]?.message}
-          </FormHelperText>
-        </Box>
-      ))}
+        );
+      })}
       <center>
         <Button onClick={onClick} type="submit">
           {submitButtonLabel}

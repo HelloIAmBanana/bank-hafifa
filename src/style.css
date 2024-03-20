@@ -21,30 +21,3 @@ body {
   text-align: center;
 }
 
-button[type="submit"] {
-  position: relative;
-  background: #f50057;
-  box-shadow: 0px 4px 10px 7px #62474940;
-  color: white;
-  text-transform: uppercase;
-  border: none;
-  margin-top: 20px;
-  padding: 20px;
-  display: block;
-  appearance: none;
-  border-radius: 50px;
-  width: 100%;
-  transition: 0.3s all;
-  max-width: 600px;
-  cursor: pointer;
-  font-family: Poppins;
-  font-size: 25px;
-  font-weight: bold;
-  line-height: 21px;
-  letter-spacing: 0.4em;
-  text-align: center;
-}
-
-button[type="submit"]:hover {
-  background: #d6044e;
-}

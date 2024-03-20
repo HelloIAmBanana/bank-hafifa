@@ -1,16 +1,16 @@
 import * as React from "react";
 import { useState } from "react";
-import GenericForm from "../../components/GenericForm";
+import GenericForm from "../../components/GenericForm/GenericForm";
 import Ajv, { JSONSchemaType } from "ajv";
 import Grid from "@mui/material/Grid";
 import { Box, Button, Input, Typography } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { Link } from "react-router-dom";
 import signupImage from "../../imgs/signupPage.svg";
-import { User } from "../../components/models/user";
+import { User } from "../../models/user";
 import ajvErrors from "ajv-errors";
 import { useNavigate } from "react-router-dom";
-import CRUDLocalStorage from "../../components/CRUDLocalStorage";
+import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
 import { useRememberedUser } from "../../hooks/useRememberedUser";
 import "./signup.css";
@@ -111,7 +111,6 @@ const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
-  useRememberedUser()
   const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -137,6 +136,7 @@ const SignUpPage: React.FC = () => {
       navigate("/signin");
     }
   };
+  useRememberedUser()
 
   return (
     <Grid container component="main" my={-7}>
