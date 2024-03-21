@@ -1,11 +1,10 @@
-import React from "react";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ReactDOM from "react-dom";
 import SignUpPage from "./pages/signup";
-import './style.css';
 import SignInPage from "./pages/signin";
 import WelcomePage from "./pages/welcome";
+import './style.css';
 
 function App() {
   return (

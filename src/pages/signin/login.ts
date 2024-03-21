@@ -1,25 +1,20 @@
-import { User } from "../../components/models/user";
-import AuthService from "../../components/AuthService";
-import CRUDLocalStorage from "../../components/CRUDLocalStorage";
-export default async function loginValidate(data: User, rememberMe: boolean) {
+import { User } from "../../models/user";
+import CRUDLocalStorage from "../../CRUDLocalStorage";
+import { UserAndRemembered } from "../../AuthService";
+
+export async function validateLogin(
+  userData: UserAndRemembered
+): Promise<User | null> {
   const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-  users.map((currentUser) => {
-    if (
-      currentUser.email.includes(`${data.email}`) &&
-      currentUser.email.length === data.email.length
-    ) {
-      if (
-        currentUser.password.includes(`${data.password}`) &&
-        currentUser.password.length === data.password.length
-      ) {
-        console.log(currentUser);
-        if (rememberMe) {
-          localStorage.setItem("rememberedUser", JSON.stringify(currentUser));
-        }
-        AuthService.storeUserToStorage(currentUser);
-        return true;
-      }
-    }
-  });
-  return false;
+  const foundUser = users.find(
+    (user) =>
+      user.email === userData.email && user.password === userData.password
+  );
+
+  if (foundUser) {
+      return foundUser as UserAndRemembered;
+  }
+  return null;
 }
+
+

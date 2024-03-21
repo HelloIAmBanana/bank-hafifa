@@ -1,6 +1,4 @@
-// fieldsRegistry.ts
-
-import { Input , Select} from "@mui/material";
+import { Checkbox, Input, Select } from "@mui/material";
 
 type FieldComponent = React.ComponentType<any>;
 
@@ -14,6 +12,7 @@ const fieldsRegistry: FieldsRegistry = {
   password: Input,
   date: Input,
   select: Select,
+  checkbox: Checkbox,
 };
 
 export default fieldsRegistry;

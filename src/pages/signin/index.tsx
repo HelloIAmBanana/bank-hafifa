@@ -2,30 +2,23 @@ import * as React from "react";
 import Ajv, { JSONSchemaType } from "ajv";
 import Grid from "@mui/material/Grid";
 import { Box } from "@mui/material";
-import CssBaseline from "@mui/material/CssBaseline";
 import Paper from "@mui/material/Paper";
 import { Link } from "react-router-dom";
 import loginImage from "../../imgs/loginPage.svg";
-import { useEffect, useState } from "react";
-import Checkbox from "@mui/material/Checkbox";
-import GenericForm from "../../components/GenericForm";
+import GenericForm from "../../components/GenericForm/GenericForm";
 import ajvErrors from "ajv-errors";
-import { User } from "../../components/models/user";
+import { User } from "../../models/user";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../../components/AuthService";
+import AuthService, { UserAndRemembered } from "../../AuthService";
+import { validateLogin } from "./login";
 import { Typography } from "@mui/material";
-import loginValidate from "./login";
-import { FlashOnOutlined } from "@mui/icons-material";
+import { useSignedUser } from "../../hooks/useRememberedUser";
+import "./login.css";
+import { errorAlert, successAlert } from "../../utils/swalAlerts";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
-
-function getCurrentUser(key: string) {
-  const data = localStorage.getItem(key);
-  const currentUser = data ? JSON.parse(data) : [];
-  return currentUser;
-}
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -44,7 +37,7 @@ const schema: JSONSchemaType<User> = {
     balance: { type: "number" },
   },
   required: ["email", "password"],
-  additionalProperties: false,
+  additionalProperties: true,
   errorMessage: {
     properties: {
       email: "Entered Email Is Invalid.",
@@ -53,11 +46,11 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-const validate = ajv.compile(schema);
+const validateForm = ajv.compile(schema);
+
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
-  const [rememberMe, setRememberMe] = useState(false);
-  const [isValid, setIsValid] = useState(false);
+
   const fields = [
     {
       id: "email",
@@ -65,8 +58,6 @@ const SignInPage: React.FC = () => {
       type: "email",
       required: true,
       placeholder: "Enter your email",
-      errorMsg: "Entered Email Is Invalid.",
-      errorMsgVisibility: true,
     },
     {
       id: "password",
@@ -74,118 +65,88 @@ const SignInPage: React.FC = () => {
       type: "password",
       required: true,
       placeholder: "Password",
-      errorMsg: "Entered Password Is Invalid.",
-      errorMsgVisibility: true,
+    },
+    {
+      id: "rememberMe",
+      label: "Remember Me",
+      type: "checkbox",
+      required: false,
     },
   ];
-  const isUserRemembered = () => {
-    const rememberedUser = getCurrentUser("rememberedUser");
-    if (rememberedUser.firstName !== undefined) {
-      AuthService.storeUserToStorage(rememberedUser);
-      navigate("/home");
-    }
-    if (AuthService.getCurrentUserID() !== undefined) {
-      navigate("/home");
-    }
-  };
-  useEffect(() => {
-    isUserRemembered();
-  }, [isValid]);
 
+  function rememberUser(userId: string): void {
+    localStorage.setItem("rememberedAuthToken", userId);
+  }
   const login = async (data: Record<string, any>) => {
-    if (validate(data)) {
-      if (await loginValidate(data as User, rememberMe)) {
+    if (validateForm(data)) {
+      const isRemembered = (data as UserAndRemembered).rememberMe;
+      const validUser = await validateLogin(data as UserAndRemembered);
+      if (validUser) {
+        if (isRemembered) {
+          rememberUser(validUser.id);
+        } else {
+          AuthService.storeAuthTokenToStorage(validUser.id);
+        }
+        console.log(validUser);
+        successAlert("Signing in!");
         navigate("/home");
-        setIsValid(true)
       } else {
-        alert("User Not Real");
+        errorAlert("Wrong Credentials!");
       }
     }
-    alert("Not all fields were filled!");
   };
 
-  const handleRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRememberMe(event.target.checked);
-  };
+  useSignedUser();
 
   return (
-    <Grid container component="main" sx={{ height: "90vh" }}>
-      <CssBaseline />
+    <Grid container component="main" sx={{ height: "85vh" }}>
       <Grid
         item
-        xs={false}
-        sm={5}
+        xs={12}
         md={6}
-        my={15}
         sx={{
           backgroundImage: `url(${loginImage})`,
           backgroundRepeat: "no-repeat",
-          backgroundSize: "65%",
+          backgroundSize: "100%",
           borderRadius: "20px",
-          backgroundPosition: "center",
+          backgroundPosition: "bottom center",
         }}
       />
       <Grid
         item
-        xs={4}
-        sm={6}
-        md={5}
-        my={5}
+        xs={12}
+        md={6}
         component={Paper}
-        elevation={8}
-        square={false}
-        borderRadius={5}
+        elevation={20}
+        borderRadius={3}
       >
-        <Box
-          sx={{
-            my: 4,
-            mx: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        ></Box>
-
-        <Grid container spacing={1}>
-          <Grid item my={5} mx={25} lineHeight={50} spacing={54}>
-            <Typography
-              variant="h2"
-              className="firstTitle"
-              style={{ lineHeight: "1" }}
-            >
-              Welcome back
-            </Typography>
+        <Box sx={{ mt: 25 }}>
+          <Grid container spacing={1}>
+            <Grid item margin={"auto"}>
+              <Typography variant="h2" className="mainTitle">
+                Welcome back
+              </Typography>
+              <Typography variant="h4" className="secondaryTitle">
+                Please enter your details.
+              </Typography>
+            </Grid>
           </Grid>
-          <Grid item ml={12} sm={12} my={-5} mx={0}>
-            <Typography variant="h4" className="secondTitle">
-              Please enter your details.
-            </Typography>
-          </Grid>
-          {/*  */}
-          <Grid item ml={12} sm={12} my={5} mx={12}>
+          <Grid item mx="auto" textAlign="center" mt={7}>
             <GenericForm
               fields={fields}
-              customSubmitFunction={login}
-              submitButtonName="Sign In"
+              onSubmit={login}
+              submitButtonLabel="Sign In"
               schema={schema}
             />
           </Grid>
-
-          <Grid container>
-            <Grid item my={-4} className="existingUserButton">
-              <Checkbox
-                onChange={handleRememberMe}
-                title="Remember me"
-              ></Checkbox>
-              Remember Me
-            </Grid>
-            <Grid item my={-3} sx={{ marginLeft: "auto" }}>
-              <Link to="/" className="existingUserButton">
+          <Grid container justifyContent="flex-start">
+            <Grid item sx={{ marginLeft: "auto" }}>
+              <Link to="/" className="forgotPasswordButton">
                 Forgot password?
               </Link>
             </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </Grid>
     </Grid>
   );
