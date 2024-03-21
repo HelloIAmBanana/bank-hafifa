@@ -12,7 +12,7 @@ import ajvErrors from "ajv-errors";
 import { useNavigate } from "react-router-dom";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
-import { useRememberedUser } from "../../hooks/useRememberedUser";
+import { useSignedUser } from "../../hooks/useRememberedUser";
 import "./signup.css";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
@@ -110,8 +110,9 @@ const schema: JSONSchemaType<User> = {
 const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
-  const navigate = useNavigate();
   const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
+
+  const navigate = useNavigate();
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -119,8 +120,7 @@ const SignUpPage: React.FC = () => {
       setAvatarImgURL(imageUrl);
     }
   };
-
-  const signUp = async (data: Partial<any>) => {
+  const signUp = async (data: any) => {
     const newUser = {
       ...data,
       id: generateUniqueId(),
@@ -136,7 +136,8 @@ const SignUpPage: React.FC = () => {
       navigate("/signin");
     }
   };
-  useRememberedUser()
+
+  useSignedUser()
 
   return (
     <Grid container component="main" my={-7}>

@@ -3,10 +3,12 @@ import { useState, useEffect } from "react";
 import AuthService from "../../AuthService";
 import { User } from "../../models/user";
 import { Box } from "@mui/material";
+import { useNotSignedUser } from "../../hooks/useRememberedUser";
 
 const WelcomePage: React.FC = () => {
   const [timeGreetings, setTimeGreetings] = useState("");
   const [fullName, setFullName] = useState("");
+
   const time = new Date().getHours();
   useEffect(() => {
     if (time < 12 && time > 6) {
@@ -19,12 +21,11 @@ const WelcomePage: React.FC = () => {
       setTimeGreetings("Good night, ");
     }
   }, [time]);
-
   async function getFullName() {
     const user = (await AuthService.getUserFromStorage(
       AuthService.getAuthToken() as string
     )) as User;
-    console.log(user)
+    console.log(user);
     setFullName(
       user.firstName[0].toUpperCase() +
         user.firstName.substring(1).toLowerCase() +
@@ -33,8 +34,9 @@ const WelcomePage: React.FC = () => {
         user.lastName.substring(1).toLowerCase()
     );
   }
-  getFullName();
 
+  getFullName();
+  useNotSignedUser();
   return (
     <Box>
       {timeGreetings} {fullName}

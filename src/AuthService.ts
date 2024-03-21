@@ -13,7 +13,7 @@ class AuthService {
     console.log(id);
     try {
       const user = users.find((user) => user.id === id);
-      return user as User;
+      return user;
     } catch (error) {
       return null;
     }

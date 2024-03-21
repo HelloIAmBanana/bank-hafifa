@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import AuthService, { UserAndRemembered } from "../../AuthService";
 import { validateLogin } from "./login";
 import { Typography } from "@mui/material";
-import { useRememberedUser } from "../../hooks/useRememberedUser";
+import { useSignedUser } from "../../hooks/useRememberedUser";
 import "./login.css";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 
@@ -75,7 +75,7 @@ const SignInPage: React.FC = () => {
   ];
 
   function rememberUser(userId: string): void {
-    localStorage.setItem("rememberedUser", userId);
+    localStorage.setItem("rememberedAuthToken", userId);
   }
   const login = async (data: Record<string, any>) => {
     if (validateForm(data)) {
@@ -89,14 +89,14 @@ const SignInPage: React.FC = () => {
         }
         console.log(validUser);
         successAlert("Signing in!");
-        navigate("/home");
+        navigate("/welcome");
       } else {
         errorAlert("Wrong Credentials!");
       }
     }
   };
 
-  useRememberedUser();
+  useSignedUser();
 
   return (
     <Grid container component="main" sx={{ height: "85vh" }}>
