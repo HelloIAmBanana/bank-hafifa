@@ -15,7 +15,6 @@ import { useNavigate } from "react-router-dom";
 import AuthService from "../../components/AuthService";
 import { Typography } from "@mui/material";
 import loginValidate from "./login";
-import { FlashOnOutlined } from "@mui/icons-material";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 
@@ -78,7 +77,8 @@ const SignInPage: React.FC = () => {
       errorMsgVisibility: true,
     },
   ];
-  const isUserRemembered = () => {
+
+  useEffect(() => {
     const rememberedUser = getCurrentUser("rememberedUser");
     if (rememberedUser.firstName !== undefined) {
       AuthService.storeUserToStorage(rememberedUser);
@@ -87,21 +87,21 @@ const SignInPage: React.FC = () => {
     if (AuthService.getCurrentUserID() !== undefined) {
       navigate("/home");
     }
-  };
-  useEffect(() => {
-    isUserRemembered();
-  }, [isValid]);
+  }, [isValid,navigate]);
 
   const login = async (data: Record<string, any>) => {
     if (validate(data)) {
-      if (await loginValidate(data as User, rememberMe)) {
+      const validUser= await loginValidate(data as User, rememberMe);
+      console.log(validUser)
+      if (validUser) {
+        console.log(loginValidate(data as User, rememberMe))
         navigate("/home");
         setIsValid(true)
-      } else {
+      } 
+      else {
         alert("User Not Real");
       }
     }
-    alert("Not all fields were filled!");
   };
 
   const handleRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {

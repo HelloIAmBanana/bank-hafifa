@@ -128,7 +128,6 @@ const SignUpPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       const imageUrl: string = URL.createObjectURL(file);
-      console.log("Uploaded image URL:", imageUrl);
       setAvatarImgURL(imageUrl);
     }
   };

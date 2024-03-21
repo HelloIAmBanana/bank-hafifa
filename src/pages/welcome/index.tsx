@@ -1,6 +1,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import NavBar from "../../components/navigationBar/navBar";
 import {
   Button,
@@ -61,6 +61,9 @@ const WelcomePage: React.FC = () => {
 
   const handleOpenModal = () => {
     setOpenModal(true);
+    setAccountId("");
+    setAmount(0);
+    setTransferReason("");
   };
 
   const handleCloseModal = () => {
@@ -87,7 +90,7 @@ const WelcomePage: React.FC = () => {
     <>
       <NavBar />
       <Box mx={30} sx={{ paddingTop: 8 }}>
-        {(isLoading||!currentUser) ? ( // Render CircularProgress if isLoading is true
+        {isLoading || !currentUser ? ( // Render CircularProgress if isLoading is true
           <Box
             sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}
           >
@@ -113,7 +116,7 @@ const WelcomePage: React.FC = () => {
                   gutterBottom
                   sx={{ fontFamily: "Poppins", fontSize: 18 }}
                 >
-                  Your Balance
+                  Your Balance💰
                 </Typography>
                 <Typography
                   variant="h4"
@@ -134,9 +137,11 @@ const WelcomePage: React.FC = () => {
                   fontWeight: "bold",
                   marginTop: 2,
                   fontSize: 18,
+                  boxShadow: 5,
+                  borderRadius: 8,
                 }}
               >
-                Make A Payment
+                Make A Payment💸
               </Button>
             </Grid>
           </Grid>
@@ -158,6 +163,7 @@ const WelcomePage: React.FC = () => {
               bgcolor: "background.paper",
               p: 4,
               borderRadius: 2,
+              boxShadow: 24,
             }}
           >
             <Typography
@@ -165,6 +171,7 @@ const WelcomePage: React.FC = () => {
               variant="h6"
               component="h2"
               gutterBottom
+              sx={{ fontFamily: "Poppins" }}
             >
               Create Transaction
             </Typography>
@@ -174,7 +181,7 @@ const WelcomePage: React.FC = () => {
               variant="outlined"
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, fontFamily: "Poppins" }}
             />
             <TextField
               fullWidth
@@ -183,7 +190,7 @@ const WelcomePage: React.FC = () => {
               variant="outlined"
               value={amount}
               onChange={(e) => setAmount(parseFloat(e.target.value))}
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, fontFamily: "Poppins" }}
             />
             <TextField
               fullWidth
@@ -191,12 +198,12 @@ const WelcomePage: React.FC = () => {
               variant="outlined"
               value={transferReason}
               onChange={(e) => setTransferReason(e.target.value)}
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, fontFamily: "Poppins" }}
             />
             <Button
               variant="contained"
               onClick={handleSubmitTransaction}
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, fontFamily: "Poppins" }}
             >
               Submit
             </Button>
