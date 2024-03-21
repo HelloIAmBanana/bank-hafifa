@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 import "./style.css";
 
-
 const WelcomePage: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | undefined>();
   const [isLoading, setIsLoading] = useState(false);
@@ -65,15 +64,21 @@ const WelcomePage: React.FC = () => {
   const handleSubmitTransaction = async () => {
     handlePaymentModal();
     setIsLoading(true);
-    const receivingUser = await AuthService.getUserFromStorage(
-      receivingAccountId
-    );
-    if (receivingUser != null) {
-      await updateBalance(currentUser as User, -amount);
-      await updateBalance(receivingUser as User, amount);
-      successAlert(`Transfered ${amount}$ to ${receivingUser.firstName}`);
+    if (receivingAccountId !== currentUser?.id) {
+      const receivingUser = await AuthService.getUserFromStorage(
+        receivingAccountId
+      );
+      if (receivingUser != null) {
+        await updateBalance(currentUser as User, -amount);
+        await updateBalance(receivingUser as User, amount);
+        successAlert(
+          `Transfered ${amount}$ to ${receivingUser.firstName} ${receivingUser.lastName}`
+        );
+      } else {
+        errorAlert("Entered ID is WRONG!");
+      }
     } else {
-      errorAlert("Entered ID is WRONG");
+      errorAlert("You can't enter your own ID!");
     }
     setIsLoading(false);
   };

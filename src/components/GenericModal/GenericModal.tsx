@@ -114,7 +114,7 @@ const GenericModal: React.FC<GenericModalProps> = ({
           <Box key={field.id}>
             <Typography
               variant="h6"
-              className="signinLabelNormal"
+              className="secondTitle"
               sx={{ fontFamily: "Poppins" }}
             >
               {field.label}
