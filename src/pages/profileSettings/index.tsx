@@ -141,6 +141,7 @@ const ProfileSettingsPage: React.FC = () => {
 
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
+      <NavBar />
       {isLoading || !currentUser ? (
         <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
           <CircularProgress />
@@ -158,7 +159,6 @@ const ProfileSettingsPage: React.FC = () => {
             fontFamily: "Poppins",
           }}
         >
-          <NavBar />
           <Grid container spacing={4} justifyContent="center">
             <Grid item>
               <Button //Name

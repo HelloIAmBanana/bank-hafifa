@@ -50,6 +50,7 @@ interface Field {
   placeholder?: string;
   checked?: boolean;
   options?: { value: string; label: string }[];
+  numberField?: boolean;
 }
 
 interface GenericModalProps {

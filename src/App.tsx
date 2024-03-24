@@ -6,6 +6,7 @@ import SignUpPage from "./pages/signup";
 import './style.css';
 import SignInPage from "./pages/signin";
 import WelcomePage from "./pages/welcome";
+import CardsPage from "./pages/cards";
 import ProfileSettingsPage from "./pages/profileSettings";
 
 function App() {
@@ -17,7 +18,7 @@ function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/home" element={<WelcomePage />} />
         <Route path="/loans" element={<WelcomePage />} />
-        <Route path="/cards" element={<WelcomePage />} />
+        <Route path="/cards" element={<CardsPage />} />
         <Route path="/deposits" element={<WelcomePage />} />
         <Route path="/account" element={<ProfileSettingsPage />} />
         </Routes>

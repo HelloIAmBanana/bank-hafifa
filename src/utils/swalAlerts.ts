@@ -29,7 +29,7 @@ export function errorAlert(message:string){
 export function warningAlert(message:string){
   Swal.fire({
   toast: true,
-  position: "bottom-end",
+  position: "top-end",
   icon: "warning",
   color: "yellow",
   title: message,

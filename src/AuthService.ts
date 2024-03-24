@@ -14,7 +14,7 @@ class AuthService {
       const user = users.find((user) => user.id === id);
       return user;
     } catch (error) {
-      return null;
+      return undefined;
     }
   }
 
