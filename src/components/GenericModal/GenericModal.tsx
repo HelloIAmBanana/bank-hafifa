@@ -5,8 +5,7 @@ import Ajv, { JSONSchemaType } from "ajv";
 import ajvErrors from "ajv-errors";
 import fieldsRegistry from "../../models/fieldTypes";
 import { User } from "../../models/user";
-import { useState } from "react";
-
+import { Field } from "../../models/field";
 import "./style.css";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
@@ -41,16 +40,6 @@ const schema: JSONSchemaType<User> = {
     },
   },
 };
-interface Field {
-  id: string;
-  label: string;
-  type: string;
-  required: boolean;
-  placeholder?: string;
-  checked?: boolean;
-  options?: { value: string; label: string }[];
-}
-
 interface GenericModalProps {
   fields: Field[];
   onSubmit: (data: Record<string, any>) => void;
@@ -73,7 +62,6 @@ const GenericModal: React.FC<GenericModalProps> = ({
   } = useForm({ mode: "onChange" });
 
   const customErrors = errors as Record<string, { message?: string }>;
-  const [isNotChanged, setIsNotChanged] = useState(true);
 
   const onClick = () => {
     clearErrors();
@@ -95,9 +83,6 @@ const GenericModal: React.FC<GenericModalProps> = ({
       onSubmit(data);
     }
   };
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsNotChanged(false)
-  }
 
 
   return (
@@ -137,7 +122,6 @@ const GenericModal: React.FC<GenericModalProps> = ({
                 {...register(field.id)}
                 sx={{ fontFamily: "Poppins", width: 260 }}
                 defaultValue={field.placeholder}
-                onChange={handleChange}
               >
                 {field.options?.map((option) => (
                   <MenuItem key={option.value} value={option.value}>

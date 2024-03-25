@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { User } from "../../models/user";
 import { successAlert } from "../../utils/swalAlerts";
 import { useNotSignedUser } from "../../hooks/useRememberedUser";
+import { Field } from "../../models/field";
 import {
   Button,
   Grid,
@@ -22,48 +23,49 @@ const ProfileSettingsPage: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [profilePictureModal, setProfilePictureModal] = useState(false);
+  const [fields,setFields]=useState<Field[]>([]);
 
-  const nameFields = [
-    {
-      id: "firstName",
-      label: "First Name",
-      type: "text",
-      required: false,
-      placeholder: `${currentUser?.firstName}`,
-    },
-    {
-      id: "lastName",
-      label: "Last Name",
-      type: "text",
-      required: false,
-      placeholder: `${currentUser?.lastName}`,
-    },
-    {
-      id: "birthDate",
-      label: "Date Of Birth",
-      type: "date",
-      required: false,
-      placeholder: `${currentUser?.birthDate}`,
-    },
-
-    {
-      id: "gender",
-      label: "Gender",
-      type: "select",
-      required: false,
-      placeholder: `${currentUser?.gender}`,
-      options: [
-        { value: "Male", label: "Male" },
-        { value: "Female", label: "Female" },
-      ],
-    },
-  ];
-
+  
   const storeCurrentUser = async () => {
     setCurrentUser(await AuthService.getCurrentUser());
   };
   useEffect(() => {
     storeCurrentUser();
+    setFields([
+      {
+        id: "firstName",
+        label: "First Name",
+        type: "text",
+        required: false,
+        placeholder: `${currentUser?.firstName}`,
+      },
+      {
+        id: "lastName",
+        label: "Last Name",
+        type: "text",
+        required: false,
+        placeholder: `${currentUser?.lastName}`,
+      },
+      {
+        id: "birthDate",
+        label: "Date Of Birth",
+        type: "date",
+        required: false,
+        placeholder: `${currentUser?.birthDate}`,
+      },
+  
+      {
+        id: "gender",
+        label: "Gender",
+        type: "select",
+        required: false,
+        placeholder: `${currentUser?.gender}`,
+        options: [
+          { value: "Male", label: "Male" },
+          { value: "Female", label: "Female" },
+        ],
+      },
+    ])
   }, []);
   async function updateUser(user: User) {
     const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
@@ -78,14 +80,12 @@ const ProfileSettingsPage: React.FC = () => {
       ...(currentUser as User),
       ...data,
     };
-    console.log("Updated User: "+(updatedUser as User))
-    console.log("Current User: "+(currentUser as User))
-
-    if(!_.isEqual(updatedUser,currentUser)){
+    if (!_.isEqual(updatedUser, currentUser)) {
       await updateUser(updatedUser);
       successAlert(`Updated User!`);
     }
     setIsLoading(false);
+    storeCurrentUser();
   };
   const closeModals = () => {
     setProfilePictureModal(false);
@@ -138,7 +138,7 @@ const ProfileSettingsPage: React.FC = () => {
             <Grid container spacing={4} justifyContent="center">
               <Grid item>
                 <GenericModal
-                  fields={nameFields}
+                  fields={fields}
                   onSubmit={handleModalSubmit}
                   submitButtonLabel="Update Profile"
                 />
