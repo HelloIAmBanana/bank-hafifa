@@ -1,13 +1,12 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Box, MenuItem } from "@mui/material";
-import FormHelperText from "@mui/material/FormHelperText";
+import { Box, MenuItem,Typography,Button,FormHelperText} from "@mui/material";
 import Ajv, { JSONSchemaType } from "ajv";
-import Button from "@mui/material/Button";
 import ajvErrors from "ajv-errors";
-import { Typography } from "@mui/material";
 import fieldsRegistry from "../../models/fieldTypes";
 import { User } from "../../models/user";
+import { useState } from "react";
+
 import "./style.css";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
@@ -74,6 +73,7 @@ const GenericModal: React.FC<GenericModalProps> = ({
   } = useForm({ mode: "onChange" });
 
   const customErrors = errors as Record<string, { message?: string }>;
+  const [isNotChanged, setIsNotChanged] = useState(true);
 
   const onClick = () => {
     clearErrors();
@@ -95,6 +95,10 @@ const GenericModal: React.FC<GenericModalProps> = ({
       onSubmit(data);
     }
   };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsNotChanged(false)
+  }
+
 
   return (
     <Box
@@ -132,6 +136,8 @@ const GenericModal: React.FC<GenericModalProps> = ({
                 {...field}
                 {...register(field.id)}
                 sx={{ fontFamily: "Poppins", width: 260 }}
+                defaultValue={field.placeholder}
+                onChange={handleChange}
               >
                 {field.options?.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
@@ -154,7 +160,7 @@ const GenericModal: React.FC<GenericModalProps> = ({
         );
       })}
       <center>
-        <Button onClick={onClick} type="submit">
+        <Button onClick={onClick} type="submit" >
           {submitButtonLabel}
         </Button>
       </center>
