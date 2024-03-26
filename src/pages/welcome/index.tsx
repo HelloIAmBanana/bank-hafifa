@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import AuthService from "../../AuthService";
 import { User } from "../../models/user";
 import { Box } from "@mui/material";
-import { useNotSignedUser } from "../../hooks/useRememberedUser";
 
 const WelcomePage: React.FC = () => {
   const [timeGreetings, setTimeGreetings] = useState("");
@@ -36,7 +35,6 @@ const WelcomePage: React.FC = () => {
   }
 
   getFullName();
-  useNotSignedUser();
   return (
     <Box>
       {timeGreetings} {fullName}

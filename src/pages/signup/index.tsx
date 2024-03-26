@@ -5,15 +5,13 @@ import Ajv, { JSONSchemaType } from "ajv";
 import Grid from "@mui/material/Grid";
 import { Box, Button, Input, Typography } from "@mui/material";
 import Paper from "@mui/material/Paper";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import signupImage from "../../imgs/signupPage.svg";
 import { User } from "../../models/user";
 import ajvErrors from "ajv-errors";
 import { useNavigate } from "react-router-dom";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
-import { useSignedUser } from "../../hooks/useRememberedUser";
-import "./signup.css";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -52,6 +50,7 @@ const fields = [
     label: "Date Of Birth",
     type: "date",
     required: false,
+    name: "hasfd",
     placeholder: "Enter your birthday",
   },
   {
@@ -110,7 +109,9 @@ const schema: JSONSchemaType<User> = {
 const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
-  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
+  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(
+    undefined
+  );
 
   const navigate = useNavigate();
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,8 +138,6 @@ const SignUpPage: React.FC = () => {
     }
   };
 
-  useSignedUser()
-
   return (
     <Grid container component="main" my={-7}>
       <Grid
@@ -160,17 +159,32 @@ const SignUpPage: React.FC = () => {
         elevation={20}
         borderRadius={3}
       >
-        <Box sx={{ mt: 1 }}>
+        <Box sx={{ mt: 1, boxSizing: "100vh" }}>
           <Grid container spacing={1}>
-            <Grid item margin={"auto"}>
-              <Typography variant="h2" className="mainTitle">
-                CREATE ACCOUNT
-              </Typography>
-              <Typography variant="h4" className="secondaryTitle">
-                Welcome! Please fill out the details below
-              </Typography>
-            </Grid>
             <Grid item mx="auto" textAlign="center">
+              <Grid item margin={"auto"}>
+                <Typography
+                  sx={{
+                    fontFamily: "Poppins",
+                    fontSize: "50px",
+                    fontWeight: "bold",
+                    lineHeight: "50px",
+                    textAlign: "center",
+                  }}
+                >
+                  CREATE ACCOUNT
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: "Poppins",
+                    fontSize: "25px",
+                    lineHeight: "50px",
+                    textAlign: "center",
+                  }}
+                >
+                  Welcome! Please fill out the details below
+                </Typography>
+              </Grid>
               <Button
                 style={{
                   padding: "50px",
@@ -203,7 +217,16 @@ const SignUpPage: React.FC = () => {
                   }}
                 />
               </Button>
-              <h4 className="addAvatarText">Upload profile image</h4>
+              <Typography
+                sx={{
+                  fontFamily: "Poppins",
+                  fontSize: "18px",
+                  lineHeight: "50px",
+                  textAlign: "center",
+                }}
+              >
+                Upload profile image
+              </Typography>
               <GenericForm
                 fields={fields}
                 onSubmit={signUp}
@@ -212,9 +235,20 @@ const SignUpPage: React.FC = () => {
               />
             </Grid>
           </Grid>
-          <Link to="/signin" className="existingUserButton">
+          <NavLink
+            to="/signin"
+            style={{
+              padding: "20px",
+              textDecoration: "none",
+              fontFamily: "Poppins",
+              color: "#181818",
+              fontSize: "18px",
+              textAlign: "center",
+              marginLeft: 10,
+            }}
+          >
             Already got a user?
-          </Link>
+          </NavLink>
         </Box>
       </Grid>
     </Grid>

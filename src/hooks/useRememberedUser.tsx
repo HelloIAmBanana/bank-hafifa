@@ -5,7 +5,7 @@ import AuthService from "../AuthService";
 export function useSignedUser() {
   const navigate = useNavigate();
   useEffect(() => {
-    if (AuthService.getAuthToken()) {
+    if (AuthService.isUserAuthinticated()) {
       navigate("/welcome");
     }
   }, [navigate]);
@@ -14,8 +14,8 @@ export function useSignedUser() {
 export function useNotSignedUser() {
   const navigate = useNavigate();
   useEffect(() => {
-    if (AuthService.getAuthToken()) {
-      navigate("/login");
+    if (!AuthService.isUserAuthinticated) {
+      navigate("/signin");
     }
   }, [navigate]);
 }

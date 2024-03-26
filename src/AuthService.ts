@@ -23,6 +23,10 @@ class AuthService {
     return localStorage.getItem("rememberedAuthToken");
   }
 
+  static isUserAuthinticated(){
+    return Boolean(AuthService.getAuthToken())
+  }
+
   static getAuthToken() {
     const rememberedUser = AuthService.getRememberedToken();
     const sessionToken = sessionStorage.getItem("currentAuthToken");
