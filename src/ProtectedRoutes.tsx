@@ -3,8 +3,8 @@ import AuthService from "./AuthService";
 import React from 'react';
 
 export const ProtectedRoutes = () => {
-    let isAuthinticated = AuthService.isUserAuthinticated()
+    let isAuthenticated = AuthService.isUserAuthenticated()
     return(
-        isAuthinticated ? <Outlet /> : <Navigate to="/signin" />
+        isAuthenticated ? <Outlet /> : <Navigate to="/signin" />
     )
 }

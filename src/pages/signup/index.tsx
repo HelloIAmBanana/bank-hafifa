@@ -12,7 +12,6 @@ import ajvErrors from "ajv-errors";
 import { useNavigate } from "react-router-dom";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
-
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 

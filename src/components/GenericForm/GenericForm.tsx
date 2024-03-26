@@ -6,8 +6,7 @@ import Ajv, { Schema } from "ajv";
 import Button from "@mui/material/Button";
 import ajvErrors from "ajv-errors";
 import { Typography } from "@mui/material";
-import fieldsRegistry from "../../models/fieldTypes";
-
+import fieldsRegistry from "./fieldsRegistry";
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);

@@ -23,7 +23,7 @@ class AuthService {
     return localStorage.getItem("rememberedAuthToken");
   }
 
-  static isUserAuthinticated(){
+  static isUserAuthenticated(){
     return Boolean(AuthService.getAuthToken())
   }
 
