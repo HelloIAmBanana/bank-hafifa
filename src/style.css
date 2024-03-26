@@ -1,0 +1,50 @@
+body {
+  padding: 70px;
+  background: #ffffff;
+}
+@font-face {
+  font-family: 'Poppins';
+  src: local('Poppins'), url(./fonts/Poppins-Regular.ttf) format('truetype');
+}
+
+Input[type="date"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+  }
+
+button[type="submit"] {
+    position: relative;
+    background: #f50057;
+    box-shadow: 0px 4px 10px 7px #62474940;
+    color: white;
+    text-transform: uppercase;
+    border: none;
+    margin-top: 20px;
+    padding: 20px;
+    display: block;
+    appearance: none;
+    border-radius: 50px;
+    width: 100%;
+    transition: 0.3s all;
+    max-width: 600px;
+    cursor: pointer;
+    font-family: Poppins;
+    font-size: 25px;
+    font-weight: bold;
+    line-height: 21px;
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+  
+  button[type="submit"]:hover {
+    background: #d6044e;
+  }
+  
