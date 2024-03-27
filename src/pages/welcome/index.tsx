@@ -162,7 +162,7 @@ const WelcomePage: React.FC = () => {
             label="Account ID"
             variant="outlined"
             value={receivingAccountId}
-            onChange={(e) => setReceivingAccountId(e.target.value)}
+            onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setReceivingAccountId(e.target.value)}
             sx={{ mt: 2 }}
           />
           <TextField
@@ -171,7 +171,7 @@ const WelcomePage: React.FC = () => {
             label="Amount"
             variant="outlined"
             value={amount}
-            onChange={(e) => setAmount(parseFloat(e.target.value))}
+            onChange={(e: { target: { value: string; }; }) => setAmount(parseFloat(e.target.value))}
             sx={{ mt: 2 }}
           />
           <TextField
@@ -179,7 +179,7 @@ const WelcomePage: React.FC = () => {
             label="Transfer Reason"
             variant="outlined"
             value={transferReason}
-            onChange={(e) => setTransferReason(e.target.value)}
+            onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setTransferReason(e.target.value)}
             sx={{ mt: 2 }}
           />
           <Button
