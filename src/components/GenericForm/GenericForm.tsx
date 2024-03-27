@@ -81,7 +81,6 @@ const GenericForm: React.FC<GenericFormProps> = ({
               </Typography>
               <Box
                 sx={{
-                  width: "auto",
                   border: "hidden",
                   margin: "auto",
                   textAlign: "auto",
@@ -92,7 +91,6 @@ const GenericForm: React.FC<GenericFormProps> = ({
                   {...register(field.id)}
                   sx={{
                     fontFamily: "Poppins",
-                    width: 200,
                   }}
                 >
                   {field.options?.map((option) => (
@@ -107,7 +105,6 @@ const GenericForm: React.FC<GenericFormProps> = ({
               <FormHelperText
                 sx={{
                   mx: 45,
-                  width: "auto",
                   color: "red",
                   fontFamily: "Poppins",
                 }}

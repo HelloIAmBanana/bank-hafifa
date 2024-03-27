@@ -1,18 +1,18 @@
-import React from 'react';
+import React, {useEffect,useState} from 'react';
 import { User } from './models/user';
 import AuthService from './AuthService';
 
 export const UserContext = React.createContext<User|undefined>(undefined);
 
 const UserProvider = ({ children }: React.PropsWithChildren) => {
-  const [currentUser, setCurrentUser] = React.useState<User>();
+  const [currentUser, setCurrentUser] = useState<User>();
 
   const storeCurrentUser = async () => {
     const user= await AuthService.getCurrentUser() as User;
     setCurrentUser(user);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     storeCurrentUser();
   }, []);
 

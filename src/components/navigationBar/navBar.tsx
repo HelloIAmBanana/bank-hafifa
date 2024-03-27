@@ -18,12 +18,11 @@ import {
   AccountCircle,
   ExitToApp,
 } from "@mui/icons-material";
-import { useState, useEffect,useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { User } from "../../models/user";
 import { useNavigate, useLocation } from "react-router-dom";
 import { capitalizeFirstLetter } from "../../utils/utils";
 import { UserContext } from "../../UserProvider";
-
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -40,12 +39,10 @@ export default function NavBar() {
     <ExitToApp />,
   ];
 
-
-
-  function logUserOut(){
-    sessionStorage.clear()
-    localStorage.removeItem("rememberedAuthToken")
-    navigate("/signin")
+  function logUserOut() {
+    sessionStorage.clear();
+    localStorage.removeItem("rememberedAuthToken");
+    navigate("/signin");
   }
 
   const currentHour = new Date().getHours();
@@ -70,7 +67,47 @@ export default function NavBar() {
       }
     }
   }, [currentUser, currentHour]);
-
+  const NavBarItem = ({
+    label,
+    icon,
+    onClickAction,
+  }: {
+    label: string;
+    icon: JSX.Element;
+    onClickAction:()=> void;
+  }) => {
+    return (
+      <ListItem
+        key={label}
+        disablePadding
+        sx={{
+          mb: 6,
+          boxShadow: 5,
+          backgroundColor:
+            location.pathname === "/" + label.toLowerCase() ? "#ca0f50d0" : "",
+        }}
+      >
+        <ListItemButton
+          onClick={() => {
+            onClickAction();
+          }}
+        >
+          <ListItemIcon sx={{ color: "#f50057", fontSize: "50px" }}>
+            {icon}
+          </ListItemIcon>
+          <Typography
+            sx={{
+              fontFamily: "Poppins",
+              fontSize: "1.2rem",
+              marginRight: "64px",
+            }}
+          >
+            {label}
+          </Typography>
+        </ListItemButton>
+      </ListItem>
+    );
+  };
   return (
     <Box>
       <Box sx={{ display: "flex" }}>
@@ -120,43 +157,20 @@ export default function NavBar() {
           <Toolbar />
           <Box sx={{ overflow: "auto" }}>
             <List>
-              {["Home", "Loans", "Cards", "Deposits", "Account", "Logout"].map(
+              {["Home", "Loans", "Cards", "Deposits", "Account"].map(
                 (text, index) => (
-                  <ListItem
-                    key={text}
-                    disablePadding
-                    sx={{
-                      mb: 6,
-                      boxShadow: 5,
-                      backgroundColor:
-                        location.pathname === "/" + text.toLowerCase()
-                          ? "#ca0f50d0"
-                          : "",
-                    }}
-                  >
-                    <ListItemButton
-                      onClick={() => {
-                        text === "Logout"
-                          ? logUserOut()
-                          : navigate(`/${text.toLowerCase()} `);
-                      }}
-                    >
-                      <ListItemIcon sx={{ color: "#f50057", fontSize: "50px" }}>
-                        {icons[index]}
-                      </ListItemIcon>
-                      <Typography
-                        sx={{
-                          fontFamily: "Poppins",
-                          fontSize: "1.2rem",
-                          marginRight: "64px",
-                        }}
-                      >
-                        {text}
-                      </Typography>
-                    </ListItemButton>
-                  </ListItem>
+                  <NavBarItem
+                    label={text}
+                    icon={icons[index]}
+                    onClickAction={(()=>(navigate(`/${text.toLowerCase()} `)))}
+                  />
                 )
               )}
+              <NavBarItem
+                label={"Logout"}
+                icon={<ExitToApp />}
+                onClickAction={logUserOut}
+              />
             </List>
           </Box>
         </Drawer>

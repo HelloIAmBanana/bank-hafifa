@@ -5,7 +5,6 @@ import Ajv, { JSONSchemaType } from "ajv";
 import Grid from "@mui/material/Grid";
 import { Box, Button, Input, Typography } from "@mui/material";
 import Paper from "@mui/material/Paper";
-
 import { NavLink } from "react-router-dom";
 import signupImage from "../../imgs/signupPage.svg";
 import { User } from "../../models/user";
@@ -110,8 +109,6 @@ const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
   const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
-
-
   const navigate = useNavigate();
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
