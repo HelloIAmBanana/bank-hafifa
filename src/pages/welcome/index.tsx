@@ -4,7 +4,6 @@ import NavBar from "../../components/navigationBar/navBar";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useState, useEffect } from "react";
 import { User } from "../../models/user";
-import { useNotSignedUser } from "../../hooks/useRememberedUser";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import {
   Button,
@@ -81,7 +80,6 @@ const WelcomePage: React.FC = () => {
     console.log("Transfer Reason:", transferReason);
   };
 
-  useNotSignedUser();
 
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
