@@ -1,14 +1,11 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-
 import { Box, Grid, MenuItem } from "@mui/material";
-
 import FormHelperText from "@mui/material/FormHelperText";
 import Ajv, { Schema } from "ajv";
 import Button from "@mui/material/Button";
 import ajvErrors from "ajv-errors";
 import { Typography } from "@mui/material";
-
 import fieldsRegistry from "./fieldsRegistry";
 const ajv = new Ajv({ allErrors: true, $data: true });
 
@@ -77,7 +74,6 @@ const GenericForm: React.FC<GenericFormProps> = ({
       {fields.map((field) => {
         const FieldComponent = fieldsRegistry[field.type];
         return (
-
           <Box>
             <Box key={field.id}>
               <Typography variant="h6" sx={{ fontFamily: "Poppins" }}>

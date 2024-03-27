@@ -1,10 +1,11 @@
 import * as React from "react";
 import AuthService from "../../AuthService";
 import NavBar from "../../components/navigationBar/navBar";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useState, useEffect } from "react";
+import { useState, useContext  } from "react";
 import { User } from "../../models/user";
+import { updateUser } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
+import { UserContext } from "../../UserProvider";
 import {
   Button,
   Grid,
@@ -18,50 +19,40 @@ import {
 import "./style.css";
 
 const WelcomePage: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | undefined>();
+  const currentUser = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
-  const [PaymentModal, setPaymentModal] = useState(false);
-  const [currentBalance, setCurrentBalance] = useState<number>();
+  const [isPaymentModalOpen, setPaymentModal] = useState(false);
   const [receivingAccountId, setReceivingAccountId] = useState("");
   const [amount, setAmount] = useState(0);
   const [transferReason, setTransferReason] = useState("");
-  useEffect(() => {
-    storeCurrentUser();
-  }, [currentBalance, currentUser]);
 
-  const storeCurrentUser = async () => {
-    setCurrentUser(await AuthService.getCurrentUser());
-  };
   const getUserBalance = () => {
     return currentUser ? currentUser.balance : 0;
   };
-  async function updateUser(user: User) {
-    const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-    const updatedUsers = users.filter((userItem) => userItem.id !== user.id);
-    updatedUsers.push(user);
-    await CRUDLocalStorage.setAsyncData("users", updatedUsers);
-  }
+
   const updateBalance = async (user: User, amount: number) => {
-    if (user) {
-      const updatedBalance = user.balance + amount;
-      setCurrentBalance(updatedBalance);
-      const updatedUser: User = {
-        ...user,
-        balance: updatedBalance,
-      };
-      await updateUser(updatedUser);
-    }
+    const updatedBalance = user.balance + amount;
+    const updatedUser: User = {
+      ...user,
+      balance: updatedBalance,
+    };
+    await updateUser(updatedUser);
   };
-  const handlePaymentModal = () => {
-    setPaymentModal(!PaymentModal);
-    if (PaymentModal) {
+
+  const openPaymentModal = () => {
+    setPaymentModal(true);
+  };
+
+  const closePaymentModal = () => {
+    setPaymentModal(false);
+    if (isPaymentModalOpen) {
       setReceivingAccountId("");
       setAmount(0);
       setTransferReason("");
     }
   };
+
   const handleSubmitTransaction = async () => {
-    handlePaymentModal();
     setIsLoading(true);
     const receivingUser = await AuthService.getUserFromStorage(
       receivingAccountId
@@ -75,12 +66,8 @@ const WelcomePage: React.FC = () => {
       setIsLoading(false);
       errorAlert("Entered ID is WRONG");
     }
-    console.log("Account ID:", receivingAccountId);
-    console.log("Amount:", amount);
-    console.log("Transfer Reason:", transferReason);
+    closePaymentModal();
   };
-
-
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
       <NavBar />
@@ -121,15 +108,15 @@ const WelcomePage: React.FC = () => {
                 >
                   {getUserBalance()}$
                 </Typography>
-                <Button onClick={handlePaymentModal}>Make A Payment💸</Button>
+                <Button onClick={openPaymentModal}>Make A Payment💸</Button>
               </Paper>
             </Grid>
           </Grid>
         </Box>
       )}
       <Modal
-        open={PaymentModal}
-        onClose={handlePaymentModal}
+        open={isPaymentModalOpen}
+        onClose={closePaymentModal}
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
         sx={{
@@ -160,8 +147,11 @@ const WelcomePage: React.FC = () => {
             label="Account ID"
             variant="outlined"
             value={receivingAccountId}
-            onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setReceivingAccountId(e.target.value)}
+            onChange={(e: {
+              target: { value: React.SetStateAction<string> };
+            }) => setReceivingAccountId(e.target.value)}
             sx={{ mt: 2 }}
+            disabled={isLoading}
           />
           <TextField
             fullWidth
@@ -169,23 +159,30 @@ const WelcomePage: React.FC = () => {
             label="Amount"
             variant="outlined"
             value={amount}
-            onChange={(e: { target: { value: string; }; }) => setAmount(parseFloat(e.target.value))}
+            onChange={(e: { target: { value: string } }) =>
+              setAmount(parseFloat(e.target.value))
+            }
             sx={{ mt: 2 }}
+            disabled={isLoading}
           />
           <TextField
             fullWidth
             label="Transfer Reason"
             variant="outlined"
             value={transferReason}
-            onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setTransferReason(e.target.value)}
+            onChange={(e: {
+              target: { value: React.SetStateAction<string> };
+            }) => setTransferReason(e.target.value)}
             sx={{ mt: 2 }}
+            disabled={isLoading}
           />
           <Button
             variant="contained"
             onClick={handleSubmitTransaction}
             sx={{ mt: 2 }}
+            disabled={isLoading}
           >
-            2 3 SHA-GER
+            {isLoading ? <CircularProgress /> : "2 3 SHA-GER"}
           </Button>
         </Box>
       </Modal>

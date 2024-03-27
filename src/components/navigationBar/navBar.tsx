@@ -16,17 +16,20 @@ import {
   RequestQuote,
   Receipt,
   AccountCircle,
+  ExitToApp,
 } from "@mui/icons-material";
-import { useState, useEffect } from "react";
+import { useState, useEffect,useContext } from "react";
 import { User } from "../../models/user";
-import AuthService from "../../AuthService";
 import { useNavigate, useLocation } from "react-router-dom";
+import { capitalizeFirstLetter } from "../../utils/utils";
+import { UserContext } from "../../UserProvider";
+
 
 export default function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [timeMessage, setTimeMessage] = useState("");
-  const [currentUser, setCurrentUser] = useState<User>();
+  const currentUser = useContext(UserContext);
 
   const icons = [
     <Home />,
@@ -34,13 +37,20 @@ export default function NavBar() {
     <CreditCard />,
     <Receipt />,
     <AccountCircle />,
+    <ExitToApp />,
   ];
-  const storeCurrentUser = async () => {
-    setCurrentUser(await AuthService.getCurrentUser());
-  };
+
+
+
+  function logUserOut(){
+    sessionStorage.clear()
+    localStorage.removeItem("rememberedAuthToken")
+    navigate("/signin")
+  }
+
   const currentHour = new Date().getHours();
+
   useEffect(() => {
-    storeCurrentUser();
     switch (Math.floor(currentHour / 6)) {
       default: {
         setTimeMessage("☀️Good morning, ");
@@ -54,15 +64,12 @@ export default function NavBar() {
         setTimeMessage("🌆Good evening, ");
         break;
       }
-      case 4: {
+      case 0: {
         setTimeMessage("🌙Good night, ");
         break;
       }
     }
   }, [currentUser, currentHour]);
-  function capitalize(word: string) {
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-  }
 
   return (
     <Box>
@@ -70,7 +77,8 @@ export default function NavBar() {
         <AppBar
           position="fixed"
           sx={{
-            zIndex: (theme) => theme.zIndex.drawer + 1,
+            zIndex: (theme: { zIndex: { drawer: number } }) =>
+              theme.zIndex.drawer + 1,
             backgroundColor: "#F50057",
           }}
         >
@@ -86,12 +94,12 @@ export default function NavBar() {
                   component="div"
                   sx={{ fontFamily: "Poppins" }}
                 >
-                  {timeMessage} {capitalize((currentUser as User).firstName)}{" "}
-                  {capitalize((currentUser as User).lastName)}
+                  {`${timeMessage} ${capitalizeFirstLetter(
+                    currentUser.firstName
+                  )} ${capitalizeFirstLetter(currentUser.lastName)}`}
                 </Typography>
               </>
             )}
-
           </Toolbar>
         </AppBar>
         <Drawer
@@ -112,7 +120,7 @@ export default function NavBar() {
           <Toolbar />
           <Box sx={{ overflow: "auto" }}>
             <List>
-              {["Home", "Loans", "Cards", "Deposits", "Account"].map(
+              {["Home", "Loans", "Cards", "Deposits", "Account", "Logout"].map(
                 (text, index) => (
                   <ListItem
                     key={text}
@@ -128,7 +136,9 @@ export default function NavBar() {
                   >
                     <ListItemButton
                       onClick={() => {
-                        navigate(`/${text.toLowerCase()} `);
+                        text === "Logout"
+                          ? logUserOut()
+                          : navigate(`/${text.toLowerCase()} `);
                       }}
                     >
                       <ListItemIcon sx={{ color: "#f50057", fontSize: "50px" }}>

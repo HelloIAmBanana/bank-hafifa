@@ -23,19 +23,18 @@ class AuthService {
     return localStorage.getItem("rememberedAuthToken");
   }
 
-
-  static async getCurrentUser() {
-    const user = await AuthService.getUserFromStorage(
-      AuthService.getAuthToken() as string
-    ) as User;
-    return user;
+  static async getCurrentUser(): Promise<User | null> {
+    const authToken= AuthService.getAuthToken();
+    if(authToken){
+      return await AuthService.getUserFromStorage(authToken) as User
     }
-  static isUserAuthenticated(){
-    return Boolean(AuthService.getAuthToken())
-
+    return null;
+  }
+  static isUserAuthenticated() {
+    return Boolean(AuthService.getAuthToken());
   }
 
-  static getAuthToken() {
+  static getAuthToken(): string | null {
     const rememberedUser = AuthService.getRememberedToken();
     const sessionToken = sessionStorage.getItem("currentAuthToken");
     const user = rememberedUser ?? sessionToken;
