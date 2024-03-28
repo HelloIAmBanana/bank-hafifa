@@ -24,15 +24,13 @@ class AuthService {
     return localStorage.getItem("rememberedAuthToken");
   }
 
-  static async getUserFullNameByID(id: string) {
-    const user = await AuthService.getUserFromStorage(id);
+  static getUserFullName(user: User) {
     if (user) {
       return `${capitalizeFirstLetter(user.firstName)} ${capitalizeFirstLetter(
         user.lastName
       )}`;
     }
   }
-
   static async getCurrentUser(): Promise<User | null> {
     const authToken = AuthService.getAuthToken();
     if (authToken) {

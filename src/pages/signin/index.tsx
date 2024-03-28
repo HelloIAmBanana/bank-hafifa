@@ -55,21 +55,18 @@ const SignInPage: React.FC = () => {
       id: "email",
       label: "Email",
       type: "email",
-      required: false,
       placeholder: "Enter your email",
     },
     {
       id: "password",
       label: "Password",
       type: "password",
-      required: false,
       placeholder: "Password",
     },
     {
       id: "rememberMe",
       label: "Remember Me",
       type: "checkbox",
-      required: false,
     },
   ];
 

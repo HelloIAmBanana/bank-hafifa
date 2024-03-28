@@ -18,9 +18,9 @@ import {
 import { useState, useEffect, useContext } from "react";
 import { User } from "../../models/user";
 import { useNavigate} from "react-router-dom";
-import { capitalizeFirstLetter } from "../../utils/utils";
 import { UserContext } from "../../UserProvider";
 import NavBarItem from "./NavBarItem";
+import AuthService from "../../AuthService";
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -46,19 +46,19 @@ export default function NavBar() {
   useEffect(() => {
     switch (Math.floor(currentHour / 6)) {
       default: {
-        setTimeMessage("☀️Good morning, ");
+        setTimeMessage("Good morning☀️, ");
         break;
       }
       case 2: {
-        setTimeMessage("🌇Good afternoon, ");
+        setTimeMessage("Good afternoon🌇, ");
         break;
       }
       case 3: {
-        setTimeMessage("🌆Good evening, ");
+        setTimeMessage("Good evening🌆, ");
         break;
       }
       case 0: {
-        setTimeMessage("🌙Good night, ");
+        setTimeMessage("Good night🌙, ");
         break;
       }
     }
@@ -87,9 +87,7 @@ export default function NavBar() {
                   component="div"
                   sx={{ fontFamily: "Poppins" }}
                 >
-                  {`${timeMessage} ${capitalizeFirstLetter(
-                    currentUser.firstName
-                  )} ${capitalizeFirstLetter(currentUser.lastName)}`}
+                  {`${timeMessage} ${AuthService.getUserFullName(currentUser)}`}
                 </Typography>
               </>
             )}

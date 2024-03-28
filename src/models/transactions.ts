@@ -6,4 +6,5 @@ export type Transaction = {
     amount:number;
     senderName:string;
     receiverName:string;
+    date:string;
   };
