@@ -1,11 +1,12 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Box, Grid, MenuItem } from "@mui/material";
+import { Box, CircularProgress, Grid, MenuItem } from "@mui/material";
 import FormHelperText from "@mui/material/FormHelperText";
 import Ajv, { Schema } from "ajv";
 import Button from "@mui/material/Button";
 import ajvErrors from "ajv-errors";
 import { Typography } from "@mui/material";
+import { useState } from "react";
 import fieldsRegistry from "./fieldsRegistry";
 const ajv = new Ajv({ allErrors: true, $data: true });
 
@@ -34,6 +35,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
   submitButtonLabel,
   schema,
 }) => {
+  const [isLoading,setIsLoading]= useState(false);
   const validate = ajv.compile(schema);
 
   const {
@@ -47,7 +49,10 @@ const GenericForm: React.FC<GenericFormProps> = ({
   const customErrors = errors as Record<string, { message?: string }>;
 
   const onClick = () => {
+    setIsLoading(true)
     clearErrors();
+    setIsLoading(false)
+
   };
 
   const validateForm = (data: Record<string, any>) => {
@@ -61,6 +66,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
   };
 
   const internalHandleSubmit = async (data: Record<string, any>) => {
+
     validateForm(data);
     onSubmit(data);
   };
@@ -91,7 +97,9 @@ const GenericForm: React.FC<GenericFormProps> = ({
                   {...register(field.id)}
                   sx={{
                     fontFamily: "Poppins",
+                    
                   }}
+                  disabled={isLoading}
                 >
                   {field.options?.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
@@ -117,8 +125,8 @@ const GenericForm: React.FC<GenericFormProps> = ({
       })}
 
       <center>
-        <Button onClick={onClick} type="submit">
-          {submitButtonLabel}
+        <Button onClick={onClick} type="submit" disabled={isLoading}>
+        {isLoading ? <CircularProgress /> : submitButtonLabel}
         </Button>
       </center>
     </Box>

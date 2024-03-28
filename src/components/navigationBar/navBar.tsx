@@ -5,9 +5,6 @@ import {
   Toolbar,
   List,
   Typography,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
   Avatar,
 } from "@mui/material";
 import {
@@ -20,13 +17,13 @@ import {
 } from "@mui/icons-material";
 import { useState, useEffect, useContext } from "react";
 import { User } from "../../models/user";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 import { capitalizeFirstLetter } from "../../utils/utils";
 import { UserContext } from "../../UserProvider";
+import NavBarItem from "./NavBarItem";
 
 export default function NavBar() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [timeMessage, setTimeMessage] = useState("");
   const currentUser = useContext(UserContext);
 
@@ -36,7 +33,6 @@ export default function NavBar() {
     <CreditCard />,
     <Receipt />,
     <AccountCircle />,
-    <ExitToApp />,
   ];
 
   function logUserOut() {
@@ -67,47 +63,7 @@ export default function NavBar() {
       }
     }
   }, [currentUser, currentHour]);
-  const NavBarItem = ({
-    label,
-    icon,
-    onClickAction,
-  }: {
-    label: string;
-    icon: JSX.Element;
-    onClickAction:()=> void;
-  }) => {
-    return (
-      <ListItem
-        key={label}
-        disablePadding
-        sx={{
-          mb: 6,
-          boxShadow: 5,
-          backgroundColor:
-            location.pathname === "/" + label.toLowerCase() ? "#ca0f50d0" : "",
-        }}
-      >
-        <ListItemButton
-          onClick={() => {
-            onClickAction();
-          }}
-        >
-          <ListItemIcon sx={{ color: "#f50057", fontSize: "50px" }}>
-            {icon}
-          </ListItemIcon>
-          <Typography
-            sx={{
-              fontFamily: "Poppins",
-              fontSize: "1.2rem",
-              marginRight: "64px",
-            }}
-          >
-            {label}
-          </Typography>
-        </ListItemButton>
-      </ListItem>
-    );
-  };
+ 
   return (
     <Box>
       <Box sx={{ display: "flex" }}>
@@ -162,14 +118,14 @@ export default function NavBar() {
                   <NavBarItem
                     label={text}
                     icon={icons[index]}
-                    onClickAction={(()=>(navigate(`/${text.toLowerCase()} `)))}
+                    onClick={(()=>(navigate(`/${text.toLowerCase()} `)))}
                   />
                 )
               )}
               <NavBarItem
                 label={"Logout"}
                 icon={<ExitToApp />}
-                onClickAction={logUserOut}
+                onClick={logUserOut}
               />
             </List>
           </Box>

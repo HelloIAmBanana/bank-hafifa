@@ -1,5 +1,6 @@
 import { User } from "./models/user";
 import CRUDLocalStorage from "./CRUDLocalStorage";
+import { capitalizeFirstLetter } from "./utils/utils";
 
 export type UserAndRemembered = User & { rememberMe: Boolean };
 
@@ -23,10 +24,19 @@ class AuthService {
     return localStorage.getItem("rememberedAuthToken");
   }
 
+  static async getUserFullNameByID(id: string) {
+    const user = await AuthService.getUserFromStorage(id);
+    if (user) {
+      return `${capitalizeFirstLetter(user.firstName)} ${capitalizeFirstLetter(
+        user.lastName
+      )}`;
+    }
+  }
+
   static async getCurrentUser(): Promise<User | null> {
-    const authToken= AuthService.getAuthToken();
-    if(authToken){
-      return await AuthService.getUserFromStorage(authToken) as User
+    const authToken = AuthService.getAuthToken();
+    if (authToken) {
+      return (await AuthService.getUserFromStorage(authToken)) as User;
     }
     return null;
   }

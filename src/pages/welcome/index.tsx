@@ -1,10 +1,10 @@
 import * as React from "react";
 import AuthService from "../../AuthService";
-import NavBar from "../../components/navigationBar/navBar";
-import { useState, useContext } from "react";
+import NavBar from "../../components/NavigationBar/NavBar";
+import { useState, useContext, useEffect } from "react";
 import { User } from "../../models/user";
 import { Transaction } from "../../models/transactions";
-import { updateUser } from "../../utils/utils";
+import { generateUniqueId, updateUser } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
 import {
@@ -20,30 +20,38 @@ import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
+import { DataGrid } from "@mui/x-data-grid";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
+interface Row {
+  id: string;
+  senderID: string;
+  receiverID: string;
+  amount: number;
+  reason: string;
+}
 const fields = [
   {
     id: "receiverID",
     label: "Receiver ID",
     type: "text",
-    required: false,
+    required: true,
     placeholder: "Enter the desired account ID",
   },
   {
     id: "amount",
     label: "Amount",
     type: "number",
-    required: false,
+    required: true,
     placeholder: "Enter transaction amount",
   },
   {
     id: "reason",
     label: "Transaction Reason",
     type: "text",
-    required: false,
+    required: true,
     placeholder: "Enter transaction reason",
   },
 ];
@@ -51,6 +59,7 @@ const fields = [
 const schema: JSONSchemaType<Transaction> = {
   type: "object",
   properties: {
+    id: { type: "string" },
     senderID: { type: "string" },
     receiverID: { type: "string", minLength: 1 },
     reason: { type: "string", minLength: 1 },
@@ -71,6 +80,8 @@ const WelcomePage: React.FC = () => {
   const currentUser = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
+  const [userTransactions, setUserTransactions] = useState<Transaction[]>();
+  const [rows, setRows] = useState<Transaction[]>([]);
 
   const updateBalance = async (user: User, amount: number) => {
     const updatedBalance = user.balance + amount;
@@ -89,10 +100,11 @@ const WelcomePage: React.FC = () => {
     setPaymentModal(false);
   };
 
-  const saveNewTransaction = async (data: any) => {
+  const CreateNewTransaction = async (data: any) => {
     const newTransaction = {
       ...data,
       senderID: currentUser?.id,
+      id: generateUniqueId(),
     };
     const transactions = await CRUDLocalStorage.getAsyncData<Transaction[]>(
       "transactions"
@@ -109,13 +121,41 @@ const WelcomePage: React.FC = () => {
       await updateBalance(receivingUser as User, data.amount);
       setIsLoading(false);
       successAlert(`Transfered ${data.amount}$ to ${receivingUser.firstName}`);
-      saveNewTransaction(data);
+      CreateNewTransaction(data);
     } else {
       setIsLoading(false);
       errorAlert("Entered ID is WRONG");
     }
     closePaymentModal();
   };
+  const columns = [
+    { field: "senderID", headerName: "Sender", width: 200 },
+    { field: "receiverID", headerName: "Receiver", width: 200 },
+    { field: "amount", headerName: "Amount", width: 150 },
+    { field: "reason", headerName: "Reason", width: 150 },
+  ];
+  
+  const storeUserTransactions = async () => {
+    try {
+      const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
+      const modifiedTransactions = await Promise.all(fetchedTransactions.map(async (row) => {
+        const senderName = await AuthService.getUserFullNameByID(row.senderID);
+        const receiverName = await AuthService.getUserFullNameByID(row.receiverID);
+
+        return { ...row, senderID: senderName,receiverID:receiverName};
+      }));
+
+      setRows(modifiedTransactions);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    storeUserTransactions();
+  }, []);
+
 
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
@@ -161,6 +201,14 @@ const WelcomePage: React.FC = () => {
               </Paper>
             </Grid>
           </Grid>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            autoHeight={true}
+            disableColumnSorting
+            getRowId={(rowData) => rowData.id}
+            disableColumnMenu
+          />
         </Box>
       )}
       <Modal
