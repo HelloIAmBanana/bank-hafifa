@@ -108,10 +108,7 @@ const schema: JSONSchemaType<User> = {
 const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
-  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(
-    undefined
-  );
-
+  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -137,6 +134,7 @@ const SignUpPage: React.FC = () => {
     }
   };
 
+
   return (
     <Grid container component="main" my={-7}>
       <Grid
@@ -158,6 +156,7 @@ const SignUpPage: React.FC = () => {
         elevation={20}
         borderRadius={3}
       >
+
         <Box sx={{ mt: 1, boxSizing: "100vh" }}>
           <Grid container spacing={1}>
             <Grid item mx="auto" textAlign="center">
@@ -216,6 +215,7 @@ const SignUpPage: React.FC = () => {
                   }}
                 />
               </Button>
+
               <Typography
                 sx={{
                   fontFamily: "Poppins",
@@ -234,6 +234,7 @@ const SignUpPage: React.FC = () => {
               />
             </Grid>
           </Grid>
+
           <NavLink
             to="/signin"
             style={{

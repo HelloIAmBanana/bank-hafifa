@@ -1,4 +1,3 @@
-import React from "react";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ReactDOM from "react-dom";
@@ -16,7 +15,11 @@ function App() {
           <Route path="/" element={<SignUpPage />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route element={<ProtectedRoutes />}>
-            <Route path="/welcome" element={<WelcomePage />} />
+            <Route path="/home" element={<WelcomePage/>} />
+            <Route path="/loans" element={<WelcomePage />} />
+            <Route path="/cards" element={<WelcomePage />} />
+            <Route path="/deposits" element={<WelcomePage />} />
+            <Route path="/account"  element={<WelcomePage />} />
           </Route>
         </Routes>
       </div>

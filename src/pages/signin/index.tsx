@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import AuthService, { UserAndRemembered } from "../../AuthService";
 import { validateLogin } from "./login";
 import { Typography } from "@mui/material";
+
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
@@ -54,14 +55,14 @@ const SignInPage: React.FC = () => {
       id: "email",
       label: "Email",
       type: "email",
-      required: true,
+      required: false,
       placeholder: "Enter your email",
     },
     {
       id: "password",
       label: "Password",
       type: "password",
-      required: true,
+      required: false,
       placeholder: "Password",
     },
     {
@@ -85,9 +86,9 @@ const SignInPage: React.FC = () => {
         } else {
           AuthService.storeAuthTokenToStorage(validUser.id);
         }
-        console.log(validUser);
         successAlert("Signing in!");
-        navigate("/welcome");
+        navigate("/home");
+
       } else {
         errorAlert("Wrong Credentials!");
       }
@@ -119,6 +120,7 @@ const SignInPage: React.FC = () => {
         <Box sx={{ mt: 25 }}>
           <Grid container spacing={1}>
             <Grid item margin={"auto"}>
+
               <Typography variant="h2" sx={{fontFamily:"Poppins", fontSize:"50px",fontWeight:"bold",lineHeight: "50px",textAlign:"center"}}>
                 Welcome back
               </Typography>
