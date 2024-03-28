@@ -4,4 +4,6 @@ export type Transaction = {
     receiverID:string;
     reason:string;
     amount:number;
+    senderName:string;
+    receiverName:string;
   };

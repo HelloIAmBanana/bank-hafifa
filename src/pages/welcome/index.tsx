@@ -7,6 +7,7 @@ import { Transaction } from "../../models/transactions";
 import { generateUniqueId, updateUser } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
+import { UserTransactionDataGrid } from "../../components/UserTransactions";
 import {
   Button,
   Grid,
@@ -20,38 +21,30 @@ import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { DataGrid } from "@mui/x-data-grid";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
-interface Row {
-  id: string;
-  senderID: string;
-  receiverID: string;
-  amount: number;
-  reason: string;
-}
 const fields = [
   {
     id: "receiverID",
     label: "Receiver ID",
     type: "text",
-    required: true,
+    required: false,
     placeholder: "Enter the desired account ID",
   },
   {
     id: "amount",
     label: "Amount",
     type: "number",
-    required: true,
+    required: false,
     placeholder: "Enter transaction amount",
   },
   {
     id: "reason",
     label: "Transaction Reason",
     type: "text",
-    required: true,
+    required: false,
     placeholder: "Enter transaction reason",
   },
 ];
@@ -64,24 +57,33 @@ const schema: JSONSchemaType<Transaction> = {
     receiverID: { type: "string", minLength: 1 },
     reason: { type: "string", minLength: 1 },
     amount: { type: "number" },
+    senderName: { type: "string" },
+    receiverName: { type: "string" },
   },
-  required: ["receiverID", "reason", "amount"],
+  required: ["receiverID", "amount"],
   additionalProperties: true,
   errorMessage: {
     properties: {
-      reason: "Entered Reason Is Invalid.",
-      password: "Entered Password Is Invalid.",
+      reason: "",
+      receiverID: "",
       amount: "",
     },
   },
 };
+interface Row {
+  id: string;
+  senderID: string;
+  receiverID: string;
+  amount: string;
+  reason: string;
+}
 
 const WelcomePage: React.FC = () => {
   const currentUser = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTableLoading, setIsTableLoading] = useState(true);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
-  const [userTransactions, setUserTransactions] = useState<Transaction[]>();
-  const [rows, setRows] = useState<Transaction[]>([]);
+  const [rows, setRows] = useState<Row[]>([]);
 
   const updateBalance = async (user: User, amount: number) => {
     const updatedBalance = user.balance + amount;
@@ -100,17 +102,24 @@ const WelcomePage: React.FC = () => {
     setPaymentModal(false);
   };
 
-  const CreateNewTransaction = async (data: any) => {
+  const createNewTransaction = async (data: any) => {
     const newTransaction = {
       ...data,
       senderID: currentUser?.id,
       id: generateUniqueId(),
+      senderName: await AuthService.getUserFullNameByID(
+        currentUser?.id as string
+      ),
+      receiverName: await AuthService.getUserFullNameByID(
+        data.receiverID as string
+      ),
     };
     const transactions = await CRUDLocalStorage.getAsyncData<Transaction[]>(
       "transactions"
     );
     const updatedTransactions = [...transactions, newTransaction];
     await CRUDLocalStorage.setAsyncData("transactions", updatedTransactions);
+    fetchUserTransactions();
   };
 
   const handleSubmitTransaction = async (data: any) => {
@@ -119,43 +128,52 @@ const WelcomePage: React.FC = () => {
     if (receivingUser != null) {
       await updateBalance(currentUser as User, -data.amount);
       await updateBalance(receivingUser as User, data.amount);
+      setIsTableLoading(true);
+      createNewTransaction(data);
       setIsLoading(false);
       successAlert(`Transfered ${data.amount}$ to ${receivingUser.firstName}`);
-      CreateNewTransaction(data);
     } else {
       setIsLoading(false);
       errorAlert("Entered ID is WRONG");
     }
     closePaymentModal();
   };
-  const columns = [
-    { field: "senderID", headerName: "Sender", width: 200 },
-    { field: "receiverID", headerName: "Receiver", width: 200 },
-    { field: "amount", headerName: "Amount", width: 150 },
-    { field: "reason", headerName: "Reason", width: 150 },
-  ];
-  
-  const storeUserTransactions = async () => {
+
+  const fetchUserTransactions = async () => {
     try {
-      const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
-      const modifiedTransactions = await Promise.all(fetchedTransactions.map(async (row) => {
-        const senderName = await AuthService.getUserFullNameByID(row.senderID);
-        const receiverName = await AuthService.getUserFullNameByID(row.receiverID);
-
-        return { ...row, senderID: senderName,receiverID:receiverName};
-      }));
-
-      setRows(modifiedTransactions);
+      const fetchedTransactions = await CRUDLocalStorage.getAsyncData<
+        Transaction[]
+      >("transactions");
+      const modifiedTransactions = await Promise.all(
+        fetchedTransactions.map(async (row) => {
+          const senderName = await AuthService.getUserFullNameByID(
+            row.senderID
+          );
+          const receiverName = await AuthService.getUserFullNameByID(
+            row.receiverID
+          );
+          const styledAmount =
+            row.senderID === currentUser?.id
+              ? `-${row.amount}$`
+              : `+${row.amount}$`;
+          return {
+            ...row,
+            senderID: senderName,
+            receiverID: receiverName,
+            amount: styledAmount,
+          };
+        })
+      );
+      setRows(modifiedTransactions as Row[]);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     }
+    setIsTableLoading(false);
   };
 
-
   useEffect(() => {
-    storeUserTransactions();
+    fetchUserTransactions();
   }, []);
-
 
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
@@ -201,14 +219,20 @@ const WelcomePage: React.FC = () => {
               </Paper>
             </Grid>
           </Grid>
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            autoHeight={true}
-            disableColumnSorting
-            getRowId={(rowData) => rowData.id}
-            disableColumnMenu
-          />
+          {isTableLoading ? (
+            <Box
+              sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Box sx={{ font: "David" }} padding={3}>
+              <Typography variant="h5" fontFamily={"Poppins"} padding={2}>
+                Recent Transaction
+              </Typography>
+              {UserTransactionDataGrid(rows)}
+            </Box>
+          )}
         </Box>
       )}
       <Modal
@@ -243,7 +267,9 @@ const WelcomePage: React.FC = () => {
             <GenericForm
               fields={fields}
               onSubmit={handleSubmitTransaction}
-              submitButtonLabel="2 3 SHA-GER"
+              submitButtonLabel={
+                isLoading ? <CircularProgress /> : "2 3 SHA-GER"
+              }
               schema={schema}
             />
           </Grid>

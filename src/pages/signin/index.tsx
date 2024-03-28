@@ -55,14 +55,14 @@ const SignInPage: React.FC = () => {
       id: "email",
       label: "Email",
       type: "email",
-      required: true,
+      required: false,
       placeholder: "Enter your email",
     },
     {
       id: "password",
       label: "Password",
       type: "password",
-      required: true,
+      required: false,
       placeholder: "Password",
     },
     {
@@ -138,7 +138,6 @@ const SignInPage: React.FC = () => {
             />
           </Grid>
           <Grid container justifyContent="flex-start">
-
             <Grid
               item
               sx={{
