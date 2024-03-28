@@ -86,7 +86,6 @@ const SignInPage: React.FC = () => {
         } else {
           AuthService.storeAuthTokenToStorage(validUser.id);
         }
-        console.log(validUser);
         successAlert("Signing in!");
         navigate("/home");
 
