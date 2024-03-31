@@ -4,12 +4,12 @@ import { Box, Typography } from "@mui/material";
 
 interface UserTransactionsTableProps {
   rows: TransactionRow[];
-  isLoading: boolean;
+  isReady: boolean;
 }
 
 const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
   rows,
-  isLoading: isTableLoading,
+  isReady: isTableLoading,
 }) => {
   const columns = [
     { field: "senderName", headerName: "Sender", width: 175 },
@@ -19,7 +19,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
     { field: "reason", headerName: "Reason", width: 450 },
   ];
   return (
-    <Box sx={{ boxShadow: "5px 6px 7px", borderRadius: 7}}>
+    <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 7, padding: 0.5}}>
       <Typography
         variant="h3"
         fontFamily={"Poppins"}
@@ -29,9 +29,9 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
       <DataGrid
         rows={rows.slice(-10)}
         columns={columns}
-        autoHeight={true}
         getRowId={(rowData) => rowData.id}
         disableColumnMenu
+        autoHeight={true}
         disableRowSelectionOnClick
         disableColumnSorting
         disableColumnSelector
@@ -44,8 +44,6 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
           fontFamily: "Poppins",
           borderTopRightRadius: 0,
           borderTopLeftRadius: 0,
-
-          color: "black",
           borderRadius: 7,
           borderTop: "transparent",
           backgroundColor: "white",

@@ -105,7 +105,7 @@ const WelcomePage: React.FC = () => {
     const designatedUserName = await AuthService.getUserFullName(
       designatedUser
     );
-    var currentDateTime = new Date()
+    var currentDateTime = new Date();
     const newTransaction = {
       ...data,
       senderID: currentUser?.id,
@@ -124,21 +124,25 @@ const WelcomePage: React.FC = () => {
   const handleSubmitTransaction = async (data: any) => {
     setIsButtonLoading(true);
     if (currentUser) {
-      const receivingUser = await AuthService.getUserFromStorage(
-        data.receiverID
-      );
-      if (receivingUser != null) {
-        await updateBalance(currentUser, -data.amount);
-        await updateBalance(receivingUser, -(data.amount * -1));
-        await createNewTransaction(data);
-        successAlert(
-          `Transfered ${data.amount}$ to ${receivingUser.firstName}`
+      if (data.receiverID !== currentUser.id) {
+        const receivingUser = await AuthService.getUserFromStorage(
+          data.receiverID
         );
+        if (receivingUser != null) {
+          await updateBalance(currentUser, -data.amount);
+          await updateBalance(receivingUser, -(data.amount * -1));
+          await createNewTransaction(data);
+          successAlert(
+            `Transfered ${data.amount}$ to ${receivingUser.firstName}`
+          );
+          //await fetchUserTransactions();
+        } else {
+          errorAlert("Entered ID is WRONG");
+        }
       } else {
-        errorAlert("Entered ID is WRONG");
+        errorAlert("You can't enter your own ID!");
       }
     }
-    await fetchUserTransactions();
     closePaymentModal();
   };
 
@@ -229,7 +233,7 @@ const WelcomePage: React.FC = () => {
           <Box padding={0.5}>
             {UserTransactionsTable({
               rows: transactions,
-              isLoading: !isTableReady,
+              isReady: !isTableReady,
             })}
           </Box>
         </Box>

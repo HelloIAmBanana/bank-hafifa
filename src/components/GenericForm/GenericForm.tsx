@@ -116,7 +116,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
       })}
 
       <center>
-        <Button onClick={onClick} type="submit">
+        <Button onClick={onClick} type="submit" disabled={Boolean(typeof(submitButtonLabel)!=="string")}>
           {submitButtonLabel}
         </Button>
       </center>

@@ -1,17 +1,17 @@
 import * as React from "react";
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import Ajv, { JSONSchemaType } from "ajv";
-import Grid from "@mui/material/Grid";
-import { Box, Button, Input, Typography } from "@mui/material";
-import Paper from "@mui/material/Paper";
-import { NavLink } from "react-router-dom";
+import { Box, Button, Input, Typography, Grid, Paper } from "@mui/material";
 import signupImage from "../../imgs/signupPage.svg";
 import { User } from "../../models/user";
 import ajvErrors from "ajv-errors";
 import { useNavigate } from "react-router-dom";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
+import { successAlert } from "../../utils/swalAlerts";
+
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
@@ -80,12 +80,25 @@ const schema: JSONSchemaType<User> = {
     password: { type: "string", minLength: 6 },
     birthDate: { type: "string", minLength: 1 },
     avatarUrl: { type: "string" },
-    gender: { type: "string", enum: ["Male", "Female"], minLength: 1},
-    accountType: { type: "string", enum: ["Business", "Personal"], minLength: 1 },
+    gender: { type: "string", enum: ["Male", "Female"], minLength: 1 },
+    accountType: {
+      type: "string",
+      enum: ["Business", "Personal"],
+      minLength: 1,
+    },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
   },
-  required: ["id", "birthDate", "email", "firstName", "lastName", "password","gender","accountType"],
+  required: [
+    "id",
+    "birthDate",
+    "email",
+    "firstName",
+    "lastName",
+    "password",
+    "gender",
+    "accountType",
+  ],
   additionalProperties: true,
   errorMessage: {
     properties: {
@@ -94,6 +107,8 @@ const schema: JSONSchemaType<User> = {
       firstName: "Enter Your First Name",
       lastName: "Enter Your Last Name",
       birthDate: "Enter Your Birthdate",
+      gender: "Please Select Your Gender",
+      accountType: "Please Select Your Account Type",
     },
   },
 };
@@ -101,7 +116,9 @@ const schema: JSONSchemaType<User> = {
 const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
-  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
+  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(
+    undefined
+  );
   const navigate = useNavigate();
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -122,11 +139,11 @@ const SignUpPage: React.FC = () => {
     if (validateForm(newUser)) {
       const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
       const updatedUsers = [...users, newUser];
+      successAlert("Account Created! Navigating to Signin Page!");
       await CRUDLocalStorage.setAsyncData("users", updatedUsers);
       navigate("/signin");
     }
   };
-
 
   return (
     <Grid container component="main" my={-7}>
@@ -149,7 +166,6 @@ const SignUpPage: React.FC = () => {
         elevation={20}
         borderRadius={3}
       >
-
         <Box sx={{ mt: 1, boxSizing: "100vh" }}>
           <Grid container spacing={1}>
             <Grid item mx="auto" textAlign="center">
