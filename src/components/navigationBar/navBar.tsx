@@ -25,7 +25,7 @@ import AuthService from "../../AuthService";
 export default function NavBar() {
   const navigate = useNavigate();
   const [timeMessage, setTimeMessage] = useState("");
-  const currentUser = useContext(UserContext);
+  const [currentUser,setCurrentUser] = useContext(UserContext);
 
   const icons = [
     <Home />,

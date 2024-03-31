@@ -1,8 +1,8 @@
-import React, {useEffect,useState} from 'react';
+import React, {createContext, useEffect,useState} from 'react';
 import { User } from './models/user';
 import AuthService from './AuthService';
 
-export const UserContext = React.createContext<User|undefined>(undefined);
+export const UserContext = createContext<[User|undefined, React.Dispatch<React.SetStateAction<User|undefined>>]>([null!, () => null!]);
 
 const UserProvider = ({ children }: React.PropsWithChildren) => {
   const [currentUser, setCurrentUser] = useState<User>();
@@ -17,7 +17,7 @@ const UserProvider = ({ children }: React.PropsWithChildren) => {
   }, []);
 
   return (
-    <UserContext.Provider value={currentUser}>
+    <UserContext.Provider value={[currentUser,setCurrentUser]}>
       {children}
     </UserContext.Provider>
   );

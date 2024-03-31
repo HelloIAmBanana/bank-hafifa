@@ -72,7 +72,7 @@ const schema: JSONSchemaType<Transaction> = {
 };
 
 const WelcomePage: React.FC = () => {
-  const currentUser = useContext(UserContext);
+  const [currentUser,setCurrentUser] = useContext(UserContext);
   const [isTableReady, setIsTableReady] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
@@ -88,6 +88,7 @@ const WelcomePage: React.FC = () => {
     await updateUser(updatedUser);
     if (user.id === currentUser?.id) {
       setUserBalance(updatedBalance);
+      setCurrentUser(updatedUser);
     }
   };
 
@@ -130,7 +131,7 @@ const WelcomePage: React.FC = () => {
         );
         if (receivingUser != null) {
           await updateBalance(currentUser, -data.amount);
-          await updateBalance(receivingUser, -(data.amount * -1));
+          await updateBalance(receivingUser, +data.amount);
           await createNewTransaction(data);
           await fetchUserTransactions();
           successAlert(
@@ -167,6 +168,7 @@ const WelcomePage: React.FC = () => {
               ...transaction,
               amount: styledAmount,
               date: styledDate,
+              senderID: currentUser.id
             };
           })
         );
@@ -243,6 +245,7 @@ const WelcomePage: React.FC = () => {
             <UserTransactionsTable
               rows={transactions}
               isLoading={!isTableReady}
+              currentUserID={currentUser.id}
             />
           </Box>
         </Box>

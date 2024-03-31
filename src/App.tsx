@@ -6,20 +6,22 @@ import "./style.css";
 import SignInPage from "./pages/signin";
 import WelcomePage from "./pages/welcome";
 import "./fonts/Poppins-Regular.ttf";
-import { ProtectedRoutes } from "./ProtectedRoutes";
+import { ProtectedRoutes, UnprotectedRoutes } from "./ProtectedRoutes";
 function App() {
   return (
     <Router>
       <div>
         <Routes>
-          <Route path="/" element={<SignUpPage />} />
-          <Route path="/signin" element={<SignInPage />} />
+          <Route element={<UnprotectedRoutes />}>
+            <Route path="/" element={<SignUpPage />} />
+            <Route path="/signin" element={<SignInPage />} />
+          </Route>
           <Route element={<ProtectedRoutes />}>
-            <Route path="/home" element={<WelcomePage/>} />
+            <Route path="/home" element={<WelcomePage />} />
             <Route path="/loans" element={<WelcomePage />} />
             <Route path="/cards" element={<WelcomePage />} />
             <Route path="/deposits" element={<WelcomePage />} />
-            <Route path="/account"  element={<WelcomePage />} />
+            <Route path="/account" element={<WelcomePage />} />
           </Route>
         </Routes>
       </div>

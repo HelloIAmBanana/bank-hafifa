@@ -1,25 +1,58 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { TransactionRow } from "../models/transactionRow";
 import { Box } from "@mui/material";
+import { TrendingDown, TrendingUp } from "@mui/icons-material";
 
 interface UserTransactionsTableProps {
   rows: TransactionRow[];
   isLoading: boolean;
+  currentUserID: string;
 }
 
 const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
   rows,
   isLoading: isTableLoading,
+  currentUserID: userID,
 }) => {
   const columns = [
-    { field: "senderName", headerName: "From", width: 175 },
-    { field: "receiverName", headerName: "To", width: 175 },
+    {
+      field: "ToOrFrom",
+      headerName: "",
+      width: 25,
+      renderCell: (params: any) =>
+        params.row.senderID === userID
+          ? `To`
+          : `From`,
+    },
+    {
+      field: "TitleAndField",
+      headerName: "",
+      width: 350,
+      renderCell: (params: any) =>
+        params.row.senderID === userID
+          ? `${params.row.receiverName} (${params.row.date})`
+          : `${params.row.senderName} (${params.row.date})`,
+    },
+    {
+      field: "icon",
+      headerName: "",
+      width: 100,
+      renderCell: (params: any) => {
+        if (params.row.amount[0] === "-") {
+          return <TrendingDown sx={{ color: "red" }} />;
+        } else {
+          return <TrendingUp sx={{ color: "green" }} />;
+        }
+      },
+    },
+    
     { field: "amount", headerName: "", width: 100 },
-    { field: "date", headerName: "", width: 175 },
     { field: "reason", headerName: "", width: 450 },
   ];
   return (
-    <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5}}>
+    <Box
+      sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5 }}
+    >
       <DataGrid
         rows={rows.slice(-10)}
         columns={columns}
@@ -37,7 +70,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
         sx={{
           fontFamily: "Poppins",
           borderTop: "transparent",
-          border:"hidden",
+          border: "hidden",
           borderTopColor: "transparent",
         }}
       />
