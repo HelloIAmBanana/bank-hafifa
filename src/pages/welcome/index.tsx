@@ -163,7 +163,7 @@ const WelcomePage: React.FC = () => {
                 : `+${transaction.amount}$`;
             const styledDate = DateTime.fromISO(transaction.date, {
               zone: "Asia/Jerusalem",
-            }).toFormat("dd/MM/yyyy hh:mm");
+            }).toFormat("dd/MM/yyyy HH:mm");
             return {
               ...transaction,
               amount: styledAmount,
