@@ -57,6 +57,8 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
         disableColumnResize
         disableColumnFilter
         hideFooter
+        disableDensitySelector
+        disableAutosize
         loading={isTableLoading}
         sx={{
           fontFamily: "Poppins",
