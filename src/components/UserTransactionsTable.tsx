@@ -16,27 +16,18 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
 }) => {
   const columns = [
     {
-      field: "ToOrFrom",
-      headerName: "",
-      width: 25,
-      renderCell: (params: any) =>
-        params.row.senderID === userID
-          ? `To`
-          : `From`,
-    },
-    {
       field: "TitleAndField",
       headerName: "",
       width: 350,
       renderCell: (params: any) =>
         params.row.senderID === userID
-          ? `${params.row.receiverName} (${params.row.date})`
-          : `${params.row.senderName} (${params.row.date})`,
+          ? `To ${params.row.receiverName} (${params.row.date})`
+          : `From ${params.row.senderName} (${params.row.date})`,
     },
     {
       field: "icon",
       headerName: "",
-      width: 100,
+      width: 50,
       renderCell: (params: any) => {
         if (params.row.amount[0] === "-") {
           return <TrendingDown sx={{ color: "red" }} />;

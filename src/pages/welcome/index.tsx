@@ -168,7 +168,6 @@ const WelcomePage: React.FC = () => {
               ...transaction,
               amount: styledAmount,
               date: styledDate,
-              senderID: currentUser.id
             };
           })
         );
