@@ -8,6 +8,7 @@ import { generateUniqueId, updateUser } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
 import UserTransactionsTable from "../../components/UserTransactionsTable";
+import { DateTime } from "luxon";
 import {
   Button,
   Grid,
@@ -112,12 +113,12 @@ const WelcomePage: React.FC = () => {
       id: generateUniqueId(),
       senderName: AuthService.getUserFullName(currentUser as User),
       receiverName: designatedUserName,
-      date: currentDateTime.toLocaleString("en-GB", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }),
+      date: currentDateTime.toISOString(),
     };
-    await CRUDLocalStorage.addItemToList("transactions", newTransaction);
+    await CRUDLocalStorage.addItemToList<Transaction>(
+      "transactions",
+      newTransaction
+    );
   };
 
   const handleSubmitTransaction = async (data: any) => {
@@ -128,15 +129,13 @@ const WelcomePage: React.FC = () => {
           data.receiverID
         );
         if (receivingUser != null) {
-          await Promise.all([
-            updateBalance(currentUser, -data.amount),
-            updateBalance(receivingUser, -(data.amount * -1)),
-          ]);
+          await updateBalance(currentUser, -data.amount);
+          await updateBalance(receivingUser, -(data.amount * -1));
           await createNewTransaction(data);
+          await fetchUserTransactions();
           successAlert(
             `Transfered ${data.amount}$ to ${receivingUser.firstName}`
           );
-          await fetchUserTransactions();
         } else {
           errorAlert("Entered ID is WRONG");
         }
@@ -152,16 +151,22 @@ const WelcomePage: React.FC = () => {
     setIsTableReady(false);
     if (currentUser) {
       try {
-        const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
+        const fetchedTransactions = await CRUDLocalStorage.getAsyncData<
+          Transaction[]
+        >("transactions");
         const modifiedTransactions = await Promise.all(
           fetchedTransactions.map((transaction) => {
             const styledAmount =
               transaction.senderID === currentUser.id
                 ? `-${transaction.amount}$`
                 : `+${transaction.amount}$`;
+            const styledDate = DateTime.fromISO(transaction.date, {
+              zone: "Asia/Jerusalem",
+            }).toFormat("dd/MM/yyyy hh:mm");
             return {
               ...transaction,
               amount: styledAmount,
+              date: styledDate,
             };
           })
         );

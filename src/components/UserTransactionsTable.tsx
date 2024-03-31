@@ -12,14 +12,14 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
   isLoading: isTableLoading,
 }) => {
   const columns = [
-    { field: "senderName", headerName: "", width: 175 },
-    { field: "receiverName", headerName: "", width: 175 },
+    { field: "senderName", headerName: "From", width: 175 },
+    { field: "receiverName", headerName: "To", width: 175 },
     { field: "amount", headerName: "", width: 100 },
     { field: "date", headerName: "", width: 175 },
     { field: "reason", headerName: "", width: 450 },
   ];
   return (
-    <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 7, padding: 0.5}}>
+    <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5}}>
       <DataGrid
         rows={rows.slice(-10)}
         columns={columns}
@@ -36,11 +36,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
         loading={isTableLoading}
         sx={{
           fontFamily: "Poppins",
-          borderTopRightRadius: 0,
-          borderTopLeftRadius: 0,
-          borderRadius: 7,
           borderTop: "transparent",
-          backgroundColor: "white",
           border:"hidden",
           borderTopColor: "transparent",
         }}

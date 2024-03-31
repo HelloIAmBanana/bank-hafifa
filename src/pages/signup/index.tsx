@@ -128,7 +128,7 @@ const SignUpPage: React.FC = () => {
     }
   };
   const signUp = async (data: any) => {
-    const newUser = {
+    const newUser: User = {
       ...data,
       id: generateUniqueId(),
       role: "customer",
@@ -138,12 +138,12 @@ const SignUpPage: React.FC = () => {
     };
     if (validateForm(newUser)) {
       successAlert("Account Created! Navigating to Signin Page!");
-      await CRUDLocalStorage.addItemToList("users",newUser);
+      await CRUDLocalStorage.addItemToList<User>("users", newUser);
       navigate("/signin");
     }
   };
-  
-  document.title = 'Sign Up';
+
+  document.title = "Sign Up";
 
   return (
     <Grid container component="main" my={-7}>
