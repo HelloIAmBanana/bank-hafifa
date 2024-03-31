@@ -137,10 +137,8 @@ const SignUpPage: React.FC = () => {
       balance: 0,
     };
     if (validateForm(newUser)) {
-      const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-      const updatedUsers = [...users, newUser];
       successAlert("Account Created! Navigating to Signin Page!");
-      await CRUDLocalStorage.setAsyncData("users", updatedUsers);
+      await CRUDLocalStorage.addItemToList("users",newUser);
       navigate("/signin");
     }
   };

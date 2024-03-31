@@ -15,9 +15,9 @@ import {
   AccountCircle,
   ExitToApp,
 } from "@mui/icons-material";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 import { User } from "../../models/user";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserProvider";
 import NavBarItem from "./NavBarItem";
 import AuthService from "../../AuthService";
@@ -42,7 +42,9 @@ export default function NavBar() {
   }
 
   const currentHour = new Date().getHours();
-
+  const userName = useMemo(() => {
+    return AuthService.getUserFullName(currentUser as User);
+  }, [currentUser]);
   useEffect(() => {
     switch (Math.floor(currentHour / 6)) {
       default: {
@@ -63,7 +65,7 @@ export default function NavBar() {
       }
     }
   }, [currentUser, currentHour]);
- 
+
   return (
     <Box>
       <Box sx={{ display: "flex" }}>
@@ -87,7 +89,7 @@ export default function NavBar() {
                   component="div"
                   sx={{ fontFamily: "Poppins" }}
                 >
-                  {`${timeMessage} ${AuthService.getUserFullName(currentUser)}`}
+                  {`${timeMessage} ${userName}`}
                 </Typography>
               </>
             )}
@@ -116,7 +118,7 @@ export default function NavBar() {
                   <NavBarItem
                     label={text}
                     icon={icons[index]}
-                    onClick={(()=>(navigate(`/${text.toLowerCase()} `)))}
+                    onClick={() => navigate(`/${text.toLowerCase()} `)}
                   />
                 )
               )}

@@ -7,7 +7,7 @@ import { Transaction } from "../../models/transactions";
 import { generateUniqueId, updateUser } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
-import UserTransactionsTable from "../../components/UserTransactionsTables";
+import UserTransactionsTable from "../../components/UserTransactionsTable";
 import {
   Button,
   Grid,
@@ -95,29 +95,29 @@ const WelcomePage: React.FC = () => {
   };
 
   const closePaymentModal = () => {
+    if (isButtonLoading) return;
     setPaymentModal(false);
   };
   const createNewTransaction = async (data: any) => {
     const designatedUser = (await AuthService.getUserFromStorage(
       data.receiverID
     )) as User;
-    const designatedUserName = await AuthService.getUserFullName(
-      designatedUser
-    );
-    var currentDateTime = new Date();
+    const designatedUserName = AuthService.getUserFullName(designatedUser);
+
+    const currentDateTime = new Date();
+
     const newTransaction = {
       ...data,
       senderID: currentUser?.id,
       id: generateUniqueId(),
-      senderName: `${currentUser?.firstName} ${currentUser?.lastName}`,
+      senderName: AuthService.getUserFullName(currentUser as User),
       receiverName: designatedUserName,
-      date: currentDateTime.toLocaleString(),
+      date: currentDateTime.toLocaleString("en-GB", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }),
     };
-    const transactions = await CRUDLocalStorage.getAsyncData<Transaction[]>(
-      "transactions"
-    );
-    const updatedTransactions = [...transactions, newTransaction];
-    await CRUDLocalStorage.setAsyncData("transactions", updatedTransactions);
+    await CRUDLocalStorage.addItemToList("transactions", newTransaction);
   };
 
   const handleSubmitTransaction = async (data: any) => {
@@ -128,13 +128,15 @@ const WelcomePage: React.FC = () => {
           data.receiverID
         );
         if (receivingUser != null) {
-          await updateBalance(currentUser, -data.amount);
-          await updateBalance(receivingUser, -(data.amount * -1));
+          await Promise.all([
+            updateBalance(currentUser, -data.amount),
+            updateBalance(receivingUser, -(data.amount * -1)),
+          ]);
           await createNewTransaction(data);
           successAlert(
             `Transfered ${data.amount}$ to ${receivingUser.firstName}`
           );
-          //await fetchUserTransactions();
+          await fetchUserTransactions();
         } else {
           errorAlert("Entered ID is WRONG");
         }
@@ -142,6 +144,7 @@ const WelcomePage: React.FC = () => {
         errorAlert("You can't enter your own ID!");
       }
     }
+    setIsButtonLoading(false);
     closePaymentModal();
   };
 
@@ -149,9 +152,7 @@ const WelcomePage: React.FC = () => {
     setIsTableReady(false);
     if (currentUser) {
       try {
-        const fetchedTransactions = await CRUDLocalStorage.getAsyncData<
-          Transaction[]
-        >("transactions");
+        const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
         const modifiedTransactions = await Promise.all(
           fetchedTransactions.map((transaction) => {
             const styledAmount =
@@ -168,16 +169,15 @@ const WelcomePage: React.FC = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-      setIsButtonLoading(false);
       setIsTableReady(true);
     }
   };
 
   useEffect(() => {
     fetchUserTransactions();
-  }, [currentUser, isPaymentModalOpen]);
+  }, [currentUser]);
 
-  document.title = 'Home';
+  document.title = "Home";
 
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
@@ -232,10 +232,13 @@ const WelcomePage: React.FC = () => {
             </Grid>
           </Grid>
           <Box padding={0.5}>
-            {UserTransactionsTable({
-              rows: transactions,
-              isReady: !isTableReady,
-            })}
+            <Typography variant="h3" fontFamily={"Poppins"}>
+              Recent Transaction
+            </Typography>
+            <UserTransactionsTable
+              rows={transactions}
+              isLoading={!isTableReady}
+            />
           </Box>
         </Box>
       )}
