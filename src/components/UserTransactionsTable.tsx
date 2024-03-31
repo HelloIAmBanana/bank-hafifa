@@ -36,10 +36,11 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
         }
       },
     },
-    
+
     { field: "amount", headerName: "", width: 100 },
     { field: "reason", headerName: "", width: 450 },
   ];
+
   return (
     <Box
       sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5 }}
@@ -57,6 +58,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
         disableColumnResize
         disableColumnFilter
         hideFooter
+        rowSelection={false}
         disableDensitySelector
         disableAutosize
         loading={isTableLoading}
