@@ -1,6 +1,6 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { TransactionRow } from "../models/transactionRow";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
 
 interface UserTransactionsTableProps {
@@ -16,13 +16,36 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
 }) => {
   const columns = [
     {
+      field: "Blank",
+      headerName: "",
+      width: 150,
+    },
+    {
       field: "TitleAndField",
       headerName: "",
-      width: 350,
+      width: 175,
       renderCell: (params: any) =>
-        params.row.senderID === userID
-          ? `To ${params.row.receiverName} (${params.row.date})`
-          : `From ${params.row.senderName} (${params.row.date})`,
+        params.row.senderID === userID ? (
+          <Box>
+            <Typography
+              fontWeight={"Bold"}
+              fontFamily={"Poppins"}
+            >{`To ${params.row.receiverName}`}</Typography>
+            <Typography
+              fontFamily={"Poppins"}
+            >{`${params.row.date}`}</Typography>
+          </Box> 
+        ) : (
+          <Box>
+            <Typography
+              fontWeight={"Bold"}
+              fontFamily={"Poppins"}
+            >{`From ${params.row.senderName}`}</Typography>
+            <Typography
+              fontFamily={"Poppins"}
+            >{`${params.row.date}`}</Typography>
+          </Box>
+        ),
     },
     {
       field: "icon",
