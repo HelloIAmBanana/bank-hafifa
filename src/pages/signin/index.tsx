@@ -92,6 +92,9 @@ const SignInPage: React.FC = () => {
     }
   };
 
+  document.title = 'Sign In';
+
+
   return (
     <Grid container component="main" sx={{ height: "85vh" }}>
       <Grid

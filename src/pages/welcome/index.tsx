@@ -97,7 +97,6 @@ const WelcomePage: React.FC = () => {
   const closePaymentModal = () => {
     setPaymentModal(false);
   };
-
   const createNewTransaction = async (data: any) => {
     const designatedUser = (await AuthService.getUserFromStorage(
       data.receiverID
@@ -177,6 +176,8 @@ const WelcomePage: React.FC = () => {
   useEffect(() => {
     fetchUserTransactions();
   }, [currentUser, isPaymentModalOpen]);
+
+  document.title = 'Home';
 
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>

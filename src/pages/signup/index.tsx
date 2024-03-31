@@ -144,6 +144,8 @@ const SignUpPage: React.FC = () => {
       navigate("/signin");
     }
   };
+  
+  document.title = 'Sign Up';
 
   return (
     <Grid container component="main" my={-7}>
