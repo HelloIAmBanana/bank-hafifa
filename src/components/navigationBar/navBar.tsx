@@ -17,7 +17,7 @@ export default function NavBar() {
   function logUserOut() {
     sessionStorage.clear();
     localStorage.removeItem("rememberedAuthToken");
-    navigate("/signin");
+    navigate("/");
   }
 
   const currentHour = new Date().getHours();
