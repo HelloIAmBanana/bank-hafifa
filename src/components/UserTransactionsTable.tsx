@@ -1,6 +1,6 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { TransactionRow } from "../models/transactionRow";
-import { Box, CircularProgress, Skeleton, Typography } from "@mui/material";
+import { Box, Skeleton, Typography } from "@mui/material";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
 
 interface UserTransactionsTableProps {
@@ -55,9 +55,11 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
   ];
 
   return (
-    <Box>
-      {isTableLoading ? (
-        <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5, width: 750, alignItems: "center" }}>
+    <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5, width: 750, alignItems: "center" }}>
+  
+
+        {isTableLoading ? (
+        <Box>
           <Skeleton width={650} height={50} />
           <Skeleton width={650} height={100} />
           <Skeleton width={650} height={75} />
@@ -66,9 +68,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
           <Skeleton width={650} height={75} />
           <Skeleton width={650} height={75} />
         </Box>
-      ) : (
-        <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5, width: 750, alignItems: "center" }}>
-          <DataGrid
+      ) : (<DataGrid
             rows={rows.slice(-10)}
             columns={columns}
             getRowId={(rowData) => rowData.id}
@@ -91,7 +91,6 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
               borderTopColor: "transparent",
             }}
           />
-        </Box>
       )}
     </Box>
   );

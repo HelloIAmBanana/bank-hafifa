@@ -8,7 +8,7 @@ import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
 import UserTransactionsTable from "../../components/UserTransactionsTable";
 import { DateTime } from "luxon";
-import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box } from "@mui/material";
+import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box, Skeleton } from "@mui/material";
 import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import GenericForm from "../../components/GenericForm/GenericForm";
@@ -68,9 +68,9 @@ const WelcomePage: React.FC = () => {
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
-  const [isFirstTimeLoading,setIsFirstTimeLoading]=useState<boolean>(true)
+  const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
-  const [userOldBalance, setUserOldBalance] = useState<number | undefined|JSX.Element>();
+  const [userOldBalance, setUserOldBalance] = useState<number>();
   const updateBalance = async (user: User, amount: number) => {
     const updatedBalance = user.balance + amount;
     const updatedUser: User = {
@@ -88,11 +88,10 @@ const WelcomePage: React.FC = () => {
     setPaymentModal(true);
   };
 
-  const closePaymentModal = () => {
+  const closePaymentModal = async () => {
     if (isButtonLoading) return;
     setPaymentModal(false);
     setUserOldBalance(currentUser?.balance);
-
   };
   const createNewTransaction = async (data: any) => {
     const designatedUser = (await AuthService.getUserFromStorage(data.receiverID)) as User;
@@ -117,9 +116,10 @@ const WelcomePage: React.FC = () => {
       if (data.receiverID !== currentUser.id) {
         const receivingUser = await AuthService.getUserFromStorage(data.receiverID);
         if (receivingUser != null) {
+          await createNewTransaction(data);
+
           await updateBalance(receivingUser, +data.amount);
           await updateBalance(currentUser, -data.amount);
-          await createNewTransaction(data);
           successAlert(`Transfered ${data.amount}$ to ${receivingUser.firstName}`);
         } else {
           errorAlert("Entered ID is WRONG");
@@ -159,9 +159,8 @@ const WelcomePage: React.FC = () => {
         console.error("Error fetching data:", error);
       }
       setIsTableLoading(false);
-      setIsFirstTimeLoading(false)
+      setIsFirstTimeLoading(false);
     }
-    
   };
 
   useEffect(() => {
@@ -174,7 +173,7 @@ const WelcomePage: React.FC = () => {
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
       <NavBar />
-      {(!currentUser) ? (
+      {!currentUser ? (
         <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
           <CircularProgress />
         </Box>
@@ -206,9 +205,15 @@ const WelcomePage: React.FC = () => {
                       fontSize: 36,
                     }}
                   >
-                    {!isFirstTimeLoading?(currentUser && !isButtonLoading && !isTableLoading && !isPaymentModalOpen
-                      ? `${currentUser.balance} $`
-                      : `${userOldBalance} $`):<CircularProgress/>}
+                    {!isFirstTimeLoading ? (
+                      currentUser && !isButtonLoading && !isTableLoading && !isPaymentModalOpen ? (
+                        `${currentUser.balance} $`
+                      ) : (
+                        `${userOldBalance} $`
+                      )
+                    ) : (
+                      <Skeleton width={150} height={100}/>
+                    )}
                   </Typography>
                   <Button onClick={openPaymentModal}>Make A Payment💸</Button>
                 </Paper>
