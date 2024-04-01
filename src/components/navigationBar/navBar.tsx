@@ -65,8 +65,10 @@ export default function NavBar() {
               <Box></Box>
             ) : (
               <>
+
                 <Avatar src={avatarIMG} />
                 <Typography variant="h6" component="div" sx={{ fontFamily: "Poppins", marginLeft: 2 }}>
+
                   {`${timeMessage} ${userName}`}
                 </Typography>
               </>

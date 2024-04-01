@@ -8,6 +8,7 @@ import WelcomePage from "./pages/welcome";
 import "./fonts/Poppins-Regular.ttf";
 import { AuthHandlerRoute } from "./ProtectedRoutes";
 import ProfileSettingsPage from "./pages/profileSettings";
+
 function App() {
   return (
     <Router>
@@ -21,6 +22,7 @@ function App() {
             <Route path="/cards" element={<WelcomePage />} />
             <Route path="/deposits" element={<WelcomePage />} />
             <Route path="/account" element={<ProfileSettingsPage />} />
+
           </Route>
         </Routes>
       </div>

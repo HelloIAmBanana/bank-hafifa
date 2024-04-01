@@ -12,7 +12,7 @@ import { Field } from "../../models/field";
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
-
+  
 interface GenericFormProps {
   fields: Field[];
   onSubmit: (data: Record<string, any>) => void;
@@ -77,6 +77,7 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
                     textAlign: "auto",
                   }}
                   defaultValue={field?.initValue}
+
                 >
                   {field.options?.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
