@@ -1,40 +1,26 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Box, MenuItem } from "@mui/material";
+import { Box, Grid, MenuItem } from "@mui/material";
 import FormHelperText from "@mui/material/FormHelperText";
 import Ajv, { Schema } from "ajv";
 import Button from "@mui/material/Button";
 import ajvErrors from "ajv-errors";
 import { Typography } from "@mui/material";
-import fieldsRegistry from "../../models/fieldTypes";
-import "./style.css";
+import fieldsRegistry from "./fieldsRegistry";
+import { Field } from "../../models/field";
+
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
 
-interface Field {
-  id: string;
-  label: string;
-  type: string;
-  required: boolean;
-  placeholder?: string;
-  checked?: boolean;
-  options?: { value: string; label: string }[];
-}
-
 interface GenericFormProps {
   fields: Field[];
   onSubmit: (data: Record<string, any>) => void;
-  submitButtonLabel: string;
+  submitButtonLabel: string | JSX.Element;
   schema: Schema;
 }
 
-const GenericForm: React.FC<GenericFormProps> = ({
-  fields,
-  onSubmit,
-  submitButtonLabel,
-  schema,
-}) => {
+const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButtonLabel, schema }) => {
   const validate = ajv.compile(schema);
 
   const {
@@ -67,58 +53,56 @@ const GenericForm: React.FC<GenericFormProps> = ({
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(internalHandleSubmit)}
-      sx={{ mt: 1 }}
-    >
+    <Box component="form" onSubmit={handleSubmit(internalHandleSubmit)} sx={{ mt: 1 }}>
       {fields.map((field) => {
         const FieldComponent = fieldsRegistry[field.type];
         return (
-          <Box key={field.id}>
-            <Typography
-              variant="h6"
-              className="signinLabelNormal"
-              sx={{ fontFamily: "Poppins" }}
-            >
-              {field.label}
-            </Typography>
-            <Box
-              className="formLabel"
-              sx={{
-                width: "auto",
-                border: "hidden",
-                margin: "auto",
-                textAlign: "auto",
-              }}
-            >
-              <FieldComponent
-                {...field}
-                {...register(field.id)}
-                sx={{ fontFamily: "Poppins", width: 260 }}
+          <Box>
+            <Box key={field.id}>
+              <Typography variant="h6" sx={{ fontFamily: "Poppins" }}>
+                {field.label}
+              </Typography>
+              <Box
+                sx={{
+                  border: "hidden",
+                  margin: "auto",
+                  textAlign: "auto",
+                }}
               >
-                {field.options?.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </FieldComponent>
+                <FieldComponent
+                  {...field}
+                  {...register(field.id)}
+                  sx={{
+                    fontFamily: "Poppins",
+                    textAlign: "auto",
+                  }}
+                  defaultValue={field?.initValue}
+                >
+                  {field.options?.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </FieldComponent>
+              </Box>
             </Box>
-            <FormHelperText
-              id="component-error-text"
-              style={{
-                color: "red",
-                fontFamily: "Poppins",
-                alignItems: "center",
-              }}
-            >
-              {customErrors[field.id]?.message}
-            </FormHelperText>
+            <Grid>
+              <FormHelperText
+                sx={{
+                  mx: 45,
+                  color: "red",
+                  fontFamily: "Poppins",
+                }}
+              >
+                {customErrors[field.id]?.message}
+              </FormHelperText>
+            </Grid>
           </Box>
         );
       })}
+
       <center>
-        <Button onClick={onClick} type="submit">
+        <Button onClick={onClick} type="submit" disabled={Boolean(typeof submitButtonLabel !== "string")}>
           {submitButtonLabel}
         </Button>
       </center>

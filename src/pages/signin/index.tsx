@@ -3,7 +3,7 @@ import Ajv, { JSONSchemaType } from "ajv";
 import Grid from "@mui/material/Grid";
 import { Box } from "@mui/material";
 import Paper from "@mui/material/Paper";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import loginImage from "../../imgs/loginPage.svg";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import ajvErrors from "ajv-errors";
@@ -12,8 +12,7 @@ import { useNavigate } from "react-router-dom";
 import AuthService, { UserAndRemembered } from "../../AuthService";
 import { validateLogin } from "./login";
 import { Typography } from "@mui/material";
-import { useSignedUser } from "../../hooks/useRememberedUser";
-import "./login.css";
+
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
@@ -56,21 +55,18 @@ const SignInPage: React.FC = () => {
       id: "email",
       label: "Email",
       type: "email",
-      required: true,
       placeholder: "Enter your email",
     },
     {
       id: "password",
       label: "Password",
       type: "password",
-      required: true,
       placeholder: "Password",
     },
     {
       id: "rememberMe",
       label: "Remember Me",
       type: "checkbox",
-      required: false,
     },
   ];
 
@@ -87,7 +83,6 @@ const SignInPage: React.FC = () => {
         } else {
           AuthService.storeAuthTokenToStorage(validUser.id);
         }
-        console.log(validUser);
         successAlert("Signing in!");
         navigate("/home");
       } else {
@@ -96,7 +91,7 @@ const SignInPage: React.FC = () => {
     }
   };
 
-  useSignedUser();
+  document.title = "Sign In";
 
   return (
     <Grid container component="main" sx={{ height: "85vh" }}>
@@ -112,38 +107,54 @@ const SignInPage: React.FC = () => {
           backgroundPosition: "bottom center",
         }}
       />
-      <Grid
-        item
-        xs={12}
-        md={6}
-        component={Paper}
-        elevation={20}
-        borderRadius={3}
-      >
+      <Grid item xs={12} md={6} component={Paper} elevation={20} borderRadius={3}>
         <Box sx={{ mt: 25 }}>
           <Grid container spacing={1}>
             <Grid item margin={"auto"}>
-              <Typography variant="h2" className="mainTitle">
+              <Typography
+                variant="h2"
+                sx={{
+                  fontFamily: "Poppins",
+                  fontSize: "50px",
+                  fontWeight: "bold",
+                  lineHeight: "50px",
+                  textAlign: "center",
+                }}
+              >
                 Welcome back
               </Typography>
-              <Typography variant="h4" className="secondaryTitle">
+              <Typography
+                variant="h4"
+                sx={{ fontFamily: "Poppins", fontSize: "25px", lineHeight: "50px", textAlign: "center" }}
+              >
                 Please enter your details.
               </Typography>
             </Grid>
           </Grid>
           <Grid item mx="auto" textAlign="center" mt={7}>
-            <GenericForm
-              fields={fields}
-              onSubmit={login}
-              submitButtonLabel="Sign In"
-              schema={schema}
-            />
+            <GenericForm fields={fields} onSubmit={login} submitButtonLabel="Sign In" schema={schema} />
           </Grid>
           <Grid container justifyContent="flex-start">
-            <Grid item sx={{ marginLeft: "auto" }}>
-              <Link to="/" className="forgotPasswordButton">
+            <Grid
+              item
+              sx={{
+                marginLeft: "auto",
+                fontFamily: "Poppins",
+                textDecoration: "none",
+              }}
+            >
+              <NavLink
+                to="/"
+                style={{
+                  padding: "20px",
+                  textDecoration: "none",
+                  fontFamily: "Poppins",
+                  color: "#181818",
+                  fontSize: "18px",
+                }}
+              >
                 Forgot password?
-              </Link>
+              </NavLink>
             </Grid>
           </Grid>
         </Box>

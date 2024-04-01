@@ -1,94 +1,177 @@
 import * as React from "react";
 import AuthService from "../../AuthService";
-import NavBar from "../../components/navigationBar/navBar";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useState, useEffect } from "react";
+import NavBar from "../../components/NavigationBar/NavBar";
+import { useState, useContext, useEffect } from "react";
 import { User } from "../../models/user";
-import { useNotSignedUser } from "../../hooks/useRememberedUser";
+import { Transaction } from "../../models/transactions";
+import { generateUniqueId, updateUser } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import {
-  Button,
-  Grid,
-  Paper,
-  Typography,
-  Modal,
-  TextField,
-  CircularProgress,
-  Box,
-} from "@mui/material";
-import "./style.css";
+import { UserContext } from "../../UserProvider";
+import UserTransactionsTable from "../../components/UserTransactionsTable";
+import { DateTime } from "luxon";
+import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box } from "@mui/material";
+import ajvErrors from "ajv-errors";
+import Ajv, { JSONSchemaType } from "ajv";
+import GenericForm from "../../components/GenericForm/GenericForm";
+import CRUDLocalStorage from "../../CRUDLocalStorage";
+import { TransactionRow } from "../../models/transactionRow";
+
+const ajv = new Ajv({ allErrors: true, $data: true });
+ajvErrors(ajv);
+
+const fields = [
+  {
+    id: "receiverID",
+    label: "Receiver ID",
+    type: "text",
+    placeholder: "Enter the desired account ID",
+  },
+  {
+    id: "amount",
+    label: "Amount",
+    type: "number",
+    placeholder: "Enter transaction amount",
+  },
+  {
+    id: "reason",
+    label: "Transaction Reason",
+    type: "text",
+    placeholder: "Enter transaction reason",
+  },
+];
+
+const schema: JSONSchemaType<Transaction> = {
+  type: "object",
+  properties: {
+    id: { type: "string" },
+    senderID: { type: "string" },
+    receiverID: { type: "string", minLength: 1 },
+    reason: { type: "string", minLength: 1 },
+    amount: { type: "number" },
+    senderName: { type: "string" },
+    receiverName: { type: "string" },
+    date: { type: "string" },
+  },
+  required: ["receiverID", "amount"],
+  additionalProperties: true,
+  errorMessage: {
+    properties: {
+      reason: "",
+      receiverID: "",
+      amount: "",
+    },
+  },
+};
 
 const WelcomePage: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [PaymentModal, setPaymentModal] = useState(false);
-  const [currentBalance, setCurrentBalance] = useState<number>();
-  const [receivingAccountId, setReceivingAccountId] = useState("");
-  const [amount, setAmount] = useState(0);
-  const [transferReason, setTransferReason] = useState("");
-  useEffect(() => {
-    storeCurrentUser();
-  }, [currentBalance, currentUser]);
+  const [currentUser, setCurrentUser] = useContext(UserContext);
+  const [isTableReady, setIsTableReady] = useState(false);
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
+  const [isPaymentModalOpen, setPaymentModal] = useState(false);
+  const [transactions, setTransactions] = useState<TransactionRow[]>([]);
+  const [userBalance, setUserBalance] = useState<number | undefined>(undefined);
 
-  const storeCurrentUser = async () => {
-    setCurrentUser(await AuthService.getCurrentUser());
-  };
-  const getUserBalance = () => {
-    return currentUser ? currentUser.balance : 0;
-  };
-  async function updateUser(user: User) {
-    const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-    const updatedUsers = users.filter((userItem) => userItem.id !== user.id);
-    updatedUsers.push(user);
-    await CRUDLocalStorage.setAsyncData("users", updatedUsers);
-  }
   const updateBalance = async (user: User, amount: number) => {
-    if (user) {
-      const updatedBalance = user.balance + amount;
-      setCurrentBalance(updatedBalance);
-      const updatedUser: User = {
-        ...user,
-        balance: updatedBalance,
-      };
-      await updateUser(updatedUser);
+    const updatedBalance = user.balance + amount;
+    const updatedUser: User = {
+      ...user,
+      balance: updatedBalance,
+    };
+    await updateUser(updatedUser);
+    if (user.id === currentUser?.id) {
+      setUserBalance(updatedBalance);
+      setCurrentUser(updatedUser);
     }
-  };
-  const handlePaymentModal = () => {
-    setPaymentModal(!PaymentModal);
-    if (PaymentModal) {
-      setReceivingAccountId("");
-      setAmount(0);
-      setTransferReason("");
-    }
-  };
-  const handleSubmitTransaction = async () => {
-    handlePaymentModal();
-    setIsLoading(true);
-    if (receivingAccountId !== currentUser?.id) {
-      const receivingUser = await AuthService.getUserFromStorage(
-        receivingAccountId
-      );
-      if (receivingUser != null) {
-        await updateBalance(currentUser as User, -amount);
-        await updateBalance(receivingUser as User, amount);
-        successAlert(
-          `Transfered ${amount}$ to ${receivingUser.firstName} ${receivingUser.lastName}`
-        );
-      } else {
-        errorAlert("Entered ID is WRONG!");
-      }
-    } else {
-      errorAlert("You can't enter your own ID!");
-    }
-    setIsLoading(false);
   };
 
-  useNotSignedUser();
+  const openPaymentModal = () => {
+    setPaymentModal(true);
+  };
+
+  const closePaymentModal = () => {
+    if (isButtonLoading) return;
+    setPaymentModal(false);
+  };
+  const createNewTransaction = async (data: any) => {
+    const designatedUser = (await AuthService.getUserFromStorage(data.receiverID)) as User;
+    const designatedUserName = AuthService.getUserFullName(designatedUser);
+
+    const currentDateTime = new Date();
+
+    const newTransaction = {
+      ...data,
+      senderID: currentUser?.id,
+      id: generateUniqueId(),
+      senderName: AuthService.getUserFullName(currentUser as User),
+      receiverName: designatedUserName,
+      date: currentDateTime.toISOString(),
+    };
+    await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
+  };
+
+  const handleSubmitTransaction = async (data: any) => {
+    setIsButtonLoading(true);
+    if (currentUser) {
+      if (data.receiverID !== currentUser.id) {
+        const receivingUser = await AuthService.getUserFromStorage(data.receiverID);
+        if (receivingUser != null) {
+          await updateBalance(currentUser, -data.amount);
+          await updateBalance(receivingUser, +data.amount);
+          await createNewTransaction(data);
+          await fetchUserTransactions();
+          successAlert(`Transfered ${data.amount}$ to ${receivingUser.firstName}`);
+        } else {
+          errorAlert("Entered ID is WRONG");
+        }
+      } else {
+        errorAlert("You can't enter your own ID!");
+      }
+    }
+    setIsButtonLoading(false);
+    closePaymentModal();
+  };
+
+  const styleAmount = (userID: string, amount: number) => {
+    return userID === currentUser?.id ? `-${amount}$` : `+${amount}$`;
+  };
+
+  const fetchUserTransactions = async () => {
+    setIsTableReady(false);
+    if (currentUser) {
+      try {
+        const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
+        const modifiedTransactions = await Promise.all(
+          fetchedTransactions.map((transaction) => {
+            const styledAmount = styleAmount(transaction.senderID, transaction.amount);
+            const styledDate = DateTime.fromISO(transaction.date, {
+              zone: "Asia/Jerusalem",
+            }).toFormat("dd/MM/yyyy HH:mm");
+            return {
+              ...transaction,
+              amount: styledAmount,
+              date: styledDate,
+            };
+          })
+        );
+        setTransactions(modifiedTransactions);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+      setIsTableReady(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserTransactions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
+
+  document.title = "Home";
 
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
       <NavBar />
-      {isLoading || !currentUser ? (
+      {!currentUser ? (
         <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
           <CircularProgress />
         </Box>
@@ -107,11 +190,7 @@ const WelcomePage: React.FC = () => {
                   borderRadius: 2,
                 }}
               >
-                <Typography
-                  variant="h5"
-                  gutterBottom
-                  sx={{ fontFamily: "Poppins", fontWeight: "bold" }}
-                >
+                <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
                   Your Balance💰
                 </Typography>
                 <Typography
@@ -123,17 +202,23 @@ const WelcomePage: React.FC = () => {
                     fontSize: 18,
                   }}
                 >
-                  {getUserBalance()}$
+                  {currentUser ? userBalance ? userBalance : currentUser.balance : <CircularProgress />}
                 </Typography>
-                <Button onClick={handlePaymentModal}>Make A Payment💸</Button>
+                <Button onClick={openPaymentModal}>Make A Payment💸</Button>
               </Paper>
             </Grid>
           </Grid>
+          <Box padding={0.5}>
+            <Typography variant="h3" fontFamily={"Poppins"}>
+              Recent Transaction
+            </Typography>
+            <UserTransactionsTable rows={transactions} isLoading={!isTableReady} currentUserID={currentUser.id} />
+          </Box>
         </Box>
       )}
       <Modal
-        open={PaymentModal}
-        onClose={handlePaymentModal}
+        open={isPaymentModalOpen}
+        onClose={closePaymentModal}
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
         sx={{
@@ -144,53 +229,23 @@ const WelcomePage: React.FC = () => {
       >
         <Box
           sx={{
-            width: 400,
+            width: 600,
             bgcolor: "background.paper",
             p: 4,
             borderRadius: 2,
           }}
         >
-          <Typography
-            id="modal-title"
-            variant="h6"
-            component="h2"
-            gutterBottom
-            sx={{ fontFamily: "Poppins" }}
-          >
+          <Typography id="modal-title" variant="h6" component="h2" gutterBottom sx={{ fontFamily: "Poppins" }}>
             Create Transaction
           </Typography>
-          <TextField
-            fullWidth
-            label="Account ID"
-            variant="outlined"
-            value={receivingAccountId}
-            onChange={(e) => setReceivingAccountId(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-          <TextField
-            fullWidth
-            type="number"
-            label="Amount"
-            variant="outlined"
-            value={amount}
-            onChange={(e) => setAmount(parseFloat(e.target.value))}
-            sx={{ mt: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Transfer Reason"
-            variant="outlined"
-            value={transferReason}
-            onChange={(e) => setTransferReason(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-          <Button
-            variant="contained"
-            onClick={handleSubmitTransaction}
-            sx={{ mt: 2 }}
-          >
-            2 3 SHA-GER
-          </Button>
+          <Grid item mx="auto" textAlign="center">
+            <GenericForm
+              fields={fields}
+              onSubmit={handleSubmitTransaction}
+              submitButtonLabel={isButtonLoading ? <CircularProgress /> : "2 3 SHA-GER"}
+              schema={schema}
+            />
+          </Grid>
         </Box>
       </Modal>
     </Box>

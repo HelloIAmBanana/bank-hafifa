@@ -1,5 +1,5 @@
 class CRUDLocalStorage {
-static getAsyncData<T>(key: string): Promise<T> {
+  static getAsyncData<T>(key: string): Promise<T> {
     return new Promise((resolve) => {
       setTimeout(() => {
         const data = localStorage.getItem(key);
@@ -24,6 +24,15 @@ static getAsyncData<T>(key: string): Promise<T> {
         resolve();
       }, 1000);
     });
+  }
+
+  static async addItemToList<T>(
+    key: string,
+    newItem: T
+  ): Promise<void> {
+    const items: T[] = (await CRUDLocalStorage.getAsyncData<T[]>(key)) || [];
+    const updatedItems: T[] = [...items, newItem];
+    await CRUDLocalStorage.setAsyncData(key, updatedItems);
   }
 }
 export default CRUDLocalStorage;

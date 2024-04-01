@@ -1,128 +1,136 @@
 import * as React from "react";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
-import GenericModal from "../../components/GenericModal/GenericModal";
-import AuthService from "../../AuthService";
-import NavBar from "../../components/navigationBar/navBar";
-import { useState, useEffect } from "react";
+import { useState, useContext, useMemo } from "react";
 import { User } from "../../models/user";
 import { successAlert } from "../../utils/swalAlerts";
-import { useNotSignedUser } from "../../hooks/useRememberedUser";
-import { Field } from "../../models/field";
-import {
-  Button,
-  Grid,
-  Typography,
-  Modal,
-  CircularProgress,
-  Input,
-  Box,
-} from "@mui/material";
+import Ajv, { JSONSchemaType } from "ajv";
+import ajvErrors from "ajv-errors";
+import { Button, Grid, Typography, Modal, CircularProgress, Input, Box } from "@mui/material";
+import { UserContext } from "../../UserProvider";
+import { updateUser } from "../../utils/utils";
+import NavBar from "../../components/NavigationBar/NavBar";
 import * as _ from "lodash";
+import GenericForm from "../../components/GenericForm/GenericForm";
+
+const ajv = new Ajv({ allErrors: true, $data: true });
+ajvErrors(ajv);
+
+const schema: JSONSchemaType<User> = {
+  type: "object",
+  properties: {
+    id: { type: "string" },
+    firstName: { type: "string", minLength: 1 },
+    lastName: { type: "string", minLength: 1 },
+    hobbies: { type: "array", items: { type: "string" } },
+    email: { type: "string", pattern: "[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,}$" },
+    password: { type: "string", minLength: 6 },
+    birthDate: { type: "string", minLength: 1 },
+    avatarUrl: { type: "string" },
+    gender: { type: "string", enum: ["Male", "Female"], minLength: 1 },
+    accountType: { type: "string", enum: ["Business", "Personal"] },
+    role: { type: "string", enum: ["admin", "customer"] },
+    balance: { type: "number" },
+  },
+  required: [],
+  additionalProperties: true,
+  errorMessage: {
+    properties: {
+      firstName: "Enter Your First Name",
+      lastName: "Enter Your Last Name",
+      birthDate: "Enter Your Birthdate",
+      gender: "Please Select Your Gender",
+    },
+  },
+};
 
 const ProfileSettingsPage: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | undefined>();
+  const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
-  const [profilePictureModal, setProfilePictureModal] = useState(false);
-  const [fields,setFields]=useState<Field[]>([]);
+  const [isProfilePictureModalOpen, setIsProfilePictureModalOpen] = useState(false);
 
-  
-  const storeCurrentUser = async () => {
-    setCurrentUser(await AuthService.getCurrentUser());
-  };
-  useEffect(() => {
-    storeCurrentUser();
-    setFields([
+  const fields = useMemo(() => {
+    return [
       {
         id: "firstName",
         label: "First Name",
         type: "text",
-        required: false,
-        placeholder: `${currentUser?.firstName}`,
+        initValue: `${currentUser?.firstName}`,
       },
       {
         id: "lastName",
         label: "Last Name",
         type: "text",
-        required: false,
-        placeholder: `${currentUser?.lastName}`,
+        initValue: `${currentUser?.lastName}`,
       },
       {
         id: "birthDate",
         label: "Date Of Birth",
         type: "date",
-        required: false,
-        placeholder: `${currentUser?.birthDate}`,
+        initValue: `${currentUser?.birthDate}`,
       },
-  
+
       {
         id: "gender",
         label: "Gender",
         type: "select",
-        required: false,
-        placeholder: `${currentUser?.gender}`,
+        initValue: `${currentUser?.gender}`,
         options: [
           { value: "Male", label: "Male" },
           { value: "Female", label: "Female" },
         ],
       },
-    ])
-  }, []);
-  async function updateUser(user: User) {
-    const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-    const updatedUsers = users.filter((userItem) => userItem.id !== user.id);
-    updatedUsers.push(user as User);
-    await CRUDLocalStorage.setAsyncData("users", updatedUsers);
-  }
-  const handleModalSubmit = async (data: any) => {
-    closeModals();
+    ];
+  }, [currentUser]);
+
+  const updateCurrentUser = async (updatedCurrentUser: User) => {
+    await updateUser(updatedCurrentUser);
+    setCurrentUser(updatedCurrentUser);
+    successAlert(`Updated User!`);
+  };
+
+  const handleSubmitProfileInfo = async (data: any) => {
     setIsLoading(true);
     const updatedUser: User = {
       ...(currentUser as User),
       ...data,
     };
     if (!_.isEqual(updatedUser, currentUser)) {
-      await updateUser(updatedUser);
-      successAlert(`Updated User!`);
+      await updateCurrentUser(updatedUser);
     }
     setIsLoading(false);
-    storeCurrentUser();
-  };
-  const closeModals = () => {
-    setProfilePictureModal(false);
-  };
-  const handleProfilePictureModal = () => {
-    setProfilePictureModal(!profilePictureModal);
   };
 
-  const handleProfilePictureChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const openProfilePicModal = () => {
+    setIsProfilePictureModalOpen(true);
+  };
+
+  const closeProfilePicModal = () => {
+    setIsProfilePictureModalOpen(false);
+  };
+
+  const handleProfilePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      handleProfilePictureModal();
+      closeProfilePicModal();
       setIsLoading(true);
       const imageUrl: string = URL.createObjectURL(file);
       const updatedUser: User = {
         ...(currentUser as User),
         avatarUrl: imageUrl,
       };
-      await updateUser(updatedUser);
-      successAlert(`Updated User!`);
+      await updateCurrentUser(updatedUser);
       setIsLoading(false);
     }
   };
 
-  useNotSignedUser();
-
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
+      <NavBar />
       {isLoading || !currentUser ? (
         <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
           <CircularProgress />
         </Box>
       ) : (
         <Box>
-          <NavBar />
           <Box
             sx={{
               width: 450,
@@ -137,14 +145,15 @@ const ProfileSettingsPage: React.FC = () => {
           >
             <Grid container spacing={4} justifyContent="center">
               <Grid item>
-                <GenericModal
-                  fields={fields}
-                  onSubmit={handleModalSubmit}
-                  submitButtonLabel="Update Profile"
-                />
-                <Button onClick={handleProfilePictureModal}>
-                  Change Profile Photo🖼️
-                </Button>
+                <center>
+                  <GenericForm
+                    fields={fields}
+                    onSubmit={handleSubmitProfileInfo}
+                    submitButtonLabel="Update Profile"
+                    schema={schema}
+                  ></GenericForm>
+                  <Button onClick={openProfilePicModal}>Change Profile Photo🖼️</Button>
+                </center>
               </Grid>
             </Grid>
           </Box>
@@ -153,8 +162,8 @@ const ProfileSettingsPage: React.FC = () => {
 
       <Modal
         id="ProfilePictureChange"
-        open={profilePictureModal}
-        onClose={handleProfilePictureModal}
+        open={isProfilePictureModalOpen}
+        onClose={closeProfilePicModal}
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
         sx={{
@@ -181,12 +190,7 @@ const ProfileSettingsPage: React.FC = () => {
           >
             Change Profile Picture
           </Typography>
-          <Input
-            required
-            type="file"
-            onChange={handleProfilePictureChange}
-            sx={{ mt: 2, fontFamily: "Poppins" }}
-          />
+          <Input type="file" onChange={handleProfilePictureChange} sx={{ mt: 2, fontFamily: "Poppins" }} />
         </Box>
       </Modal>
     </Box>
