@@ -15,26 +15,19 @@ interface Field {
   id: string;
   label: string;
   type: string;
-  required: boolean;
   placeholder?: string;
   checked?: boolean;
-
   options?: { value: string; label: string }[];
 }
 
 interface GenericFormProps {
   fields: Field[];
   onSubmit: (data: Record<string, any>) => void;
-  submitButtonLabel: string;
+  submitButtonLabel: string | JSX.Element;
   schema: Schema;
 }
 
-const GenericForm: React.FC<GenericFormProps> = ({
-  fields,
-  onSubmit,
-  submitButtonLabel,
-  schema,
-}) => {
+const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButtonLabel, schema }) => {
   const validate = ajv.compile(schema);
 
   const {
@@ -67,11 +60,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(internalHandleSubmit)}
-      sx={{ mt: 1 }}
-    >
+    <Box component="form" onSubmit={handleSubmit(internalHandleSubmit)} sx={{ mt: 1 }}>
       {fields.map((field) => {
         const FieldComponent = fieldsRegistry[field.type];
         return (
@@ -82,7 +71,6 @@ const GenericForm: React.FC<GenericFormProps> = ({
               </Typography>
               <Box
                 sx={{
-                  width: "auto",
                   border: "hidden",
                   margin: "auto",
                   textAlign: "auto",
@@ -93,7 +81,6 @@ const GenericForm: React.FC<GenericFormProps> = ({
                   {...register(field.id)}
                   sx={{
                     fontFamily: "Poppins",
-                    width: 200,
                   }}
                 >
                   {field.options?.map((option) => (
@@ -108,7 +95,6 @@ const GenericForm: React.FC<GenericFormProps> = ({
               <FormHelperText
                 sx={{
                   mx: 45,
-                  width: "auto",
                   color: "red",
                   fontFamily: "Poppins",
                 }}
@@ -121,7 +107,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
       })}
 
       <center>
-        <Button onClick={onClick} type="submit">
+        <Button onClick={onClick} type="submit" disabled={Boolean(typeof submitButtonLabel !== "string")}>
           {submitButtonLabel}
         </Button>
       </center>

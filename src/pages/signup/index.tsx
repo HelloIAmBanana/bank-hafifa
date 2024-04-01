@@ -1,17 +1,17 @@
 import * as React from "react";
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import Ajv, { JSONSchemaType } from "ajv";
-import Grid from "@mui/material/Grid";
-import { Box, Button, Input, Typography } from "@mui/material";
-import Paper from "@mui/material/Paper";
-import { NavLink } from "react-router-dom";
+import { Box, Button, Input, Typography, Grid, Paper } from "@mui/material";
 import signupImage from "../../imgs/signupPage.svg";
 import { User } from "../../models/user";
 import ajvErrors from "ajv-errors";
 import { useNavigate } from "react-router-dom";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
+import { successAlert } from "../../utils/swalAlerts";
+
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
@@ -20,35 +20,30 @@ const fields = [
     id: "firstName",
     label: "First Name",
     type: "text",
-    required: false,
     placeholder: "Enter your first name",
   },
   {
     id: "lastName",
     label: "Last Name",
     type: "text",
-    required: false,
     placeholder: "Enter your last name",
   },
   {
     id: "email",
     label: "Email",
     type: "text",
-    required: false,
     placeholder: "Enter your email",
   },
   {
     id: "password",
     label: "Password",
     type: "password",
-    required: false,
     placeholder: "Password",
   },
   {
     id: "birthDate",
     label: "Date Of Birth",
     type: "date",
-    required: false,
     name: "hasfd",
     placeholder: "Enter your birthday",
   },
@@ -56,7 +51,6 @@ const fields = [
     id: "gender",
     label: "Gender",
     type: "select",
-    required: true,
     placeholder: "Enter your gender",
     options: [
       { value: "Male", label: "Male" },
@@ -68,7 +62,6 @@ const fields = [
     label: "Account Type",
     type: "select",
     placeholder: "Enter your Account Type",
-    required: true,
     options: [
       { value: "Personal", label: "Personal" },
       { value: "Business", label: "Business" },
@@ -87,12 +80,16 @@ const schema: JSONSchemaType<User> = {
     password: { type: "string", minLength: 6 },
     birthDate: { type: "string", minLength: 1 },
     avatarUrl: { type: "string" },
-    gender: { type: "string", enum: ["Male", "Female"] },
-    accountType: { type: "string", enum: ["Business", "Personal"] },
+    gender: { type: "string", enum: ["Male", "Female"], minLength: 1 },
+    accountType: {
+      type: "string",
+      enum: ["Business", "Personal"],
+      minLength: 1,
+    },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
   },
-  required: ["id", "birthDate", "email", "firstName", "lastName", "password"],
+  required: ["id", "birthDate", "email", "firstName", "lastName", "password", "gender", "accountType"],
   additionalProperties: true,
   errorMessage: {
     properties: {
@@ -101,6 +98,8 @@ const schema: JSONSchemaType<User> = {
       firstName: "Enter Your First Name",
       lastName: "Enter Your Last Name",
       birthDate: "Enter Your Birthdate",
+      gender: "Please Select Your Gender",
+      accountType: "Please Select Your Account Type",
     },
   },
 };
@@ -108,10 +107,7 @@ const schema: JSONSchemaType<User> = {
 const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
-  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(
-    undefined
-  );
-
+  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -121,21 +117,22 @@ const SignUpPage: React.FC = () => {
     }
   };
   const signUp = async (data: any) => {
-    const newUser = {
+    const newUser: User = {
       ...data,
       id: generateUniqueId(),
       role: "customer",
-      email: data.email?.toLowerCase(),
+      email: data.email.toLowerCase(),
       avatarUrl: avatarImgURL,
       balance: 0,
     };
     if (validateForm(newUser)) {
-      const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-      const updatedUsers = [...users, newUser];
-      await CRUDLocalStorage.setAsyncData("users", updatedUsers);
+      successAlert("Account Created! Navigating to Signin Page!");
+      await CRUDLocalStorage.addItemToList<User>("users", newUser);
       navigate("/signin");
     }
   };
+
+  document.title = "Sign Up";
 
   return (
     <Grid container component="main" my={-7}>
@@ -150,14 +147,7 @@ const SignUpPage: React.FC = () => {
           backgroundPosition: "bottom center",
         }}
       />
-      <Grid
-        item
-        xs={12}
-        md={6}
-        component={Paper}
-        elevation={20}
-        borderRadius={3}
-      >
+      <Grid item xs={12} md={6} component={Paper} elevation={20} borderRadius={3}>
         <Box sx={{ mt: 1, boxSizing: "100vh" }}>
           <Grid container spacing={1}>
             <Grid item mx="auto" textAlign="center">
@@ -190,9 +180,7 @@ const SignUpPage: React.FC = () => {
                   borderRadius: "100%",
                   backgroundSize: "100%",
                   backgroundImage: `url(${
-                    avatarImgURL
-                      ? avatarImgURL
-                      : "https://static.thenounproject.com/png/765938-200.png"
+                    avatarImgURL ? avatarImgURL : "https://static.thenounproject.com/png/765938-200.png"
                   })`,
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "center",
@@ -216,6 +204,7 @@ const SignUpPage: React.FC = () => {
                   }}
                 />
               </Button>
+
               <Typography
                 sx={{
                   fontFamily: "Poppins",
@@ -226,14 +215,10 @@ const SignUpPage: React.FC = () => {
               >
                 Upload profile image
               </Typography>
-              <GenericForm
-                fields={fields}
-                onSubmit={signUp}
-                submitButtonLabel="Sign Up"
-                schema={schema}
-              />
+              <GenericForm fields={fields} onSubmit={signUp} submitButtonLabel="Sign Up" schema={schema} />
             </Grid>
           </Grid>
+
           <NavLink
             to="/signin"
             style={{
