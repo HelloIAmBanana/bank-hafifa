@@ -1,6 +1,5 @@
 import * as React from "react";
 import AuthService from "../../AuthService";
-import NavBar from "../../components/NavigationBar/NavBar";
 import { useState, useContext, useEffect } from "react";
 import { User } from "../../models/user";
 import { Transaction } from "../../models/transactions";
@@ -15,6 +14,7 @@ import Ajv, { JSONSchemaType } from "ajv";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { TransactionRow } from "../../models/transactionRow";
+import NavBar from "../../components/NavigationBar/NavBar";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
