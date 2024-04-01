@@ -122,6 +122,9 @@ const ProfileSettingsPage: React.FC = () => {
     }
   };
 
+  document.title = "Porfile Settings";
+
+
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
       <NavBar />
