@@ -11,4 +11,5 @@ export type User = {
     accountType: string;
     role: string;
     balance: number;
+    cardsAmount:number;
   };

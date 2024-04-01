@@ -1,121 +1,167 @@
 import * as React from "react";
 import AuthService from "../../AuthService";
-import NavBar from "../../components/navigationBar/navBar";
+import NavBar from "../../components/NavigationBar/NavBar";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useState, useEffect } from "react";
-import { User } from "../../models/user";
+import { useState, useEffect, useContext, useMemo } from "react";
 import { Card } from "../../models/card";
-import { useNotSignedUser } from "../../hooks/useRememberedUser";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import {
-  generateUniqueCardNumber,
-  generateUniqueCardPin,
-} from "../../utils/utils";
+import { generateUniqueNumber, updateUser } from "../../utils/utils";
 import { DataGrid } from "@mui/x-data-grid";
-import { Button, Grid, Modal, CircularProgress, Box } from "@mui/material";
-import GenericModal from "../../components/GenericModal/GenericModal";
+import { Button, Grid, Modal, CircularProgress, Box, Typography } from "@mui/material";
+import Ajv, { JSONSchemaType } from "ajv";
+import ajvErrors from "ajv-errors";
+import GenericForm from "../../components/GenericForm/GenericForm";
+import { UserContext } from "../../UserProvider";
+import { User } from "../../models/user";
 
-const modalFields = [
-  {
-    id: "accountID",
-    label: "Account ID",
-    type: "text",
-    required: true,
-    placeholder: "Enter Account ID",
+const ajv = new Ajv({ allErrors: true, $data: true });
+ajvErrors(ajv);
+
+const schema: JSONSchemaType<Card> = {
+  type: "object",
+  properties: {
+    cardNumber: { type: "number" },
+    accountID: { type: "string" },
+    type: { type: "string", enum: ["Visa", "Mastercard", "American Express"] },
+    expireDate: { type: "string", minLength:1},
+    hiddenPin: { type: "number" },
+    status: { type: "string" },
+    rejectedMessage: { type: "string" },
   },
-  {
-    id: "type",
-    label: "Card Type",
-    type: "select",
-    required: true,
-    placeholder: "Enter Credit Card Provider",
-    options: [
-      { value: "Visa", label: "Visa" },
-      { value: "Mastercard", label: "Mastercard" },
-      { value: "American Express", label: "American Express" },
-    ],
+  required: ["accountID","type","expireDate"],
+  additionalProperties: true,
+  errorMessage: {
+    properties: {
+      accountID: "Enter Account ID",
+      type: "Enter Card Provider",
+      expireDate: "Please Enter Expiration Date",
+    },
   },
-  {
-    id: "expireDate",
-    label: "Date Of Expiry",
-    type: "date",
-    required: true,
-    placeholder: "Enter Date Of Expiration",
-  },
-];
+};
+
+const validateForm = ajv.compile(schema);
 
 const CardsPage: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [testModal, setTestModal] = useState(false);
-  const [approvedCards, setApprovedCards] = useState<Card[]>([]);
-  const [rejectedCards, setRejectedCards] = useState<Card[]>([]);
-
-  useEffect(() => {
-    storeCurrentUser();
-    storeCards();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const storeCards = async () => {
-    const storedCards = await CRUDLocalStorage.getAsyncData<Card[]>("cards");
-    const userCards = storedCards.filter(
-      (card) => card.accountId === currentUser?.id
-    );
-    const userApprovedCards = userCards.filter(
-      (card) => card.status === "appending"
-    );
-    const userRejectedCards = userCards.filter(
-      (card) => card.status === "rejected"
-    );
-    setApprovedCards(userApprovedCards);
-    setRejectedCards(userRejectedCards);
-  };
-  const storeCurrentUser = async () => {
-    setCurrentUser(await AuthService.getCurrentUser());
-  };
-  const handleCardModal = () => {
-    setTestModal(!testModal);
-  };
-
-  const handleModalSubmit = async (data: any) => {
-    handleCardModal();
-    setIsLoading(true);
-    const cardOwner = await AuthService.getUserFromStorage(data.accountID);
-    if (cardOwner) {
-      const newCard: Card = {
-        ...data,
-        cardNumber: generateUniqueCardNumber(),
-        ownerName: cardOwner.firstName + " " + cardOwner.lastName,
-        hiddenPin: generateUniqueCardPin(),
-        status: "appending",
-        rejectedMessage: "",
-      };
-      const cards = await CRUDLocalStorage.getAsyncData<Card[]>("cards");
-      const updatedCards = [...cards, newCard];
-      await CRUDLocalStorage.setAsyncData("cards", updatedCards);
-      successAlert("Card was created!");
-    } else {
-      errorAlert("!USER DOES NOT EXIST!");
-    }
-    setIsLoading(false);
-  };
+  const [currentUser, setCurrentUser] = useContext(UserContext);
+  const [isTableLoading, setIsTableLoading] = useState(false);
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
 
   const columns = [
     { field: "cardNumber", headerName: "Number", width: 200 },
-    { field: "ownerName", headerName: "Owner Name", width: 200 },
+    { field: "cardOwnerName", headerName: "Owner Name", width: 200 },
     { field: "type", headerName: "Type", width: 150 },
     { field: "expireDate", headerName: "Expire Date", width: 150 },
     { field: "hiddenPin", headerName: "Hidden PIN", width: 150 },
     { field: "status", headerName: "Status", width: 150 },
   ];
 
-  useNotSignedUser();
+  const fields = useMemo(() => {
+    return [
+      {
+        id: "accountID",
+        label: "Account ID",
+        type: "text",
+        placeholder: "Enter Account ID",
+        initValue: `${currentUser?.id}`
+      },
+      {
+        id: "type",
+        label: "Card Type",
+        type: "select",
+        placeholder: "Enter Credit Card Provider",
+        options: [
+          { value: "Visa", label: "Visa" },
+          { value: "Mastercard", label: "Mastercard" },
+          { value: "American Express", label: "American Express" },
+        ],
+      },
+      {
+        id: "expireDate",
+        label: "Date Of Expiry",
+        type: "date",
+        placeholder: "Enter Date Of Expiration",
+      },
+    ];
+  }, [currentUser]);
+
+  const fetchUserCards = async () => {
+    setIsTableLoading(true);
+    if (currentUser) {
+      try {
+        const fetchedCards = await CRUDLocalStorage.getAsyncData<Card[]>("cards");
+        const modifiedCards = await Promise.all(
+          fetchedCards
+            .filter((filteredCards) => filteredCards.accountID === currentUser.id)
+            .map((cards) => {
+              return {
+                ...cards,
+                cardOwnerName: AuthService.getUserFullName(currentUser),
+                expireDate: cards.expireDate.slice(0,7).replace("-","/"),
+              };
+            })
+        );
+        setCards(modifiedCards);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+    setIsTableLoading(false);
+  };
+
+  const openCardModal = () => {
+    setIsNewCardModalOpen(true);
+  };
+
+  const closeCardModal = () => {
+    setIsNewCardModalOpen(false);
+  };
+
+  const updateUserCardsAmount = async (cardOwner: User) => {
+    const updatedCardsAmount = cardOwner.cardsAmount + 1;
+    const updatedUser: User = {
+      ...cardOwner,
+      cardsAmount: updatedCardsAmount,
+    };
+    await updateUser(updatedUser);
+    if (cardOwner.id === currentUser?.id) {
+      setCurrentUser(updatedUser);
+    }
+  };
+
+  const handleCardModalSubmit = async (data: any) => {
+    setIsButtonLoading(true);
+    const cardOwner = await AuthService.getUserFromStorage(data.accountID);
+    if (cardOwner) {
+      const newCard: Card = {
+        ...data,
+        cardNumber: Number(generateUniqueNumber(16)),
+        hiddenPin: Number(generateUniqueNumber(16).slice(1,4)),
+        status: "Appending",
+        rejectedMessage: "",
+      };
+      if (validateForm(newCard)) {
+        await CRUDLocalStorage.addItemToList<Card>("cards", newCard);
+        await updateUserCardsAmount(cardOwner);
+        successAlert("Card was created!");
+        closeCardModal();
+      }
+    } else {
+      errorAlert("USER DOES NOT EXIST!");
+      closeCardModal();
+    }
+    setIsButtonLoading(false);
+  };
+
+  useEffect(() => {
+    fetchUserCards();
+  }, [currentUser]);
 
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
       <NavBar />
-      {isLoading || !currentUser ? (
+      {!currentUser ? (
         <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
           <CircularProgress />
         </Box>
@@ -123,33 +169,27 @@ const CardsPage: React.FC = () => {
         <Box>
           <Grid container spacing={3} justifyContent="center">
             <Grid item xs={12} md={6}>
-              <Button onClick={handleCardModal}>CREATE NEW CARD (TEST)</Button>
+              <Button onClick={openCardModal}>CREATE NEW CARD (TEST)</Button>
             </Grid>
           </Grid>
-          Approved Cards
+          <Typography id="modal-title" variant="h6" component="h2" gutterBottom sx={{ fontFamily: "Poppins" }}>
+            Create Transaction
+          </Typography>
           <DataGrid
-            rows={approvedCards}
+            rows={cards}
             columns={columns}
             autoHeight={true}
             getRowId={(rowData) => rowData.cardNumber}
             disableColumnSorting
             disableColumnMenu
-          />
-          Rejected Cards
-          <DataGrid
-            rows={rejectedCards}
-            columns={columns}
-            autoHeight={true}
-            getRowId={(rowData) => rowData.cardNumber}
-            disableColumnSorting
-            disableColumnMenu
+            loading={isTableLoading}
           />
         </Box>
       )}
-      <Modal //Card
+      <Modal
         id="CardModal"
-        open={testModal}
-        onClose={handleCardModal}
+        open={isNewCardModalOpen}
+        onClose={closeCardModal}
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
         sx={{
@@ -158,11 +198,23 @@ const CardsPage: React.FC = () => {
           justifyContent: "center",
         }}
       >
-        <GenericModal
-          fields={modalFields}
-          onSubmit={handleModalSubmit}
-          submitButtonLabel="Create Card"
-        />
+        <Box
+          sx={{
+            width: 400,
+            bgcolor: "background.paper",
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <center>
+            <GenericForm
+              fields={fields}
+              onSubmit={handleCardModalSubmit}
+              submitButtonLabel={isButtonLoading?<CircularProgress />:"Create Card"}
+              schema={schema}
+            ></GenericForm>
+          </center>
+        </Box>
       </Modal>
     </Box>
   );

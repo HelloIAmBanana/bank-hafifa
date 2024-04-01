@@ -1,68 +1,54 @@
-import {
-  Box,
-  Drawer,
-  AppBar,
-  Toolbar,
-  List,
-  Typography,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  Avatar,
-} from "@mui/material";
-import {
-  CreditCard,
-  Home,
-  RequestQuote,
-  Receipt,
-  AccountCircle,
-} from "@mui/icons-material";
-import { useState, useEffect } from "react";
+import { Box, Drawer, AppBar, Toolbar, List, Typography, Avatar } from "@mui/material";
+import { CreditCard, Home, RequestQuote, Receipt, AccountCircle, ExitToApp } from "@mui/icons-material";
+import { useState, useEffect, useContext, useMemo } from "react";
 import { User } from "../../models/user";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../UserProvider";
 import AuthService from "../../AuthService";
-import { useNavigate, useLocation } from "react-router-dom";
+import NavBarItem from "./NavBarItem";
 
 export default function NavBar() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [timeMessage, setTimeMessage] = useState("");
-  const [currentUser, setCurrentUser] = useState<User>();
+  const [currentUser, setCurrentUser] = useContext(UserContext);
 
-  const icons = [
-    <Home />,
-    <RequestQuote />,
-    <CreditCard />,
-    <Receipt />,
-    <AccountCircle />,
-  ];
-  const storeCurrentUser = async () => {
-    setCurrentUser(await AuthService.getCurrentUser());
-  };
+  const icons = [<Home />, <RequestQuote />, <CreditCard />, <Receipt />, <AccountCircle />];
+
+  function logUserOut() {
+    sessionStorage.clear();
+    localStorage.removeItem("rememberedAuthToken");
+    navigate("/signin");
+  }
+
   const currentHour = new Date().getHours();
+  const userName = useMemo(() => {
+    return AuthService.getUserFullName(currentUser as User);
+  }, [currentUser]);
+
+  const avatarIMG = useMemo(() => {
+    return currentUser?.avatarUrl;
+  }, [currentUser]);
+
   useEffect(() => {
-    storeCurrentUser();
     switch (Math.floor(currentHour / 6)) {
       default: {
-        setTimeMessage("☀️Good morning, ");
+        setTimeMessage("Good morning☀️, ");
         break;
       }
       case 2: {
-        setTimeMessage("🌇Good afternoon, ");
+        setTimeMessage("Good afternoon🌇, ");
         break;
       }
       case 3: {
-        setTimeMessage("🌆Good evening, ");
+        setTimeMessage("Good evening🌆, ");
         break;
       }
-      case 4: {
-        setTimeMessage("🌙Good night, ");
+      case 0: {
+        setTimeMessage("Good night🌙, ");
         break;
       }
     }
   }, [currentUser, currentHour]);
-  function capitalize(word: string) {
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-  }
 
   return (
     <Box>
@@ -70,7 +56,7 @@ export default function NavBar() {
         <AppBar
           position="fixed"
           sx={{
-            zIndex: (theme) => theme.zIndex.drawer + 1,
+            zIndex: (theme: { zIndex: { drawer: number } }) => theme.zIndex.drawer + 1,
             backgroundColor: "#F50057",
           }}
         >
@@ -79,19 +65,12 @@ export default function NavBar() {
               <Box></Box>
             ) : (
               <>
-                <Avatar src={(currentUser as User).avatarUrl} />
-                <Typography
-                  variant="h6"
-                  noWrap
-                  component="div"
-                  sx={{ fontFamily: "Poppins" }}
-                >
-                  {timeMessage} {capitalize((currentUser as User).firstName)}{" "}
-                  {capitalize((currentUser as User).lastName)}
+                <Avatar src={avatarIMG} />
+                <Typography variant="h6" component="div" sx={{ fontFamily: "Poppins", marginLeft: 2 }}>
+                  {`${timeMessage} ${userName}`}
                 </Typography>
               </>
             )}
-
           </Toolbar>
         </AppBar>
         <Drawer
@@ -112,41 +91,10 @@ export default function NavBar() {
           <Toolbar />
           <Box sx={{ overflow: "auto" }}>
             <List>
-              {["Home", "Loans", "Cards", "Deposits", "Account"].map(
-                (text, index) => (
-                  <ListItem
-                    key={text}
-                    disablePadding
-                    sx={{
-                      mb: 6,
-                      boxShadow: 5,
-                      backgroundColor:
-                        location.pathname === "/" + text.toLowerCase()
-                          ? "#ca0f50d0"
-                          : "",
-                    }}
-                  >
-                    <ListItemButton
-                      onClick={() => {
-                        navigate(`/${text.toLowerCase()} `);
-                      }}
-                    >
-                      <ListItemIcon sx={{ color: "#f50057", fontSize: "50px" }}>
-                        {icons[index]}
-                      </ListItemIcon>
-                      <Typography
-                        sx={{
-                          fontFamily: "Poppins",
-                          fontSize: "1.2rem",
-                          marginRight: "64px",
-                        }}
-                      >
-                        {text}
-                      </Typography>
-                    </ListItemButton>
-                  </ListItem>
-                )
-              )}
+              {["Home", "Loans", "Cards", "Deposits", "Account"].map((text, index) => (
+                <NavBarItem label={text} icon={icons[index]} onClick={() => navigate(`/${text.toLowerCase()} `)} />
+              ))}
+              <NavBarItem label={"Logout"} icon={<ExitToApp />} onClick={logUserOut} />
             </List>
           </Box>
         </Drawer>

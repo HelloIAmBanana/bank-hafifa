@@ -1,143 +1,131 @@
 import * as React from "react";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
-import GenericModal from "../../components/GenericModal/GenericModal";
-import AuthService from "../../AuthService";
-import NavBar from "../../components/navigationBar/navBar";
-import { useState, useEffect } from "react";
+import { useState, useContext, useMemo } from "react";
 import { User } from "../../models/user";
 import { successAlert } from "../../utils/swalAlerts";
-import { useNotSignedUser } from "../../hooks/useRememberedUser";
-import {
-  Button,
-  Grid,
-  Typography,
-  Modal,
-  CircularProgress,
-  Input,
-  Box,
-} from "@mui/material";
+import Ajv, { JSONSchemaType } from "ajv";
+import ajvErrors from "ajv-errors";
+import { Button, Grid, Typography, Modal, CircularProgress, Input, Box } from "@mui/material";
+import { UserContext } from "../../UserProvider";
+import { updateUser } from "../../utils/utils";
+import NavBar from "../../components/NavigationBar/NavBar";
+import * as _ from "lodash";
+import GenericForm from "../../components/GenericForm/GenericForm";
 
-const nameFields = [
-  {
-    id: "firstName",
-    label: "First Name",
-    type: "text",
-    required: false,
-    placeholder: "Enter your first name",
+const ajv = new Ajv({ allErrors: true, $data: true });
+ajvErrors(ajv);
+
+const schema: JSONSchemaType<User> = {
+  type: "object",
+  properties: {
+    id: { type: "string" },
+    firstName: { type: "string", minLength: 1 },
+    lastName: { type: "string", minLength: 1 },
+    hobbies: { type: "array", items: { type: "string" } },
+    email: { type: "string", pattern: "[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,}$" },
+    password: { type: "string", minLength: 6 },
+    birthDate: { type: "string", minLength: 1 },
+    avatarUrl: { type: "string" },
+    gender: { type: "string", enum: ["Male", "Female"], minLength: 1 },
+    accountType: { type: "string", enum: ["Business", "Personal"] },
+    role: { type: "string", enum: ["admin", "customer"] },
+    balance: { type: "number" },
+    cardsAmount:{ type: "number" },
+
   },
-  {
-    id: "lastName",
-    label: "Last Name",
-    type: "text",
-    required: false,
-    placeholder: "Enter your last name",
+  required: [],
+  additionalProperties: true,
+  errorMessage: {
+    properties: {
+      firstName: "Enter Your First Name",
+      lastName: "Enter Your Last Name",
+      birthDate: "Enter Your Birthdate",
+      gender: "Please Select Your Gender",
+    },
   },
-];
-const passwordFields = [
-  {
-    id: "password",
-    label: "Password",
-    type: "password",
-    required: false,
-    placeholder: "Password",
-  },
-];
-const genderFields = [
-  {
-    id: "gender",
-    label: "Gender",
-    type: "select",
-    required: false,
-    placeholder: "Enter your gender",
-    options: [
-      { value: "Male", label: "Male" },
-      { value: "Female", label: "Female" },
-    ],
-  },
-];
-const birthdateFields = [
-  {
-    id: "birthDate",
-    label: "Date Of Birth",
-    type: "date",
-    required: false,
-    placeholder: "Enter your birthday",
-  },
-];
+};
 
 const ProfileSettingsPage: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | undefined>();
+  const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
-  const [nameModal, setNameModal] = useState(false);
-  const [passwordModal, setPasswordModal] = useState(false);
-  const [genderModal, setGenderModal] = useState(false);
-  const [birthDateModal, setBirthDateModal] = useState(false);
-  const [profilePictureModal, setProfilePictureModal] = useState(false);
+  const [isProfilePictureModalOpen, setIsProfilePictureModalOpen] = useState(false);
 
-  const storeCurrentUser = async () => {
-    setCurrentUser(await AuthService.getCurrentUser());
-  };
-  useEffect(() => {
-    storeCurrentUser();
+  const fields = useMemo(() => {
+    return [
+      {
+        id: "firstName",
+        label: "First Name",
+        type: "text",
+        initValue: `${currentUser?.firstName}`,
+      },
+      {
+        id: "lastName",
+        label: "Last Name",
+        type: "text",
+        initValue: `${currentUser?.lastName}`,
+      },
+      {
+        id: "birthDate",
+        label: "Date Of Birth",
+        type: "date",
+        initValue: `${currentUser?.birthDate}`,
+      },
+
+      {
+        id: "gender",
+        label: "Gender",
+        type: "select",
+        initValue: `${currentUser?.gender}`,
+        options: [
+          { value: "Male", label: "Male" },
+          { value: "Female", label: "Female" },
+        ],
+      },
+    ];
   }, [currentUser]);
-  async function updateUser(user: User) {
-    const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-    const updatedUsers = users.filter((userItem) => userItem.id !== user.id);
-    updatedUsers.push(user as User);
-    await CRUDLocalStorage.setAsyncData("users", updatedUsers);
-  }
-  const handleModalSubmit = async (data: any) => {
-    closeModals();
+
+  const updateCurrentUser = async (updatedCurrentUser: User) => {
+    await updateUser(updatedCurrentUser);
+    setCurrentUser(updatedCurrentUser);
+    successAlert(`Updated User!`);
+  };
+
+  const handleSubmitProfileInfo = async (data: any) => {
     setIsLoading(true);
     const updatedUser: User = {
       ...(currentUser as User),
       ...data,
     };
-    await updateUser(updatedUser);
-    successAlert(`Updated User!`);
+    if (!_.isEqual(updatedUser, currentUser)) {
+      await updateCurrentUser(updatedUser);
+    }
     setIsLoading(false);
   };
-  const closeModals = () => {
-    setNameModal(false);
-    setBirthDateModal(false);
-    setProfilePictureModal(false);
-    setPasswordModal(false);
-    setGenderModal(false);
+
+  const openProfilePicModal = () => {
+    setIsProfilePictureModalOpen(true);
   };
-  const handleNameModal = () => {
-    setNameModal(!nameModal);
+
+  const closeProfilePicModal = () => {
+    setIsProfilePictureModalOpen(false);
   };
-  const handleBirthDateModal = () => {
-    setBirthDateModal(!birthDateModal);
-  };
-  const handleProfilePictureModal = () => {
-    setProfilePictureModal(!profilePictureModal);
-  };
-  const handlePasswordModal = () => {
-    setPasswordModal(!passwordModal);
-  };
-  const handleGenderModal = () => {
-    setGenderModal(!genderModal);
-  };
-  const handleProfilePictureChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+
+  const handleProfilePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      handleProfilePictureModal();
+      closeProfilePicModal();
       setIsLoading(true);
       const imageUrl: string = URL.createObjectURL(file);
       const updatedUser: User = {
         ...(currentUser as User),
         avatarUrl: imageUrl,
       };
-      await updateUser(updatedUser);
-      successAlert(`Updated User!`);
+      await updateCurrentUser(updatedUser);
       setIsLoading(false);
     }
   };
 
-  useNotSignedUser();
+  document.title = "Porfile Settings";
+
 
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
@@ -147,125 +135,40 @@ const ProfileSettingsPage: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <Box
-          sx={{
-            width: 450,
-            bgcolor: "background.paper",
-            p: 4,
-            borderRadius: 2,
-            justifyContent: "center",
-            display: "flex",
-            margin: "auto",
-            fontFamily: "Poppins",
-          }}
-        >
-          <Grid container spacing={4} justifyContent="center">
-            <Grid item>
-              <Button //Name
-                onClick={handleNameModal}
-              >
-                Change Name👤
-              </Button>
-              <Button //Password
-                onClick={handlePasswordModal}
-              >
-                Change Password🔒
-              </Button>
-              <Button //Gender
-                onClick={handleGenderModal}
-              >
-                Change Gender🚻
-              </Button>
-              <Button //Birthday
-                onClick={handleBirthDateModal}
-              >
-                Change Birth Date📆
-              </Button>
-              <Button //Profile photo
-                onClick={handleProfilePictureModal}
-              >
-                Change Profile Photo🖼️
-              </Button>
+        <Box>
+          <Box
+            sx={{
+              width: 450,
+              bgcolor: "background.paper",
+              p: 4,
+              borderRadius: 2,
+              justifyContent: "center",
+              display: "flex",
+              margin: "auto",
+              fontFamily: "Poppins",
+            }}
+          >
+            <Grid container spacing={4} justifyContent="center">
+              <Grid item>
+                <center>
+                  <GenericForm
+                    fields={fields}
+                    onSubmit={handleSubmitProfileInfo}
+                    submitButtonLabel="Update Profile"
+                    schema={schema}
+                  ></GenericForm>
+                  <Button onClick={openProfilePicModal}>Change Profile Photo🖼️</Button>
+                </center>
+              </Grid>
             </Grid>
-          </Grid>
+          </Box>
         </Box>
       )}
-      <Modal //Name
-        id="NameChange"
-        open={nameModal}
-        onClose={handleNameModal}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <GenericModal
-          fields={nameFields}
-          onSubmit={handleModalSubmit}
-          submitButtonLabel="Change Name"
-        />
-      </Modal>
-      <Modal //Password
-        id="PasswordChange"
-        open={passwordModal}
-        onClose={handlePasswordModal}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <GenericModal
-          fields={passwordFields}
-          onSubmit={handleModalSubmit}
-          submitButtonLabel="Change Password"
-        />
-      </Modal>
-      <Modal //Birthday
-        id="BirthdayModal"
-        open={birthDateModal}
-        onClose={handleBirthDateModal}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <GenericModal
-          fields={birthdateFields}
-          onSubmit={handleModalSubmit}
-          submitButtonLabel="Change Birth Date"
-        />
-      </Modal>
-      <Modal //Gender
-        id="GenderModal"
-        open={genderModal}
-        onClose={handleGenderModal}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <GenericModal
-          fields={genderFields}
-          onSubmit={handleModalSubmit}
-          submitButtonLabel="Change Gender"
-        />
-      </Modal>
-      <Modal //Profile Picture
+
+      <Modal
         id="ProfilePictureChange"
-        open={profilePictureModal}
-        onClose={handleProfilePictureModal}
+        open={isProfilePictureModalOpen}
+        onClose={closeProfilePicModal}
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
         sx={{
@@ -292,12 +195,7 @@ const ProfileSettingsPage: React.FC = () => {
           >
             Change Profile Picture
           </Typography>
-          <Input
-            required
-            type="file"
-            onChange={handleProfilePictureChange}
-            sx={{ mt: 2, fontFamily: "Poppins" }}
-          />
+          <Input type="file" onChange={handleProfilePictureChange} sx={{ mt: 2, fontFamily: "Poppins" }} />
         </Box>
       </Modal>
     </Box>

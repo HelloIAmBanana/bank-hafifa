@@ -1,7 +1,6 @@
 export type Card = {
   cardNumber: number;
-  accountId: string;
-  ownerName: string;
+  accountID: string;
   type: string;
   expireDate: string;
   hiddenPin: number;
