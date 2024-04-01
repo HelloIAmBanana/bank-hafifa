@@ -1,20 +1,5 @@
-import {
-  Box,
-  Drawer,
-  AppBar,
-  Toolbar,
-  List,
-  Typography,
-  Avatar,
-} from "@mui/material";
-import {
-  CreditCard,
-  Home,
-  RequestQuote,
-  Receipt,
-  AccountCircle,
-  ExitToApp,
-} from "@mui/icons-material";
+import { Box, Drawer, AppBar, Toolbar, List, Typography, Avatar } from "@mui/material";
+import { CreditCard, Home, RequestQuote, Receipt, AccountCircle, ExitToApp } from "@mui/icons-material";
 import { useState, useEffect, useContext, useMemo } from "react";
 import { User } from "../../models/user";
 import { useNavigate } from "react-router-dom";
@@ -25,15 +10,9 @@ import AuthService from "../../AuthService";
 export default function NavBar() {
   const navigate = useNavigate();
   const [timeMessage, setTimeMessage] = useState("");
-  const [currentUser,setCurrentUser] = useContext(UserContext);
+  const [currentUser, setCurrentUser] = useContext(UserContext);
 
-  const icons = [
-    <Home />,
-    <RequestQuote />,
-    <CreditCard />,
-    <Receipt />,
-    <AccountCircle />,
-  ];
+  const icons = [<Home />, <RequestQuote />, <CreditCard />, <Receipt />, <AccountCircle />];
 
   function logUserOut() {
     sessionStorage.clear();
@@ -72,8 +51,7 @@ export default function NavBar() {
         <AppBar
           position="fixed"
           sx={{
-            zIndex: (theme: { zIndex: { drawer: number } }) =>
-              theme.zIndex.drawer + 1,
+            zIndex: (theme: { zIndex: { drawer: number } }) => theme.zIndex.drawer + 1,
             backgroundColor: "#F50057",
           }}
         >
@@ -83,12 +61,7 @@ export default function NavBar() {
             ) : (
               <>
                 <Avatar src={(currentUser as User).avatarUrl} />
-                <Typography
-                  variant="h6"
-                  noWrap
-                  component="div"
-                  sx={{ fontFamily: "Poppins" }}
-                >
+                <Typography variant="h6" noWrap component="div" sx={{ fontFamily: "Poppins" }}>
                   {`${timeMessage} ${userName}`}
                 </Typography>
               </>
@@ -113,20 +86,10 @@ export default function NavBar() {
           <Toolbar />
           <Box sx={{ overflow: "auto" }}>
             <List>
-              {["Home", "Loans", "Cards", "Deposits", "Account"].map(
-                (text, index) => (
-                  <NavBarItem
-                    label={text}
-                    icon={icons[index]}
-                    onClick={() => navigate(`/${text.toLowerCase()} `)}
-                  />
-                )
-              )}
-              <NavBarItem
-                label={"Logout"}
-                icon={<ExitToApp />}
-                onClick={logUserOut}
-              />
+              {["Home", "Loans", "Cards", "Deposits", "Account"].map((text, index) => (
+                <NavBarItem label={text} icon={icons[index]} onClick={() => navigate(`/${text.toLowerCase()} `)} />
+              ))}
+              <NavBarItem label={"Logout"} icon={<ExitToApp />} onClick={logUserOut} />
             </List>
           </Box>
         </Drawer>

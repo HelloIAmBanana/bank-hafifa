@@ -8,11 +8,7 @@ interface NavBarItemProps {
   onClick: () => void;
 }
 
-const NavBarItem: FunctionComponent<NavBarItemProps> = ({
-  label,
-  icon,
-  onClick,
-}) => {
+const NavBarItem: FunctionComponent<NavBarItemProps> = ({ label, icon, onClick }) => {
   const location = useLocation();
 
   return (
@@ -22,14 +18,11 @@ const NavBarItem: FunctionComponent<NavBarItemProps> = ({
       sx={{
         mb: 6,
         boxShadow: 5,
-        backgroundColor:
-          location.pathname === "/" + label.toLowerCase() ? "#ca0f50d0" : "",
+        backgroundColor: location.pathname === "/" + label.toLowerCase() ? "#ca0f50d0" : "",
       }}
     >
       <ListItemButton onClick={onClick}>
-        <ListItemIcon sx={{ color: "#f50057", fontSize: "50px" }}>
-          {icon}
-        </ListItemIcon>
+        <ListItemIcon sx={{ color: "#f50057", fontSize: "50px" }}>{icon}</ListItemIcon>
         <Typography
           sx={{
             fontFamily: "Poppins",

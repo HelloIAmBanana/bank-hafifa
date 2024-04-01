@@ -89,16 +89,7 @@ const schema: JSONSchemaType<User> = {
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
   },
-  required: [
-    "id",
-    "birthDate",
-    "email",
-    "firstName",
-    "lastName",
-    "password",
-    "gender",
-    "accountType",
-  ],
+  required: ["id", "birthDate", "email", "firstName", "lastName", "password", "gender", "accountType"],
   additionalProperties: true,
   errorMessage: {
     properties: {
@@ -116,9 +107,7 @@ const schema: JSONSchemaType<User> = {
 const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
-  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(
-    undefined
-  );
+  const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -158,14 +147,7 @@ const SignUpPage: React.FC = () => {
           backgroundPosition: "bottom center",
         }}
       />
-      <Grid
-        item
-        xs={12}
-        md={6}
-        component={Paper}
-        elevation={20}
-        borderRadius={3}
-      >
+      <Grid item xs={12} md={6} component={Paper} elevation={20} borderRadius={3}>
         <Box sx={{ mt: 1, boxSizing: "100vh" }}>
           <Grid container spacing={1}>
             <Grid item mx="auto" textAlign="center">
@@ -198,9 +180,7 @@ const SignUpPage: React.FC = () => {
                   borderRadius: "100%",
                   backgroundSize: "100%",
                   backgroundImage: `url(${
-                    avatarImgURL
-                      ? avatarImgURL
-                      : "https://static.thenounproject.com/png/765938-200.png"
+                    avatarImgURL ? avatarImgURL : "https://static.thenounproject.com/png/765938-200.png"
                   })`,
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "center",
@@ -235,12 +215,7 @@ const SignUpPage: React.FC = () => {
               >
                 Upload profile image
               </Typography>
-              <GenericForm
-                fields={fields}
-                onSubmit={signUp}
-                submitButtonLabel="Sign Up"
-                schema={schema}
-              />
+              <GenericForm fields={fields} onSubmit={signUp} submitButtonLabel="Sign Up" schema={schema} />
             </Grid>
           </Grid>
 

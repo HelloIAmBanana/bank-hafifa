@@ -1,14 +1,17 @@
-import React, {createContext, useEffect,useState} from 'react';
-import { User } from './models/user';
-import AuthService from './AuthService';
+import React, { createContext, useEffect, useState } from "react";
+import { User } from "./models/user";
+import AuthService from "./AuthService";
 
-export const UserContext = createContext<[User|undefined, React.Dispatch<React.SetStateAction<User|undefined>>]>([null!, () => null!]);
+export const UserContext = createContext<[User | undefined, React.Dispatch<React.SetStateAction<User | undefined>>]>([
+  null!,
+  () => null!,
+]);
 
 const UserProvider = ({ children }: React.PropsWithChildren) => {
   const [currentUser, setCurrentUser] = useState<User>();
 
   const storeCurrentUser = async () => {
-    const user= await AuthService.getCurrentUser() as User;
+    const user = (await AuthService.getCurrentUser()) as User;
     setCurrentUser(user);
   };
 
@@ -16,11 +19,7 @@ const UserProvider = ({ children }: React.PropsWithChildren) => {
     storeCurrentUser();
   }, []);
 
-  return (
-    <UserContext.Provider value={[currentUser,setCurrentUser]}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={[currentUser, setCurrentUser]}>{children}</UserContext.Provider>;
 };
 
 export default UserProvider;

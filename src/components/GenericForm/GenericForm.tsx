@@ -27,12 +27,7 @@ interface GenericFormProps {
   schema: Schema;
 }
 
-const GenericForm: React.FC<GenericFormProps> = ({
-  fields,
-  onSubmit,
-  submitButtonLabel,
-  schema,
-}) => {
+const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButtonLabel, schema }) => {
   const validate = ajv.compile(schema);
 
   const {
@@ -65,11 +60,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(internalHandleSubmit)}
-      sx={{ mt: 1 }}
-    >
+    <Box component="form" onSubmit={handleSubmit(internalHandleSubmit)} sx={{ mt: 1 }}>
       {fields.map((field) => {
         const FieldComponent = fieldsRegistry[field.type];
         return (
@@ -116,7 +107,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
       })}
 
       <center>
-        <Button onClick={onClick} type="submit" disabled={Boolean(typeof(submitButtonLabel)!=="string")}>
+        <Button onClick={onClick} type="submit" disabled={Boolean(typeof submitButtonLabel !== "string")}>
           {submitButtonLabel}
         </Button>
       </center>

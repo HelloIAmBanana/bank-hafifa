@@ -27,23 +27,13 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
       renderCell: (params: any) =>
         params.row.senderID === userID ? (
           <Box>
-            <Typography
-              fontWeight={"Bold"}
-              fontFamily={"Poppins"}
-            >{`To ${params.row.receiverName}`}</Typography>
-            <Typography
-              fontFamily={"Poppins"}
-            >{`${params.row.date}`}</Typography>
-          </Box> 
+            <Typography fontWeight={"Bold"} fontFamily={"Poppins"}>{`To ${params.row.receiverName}`}</Typography>
+            <Typography fontFamily={"Poppins"}>{`${params.row.date}`}</Typography>
+          </Box>
         ) : (
           <Box>
-            <Typography
-              fontWeight={"Bold"}
-              fontFamily={"Poppins"}
-            >{`From ${params.row.senderName}`}</Typography>
-            <Typography
-              fontFamily={"Poppins"}
-            >{`${params.row.date}`}</Typography>
+            <Typography fontWeight={"Bold"} fontFamily={"Poppins"}>{`From ${params.row.senderName}`}</Typography>
+            <Typography fontFamily={"Poppins"}>{`${params.row.date}`}</Typography>
           </Box>
         ),
     },
@@ -65,9 +55,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
   ];
 
   return (
-    <Box
-      sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5 }}
-    >
+    <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5 }}>
       <DataGrid
         rows={rows.slice(-10)}
         columns={columns}

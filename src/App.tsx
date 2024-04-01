@@ -12,7 +12,7 @@ function App() {
     <Router>
       <div>
         <Routes>
-        <Route element={<AuthHandlerRoute />}>
+          <Route element={<AuthHandlerRoute />}>
             <Route path="/" element={<SignUpPage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/home" element={<WelcomePage />} />

@@ -85,14 +85,13 @@ const SignInPage: React.FC = () => {
         }
         successAlert("Signing in!");
         navigate("/home");
-
       } else {
         errorAlert("Wrong Credentials!");
       }
     }
   };
 
-  document.title = 'Sign In';
+  document.title = "Sign In";
 
   return (
     <Grid container component="main" sx={{ height: "85vh" }}>
@@ -108,33 +107,32 @@ const SignInPage: React.FC = () => {
           backgroundPosition: "bottom center",
         }}
       />
-      <Grid
-        item
-        xs={12}
-        md={6}
-        component={Paper}
-        elevation={20}
-        borderRadius={3}
-      >
+      <Grid item xs={12} md={6} component={Paper} elevation={20} borderRadius={3}>
         <Box sx={{ mt: 25 }}>
           <Grid container spacing={1}>
             <Grid item margin={"auto"}>
-
-              <Typography variant="h2" sx={{fontFamily:"Poppins", fontSize:"50px",fontWeight:"bold",lineHeight: "50px",textAlign:"center"}}>
+              <Typography
+                variant="h2"
+                sx={{
+                  fontFamily: "Poppins",
+                  fontSize: "50px",
+                  fontWeight: "bold",
+                  lineHeight: "50px",
+                  textAlign: "center",
+                }}
+              >
                 Welcome back
               </Typography>
-              <Typography variant="h4" sx={{fontFamily:"Poppins", fontSize:"25px",lineHeight: "50px",textAlign:"center"}}>
+              <Typography
+                variant="h4"
+                sx={{ fontFamily: "Poppins", fontSize: "25px", lineHeight: "50px", textAlign: "center" }}
+              >
                 Please enter your details.
               </Typography>
             </Grid>
           </Grid>
           <Grid item mx="auto" textAlign="center" mt={7}>
-            <GenericForm
-              fields={fields}
-              onSubmit={login}
-              submitButtonLabel="Sign In"
-              schema={schema}
-            />
+            <GenericForm fields={fields} onSubmit={login} submitButtonLabel="Sign In" schema={schema} />
           </Grid>
           <Grid container justifyContent="flex-start">
             <Grid

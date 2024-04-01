@@ -9,15 +9,7 @@ import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
 import UserTransactionsTable from "../../components/UserTransactionsTable";
 import { DateTime } from "luxon";
-import {
-  Button,
-  Grid,
-  Paper,
-  Typography,
-  Modal,
-  CircularProgress,
-  Box,
-} from "@mui/material";
+import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box } from "@mui/material";
 import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import GenericForm from "../../components/GenericForm/GenericForm";
@@ -72,7 +64,7 @@ const schema: JSONSchemaType<Transaction> = {
 };
 
 const WelcomePage: React.FC = () => {
-  const [currentUser,setCurrentUser] = useContext(UserContext);
+  const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isTableReady, setIsTableReady] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
@@ -101,9 +93,7 @@ const WelcomePage: React.FC = () => {
     setPaymentModal(false);
   };
   const createNewTransaction = async (data: any) => {
-    const designatedUser = (await AuthService.getUserFromStorage(
-      data.receiverID
-    )) as User;
+    const designatedUser = (await AuthService.getUserFromStorage(data.receiverID)) as User;
     const designatedUserName = AuthService.getUserFullName(designatedUser);
 
     const currentDateTime = new Date();
@@ -116,27 +106,20 @@ const WelcomePage: React.FC = () => {
       receiverName: designatedUserName,
       date: currentDateTime.toISOString(),
     };
-    await CRUDLocalStorage.addItemToList<Transaction>(
-      "transactions",
-      newTransaction
-    );
+    await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
   };
 
   const handleSubmitTransaction = async (data: any) => {
     setIsButtonLoading(true);
     if (currentUser) {
       if (data.receiverID !== currentUser.id) {
-        const receivingUser = await AuthService.getUserFromStorage(
-          data.receiverID
-        );
+        const receivingUser = await AuthService.getUserFromStorage(data.receiverID);
         if (receivingUser != null) {
           await updateBalance(currentUser, -data.amount);
           await updateBalance(receivingUser, +data.amount);
           await createNewTransaction(data);
           await fetchUserTransactions();
-          successAlert(
-            `Transfered ${data.amount}$ to ${receivingUser.firstName}`
-          );
+          successAlert(`Transfered ${data.amount}$ to ${receivingUser.firstName}`);
         } else {
           errorAlert("Entered ID is WRONG");
         }
@@ -148,19 +131,18 @@ const WelcomePage: React.FC = () => {
     closePaymentModal();
   };
 
+  const styleAmount = (userID: string, amount: number) => {
+    return userID === currentUser?.id ? `-${amount}$` : `+${amount}$`;
+  };
+
   const fetchUserTransactions = async () => {
     setIsTableReady(false);
     if (currentUser) {
       try {
-        const fetchedTransactions = await CRUDLocalStorage.getAsyncData<
-          Transaction[]
-        >("transactions");
+        const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
         const modifiedTransactions = await Promise.all(
           fetchedTransactions.map((transaction) => {
-            const styledAmount =
-              transaction.senderID === currentUser.id
-                ? `-${transaction.amount}$`
-                : `+${transaction.amount}$`;
+            const styledAmount = styleAmount(transaction.senderID, transaction.amount);
             const styledDate = DateTime.fromISO(transaction.date, {
               zone: "Asia/Jerusalem",
             }).toFormat("dd/MM/yyyy HH:mm");
@@ -181,6 +163,7 @@ const WelcomePage: React.FC = () => {
 
   useEffect(() => {
     fetchUserTransactions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   document.title = "Home";
@@ -207,11 +190,7 @@ const WelcomePage: React.FC = () => {
                   borderRadius: 2,
                 }}
               >
-                <Typography
-                  variant="h5"
-                  gutterBottom
-                  sx={{ fontFamily: "Poppins", fontWeight: "bold" }}
-                >
+                <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
                   Your Balance💰
                 </Typography>
                 <Typography
@@ -223,15 +202,7 @@ const WelcomePage: React.FC = () => {
                     fontSize: 18,
                   }}
                 >
-                  {currentUser ? (
-                    userBalance ? (
-                      userBalance
-                    ) : (
-                      currentUser.balance
-                    )
-                  ) : (
-                    <CircularProgress />
-                  )}
+                  {currentUser ? userBalance ? userBalance : currentUser.balance : <CircularProgress />}
                 </Typography>
                 <Button onClick={openPaymentModal}>Make A Payment💸</Button>
               </Paper>
@@ -241,11 +212,7 @@ const WelcomePage: React.FC = () => {
             <Typography variant="h3" fontFamily={"Poppins"}>
               Recent Transaction
             </Typography>
-            <UserTransactionsTable
-              rows={transactions}
-              isLoading={!isTableReady}
-              currentUserID={currentUser.id}
-            />
+            <UserTransactionsTable rows={transactions} isLoading={!isTableReady} currentUserID={currentUser.id} />
           </Box>
         </Box>
       )}
@@ -268,22 +235,14 @@ const WelcomePage: React.FC = () => {
             borderRadius: 2,
           }}
         >
-          <Typography
-            id="modal-title"
-            variant="h6"
-            component="h2"
-            gutterBottom
-            sx={{ fontFamily: "Poppins" }}
-          >
+          <Typography id="modal-title" variant="h6" component="h2" gutterBottom sx={{ fontFamily: "Poppins" }}>
             Create Transaction
           </Typography>
           <Grid item mx="auto" textAlign="center">
             <GenericForm
               fields={fields}
               onSubmit={handleSubmitTransaction}
-              submitButtonLabel={
-                isButtonLoading ? <CircularProgress /> : "2 3 SHA-GER"
-              }
+              submitButtonLabel={isButtonLoading ? <CircularProgress /> : "2 3 SHA-GER"}
               schema={schema}
             />
           </Grid>
