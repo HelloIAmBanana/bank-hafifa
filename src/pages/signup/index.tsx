@@ -220,7 +220,7 @@ const SignUpPage: React.FC = () => {
           </Grid>
 
           <NavLink
-            to="/signin"
+            to="/"
             style={{
               padding: "20px",
               textDecoration: "none",

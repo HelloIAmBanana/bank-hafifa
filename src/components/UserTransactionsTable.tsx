@@ -1,6 +1,6 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { TransactionRow } from "../models/transactionRow";
-import { Box, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
 
 interface UserTransactionsTableProps {
@@ -51,35 +51,38 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
     },
 
     { field: "amount", headerName: "", width: 100 },
-    { field: "reason", headerName: "", width: 450 },
+    { field: "reason", headerName: "" },
   ];
 
   return (
-    <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5 }}>
-      <DataGrid
-        rows={rows.slice(-10)}
-        columns={columns}
-        getRowId={(rowData) => rowData.id}
-        disableColumnMenu
-        autoHeight={true}
-        disableRowSelectionOnClick
-        disableColumnSorting
-        disableColumnSelector
-        autoPageSize={true}
-        disableColumnResize
-        disableColumnFilter
-        hideFooter
-        rowSelection={false}
-        disableDensitySelector
-        disableAutosize
-        loading={isTableLoading}
-        sx={{
-          fontFamily: "Poppins",
-          borderTop: "transparent",
-          border: "hidden",
-          borderTopColor: "transparent",
-        }}
-      />
+    <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5, width: 750, alignItems: "center" }}>
+      {isTableLoading ? (
+        <CircularProgress />
+      ) : (
+        <DataGrid
+          rows={rows.slice(-10)}
+          columns={columns}
+          getRowId={(rowData) => rowData.id}
+          disableColumnMenu
+          autoHeight={true}
+          disableRowSelectionOnClick
+          disableColumnSorting
+          disableColumnSelector
+          autoPageSize={true}
+          disableColumnResize
+          disableColumnFilter
+          hideFooter
+          rowSelection={false}
+          disableDensitySelector
+          disableAutosize
+          sx={{
+            fontFamily: "Poppins",
+            borderTop: "transparent",
+            border: "hidden",
+            borderTopColor: "transparent",
+          }}
+        />
+      )}
     </Box>
   );
 };

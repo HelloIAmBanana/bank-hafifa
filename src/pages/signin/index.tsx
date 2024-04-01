@@ -144,7 +144,7 @@ const SignInPage: React.FC = () => {
               }}
             >
               <NavLink
-                to="/"
+                to="/signup"
                 style={{
                   padding: "20px",
                   textDecoration: "none",

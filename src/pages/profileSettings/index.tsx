@@ -44,7 +44,9 @@ const schema: JSONSchemaType<User> = {
 
 const ProfileSettingsPage: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isFormLoading, setIsFormLoading] = useState(false);
+  const [isProfilePicLoading, setIsProfilePicLoading] = useState(false);
+
   const [isProfilePictureModalOpen, setIsProfilePictureModalOpen] = useState(false);
 
   const fields = useMemo(() => {
@@ -88,7 +90,7 @@ const ProfileSettingsPage: React.FC = () => {
   };
 
   const handleSubmitProfileInfo = async (data: any) => {
-    setIsLoading(true);
+    setIsFormLoading(true);
     const updatedUser: User = {
       ...(currentUser as User),
       ...data,
@@ -96,7 +98,7 @@ const ProfileSettingsPage: React.FC = () => {
     if (!_.isEqual(updatedUser, currentUser)) {
       await updateCurrentUser(updatedUser);
     }
-    setIsLoading(false);
+    setIsFormLoading(false);
   };
 
   const openProfilePicModal = () => {
@@ -110,25 +112,24 @@ const ProfileSettingsPage: React.FC = () => {
   const handleProfilePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      closeProfilePicModal();
-      setIsLoading(true);
+      setIsProfilePicLoading(true);
       const imageUrl: string = URL.createObjectURL(file);
       const updatedUser: User = {
         ...(currentUser as User),
         avatarUrl: imageUrl,
       };
       await updateCurrentUser(updatedUser);
-      setIsLoading(false);
+      setIsProfilePicLoading(false);
+      closeProfilePicModal();
     }
   };
 
   document.title = "Porfile Settings";
 
-
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
       <NavBar />
-      {isLoading || !currentUser ? (
+      {!currentUser ? (
         <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
           <CircularProgress />
         </Box>
@@ -152,7 +153,7 @@ const ProfileSettingsPage: React.FC = () => {
                   <GenericForm
                     fields={fields}
                     onSubmit={handleSubmitProfileInfo}
-                    submitButtonLabel="Update Profile"
+                    submitButtonLabel={isFormLoading ? <CircularProgress /> : "Update Profile"}
                     schema={schema}
                   ></GenericForm>
                   <Button onClick={openProfilePicModal}>Change Profile Photo🖼️</Button>
@@ -188,12 +189,17 @@ const ProfileSettingsPage: React.FC = () => {
             variant="h6"
             component="h2"
             gutterBottom
-            className="signinLabelNormal"
             sx={{ fontFamily: "Poppins" }}
           >
             Change Profile Picture
           </Typography>
-          <Input type="file" onChange={handleProfilePictureChange} sx={{ mt: 2, fontFamily: "Poppins" }} />
+          {isProfilePicLoading ? (
+            <center>
+              <CircularProgress />
+            </center>
+          ) : (
+            <Input type="file" onChange={handleProfilePictureChange} sx={{ mt: 2, fontFamily: "Poppins" }} />
+          )}
         </Box>
       </Modal>
     </Box>

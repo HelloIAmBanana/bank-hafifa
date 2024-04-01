@@ -15,8 +15,8 @@ function App() {
       <div>
         <Routes>
           <Route element={<AuthHandlerRoute />}>
-            <Route path="/" element={<SignUpPage />} />
-            <Route path="/signin" element={<SignInPage />} />
+            <Route path="/" element={<SignInPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
             <Route path="/home" element={<WelcomePage />} />
             <Route path="/loans" element={<WelcomePage />} />
             <Route path="/cards" element={<WelcomePage />} />

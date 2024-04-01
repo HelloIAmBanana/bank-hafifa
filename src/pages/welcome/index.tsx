@@ -65,7 +65,7 @@ const schema: JSONSchemaType<Transaction> = {
 
 const WelcomePage: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
-  const [isTableReady, setIsTableReady] = useState(false);
+  const [isTableLoading, setIsTableLoading] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
@@ -115,8 +115,8 @@ const WelcomePage: React.FC = () => {
       if (data.receiverID !== currentUser.id) {
         const receivingUser = await AuthService.getUserFromStorage(data.receiverID);
         if (receivingUser != null) {
-          await updateBalance(currentUser, -data.amount);
           await updateBalance(receivingUser, +data.amount);
+          await updateBalance(currentUser, -data.amount);
           await createNewTransaction(data);
           await fetchUserTransactions();
           successAlert(`Transfered ${data.amount}$ to ${receivingUser.firstName}`);
@@ -136,7 +136,7 @@ const WelcomePage: React.FC = () => {
   };
 
   const fetchUserTransactions = async () => {
-    setIsTableReady(false);
+    setIsTableLoading(true);
     if (currentUser) {
       try {
         const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
@@ -157,13 +157,13 @@ const WelcomePage: React.FC = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-      setIsTableReady(true);
+      setIsTableLoading(false);
     }
   };
 
   useEffect(() => {
     fetchUserTransactions();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   document.title = "Home";
@@ -176,6 +176,7 @@ const WelcomePage: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : (
+        <center>
         <Box>
           <Grid container spacing={3} justifyContent="center">
             <Grid item xs={12} md={6}>
@@ -202,7 +203,7 @@ const WelcomePage: React.FC = () => {
                     fontSize: 18,
                   }}
                 >
-                  {currentUser ? userBalance ? userBalance : currentUser.balance : <CircularProgress />}
+                  {currentUser && !isButtonLoading && !isTableLoading? (userBalance ? `${userBalance} $` : `${currentUser.balance} $`) : <CircularProgress />}
                 </Typography>
                 <Button onClick={openPaymentModal}>Make A Payment💸</Button>
               </Paper>
@@ -212,9 +213,10 @@ const WelcomePage: React.FC = () => {
             <Typography variant="h3" fontFamily={"Poppins"}>
               Recent Transaction
             </Typography>
-            <UserTransactionsTable rows={transactions} isLoading={!isTableReady} currentUserID={currentUser.id} />
+            <UserTransactionsTable rows={transactions} isLoading={isTableLoading} currentUserID={currentUser.id} />
           </Box>
         </Box>
+        </center>
       )}
       <Modal
         open={isPaymentModalOpen}
