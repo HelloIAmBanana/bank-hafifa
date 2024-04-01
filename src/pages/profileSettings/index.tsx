@@ -42,12 +42,14 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
+const validateForm = ajv.compile(schema);
+
 const ProfileSettingsPage: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isFormLoading, setIsFormLoading] = useState(false);
   const [isProfilePicLoading, setIsProfilePicLoading] = useState(false);
-
   const [isProfilePictureModalOpen, setIsProfilePictureModalOpen] = useState(false);
+
 
   const fields = useMemo(() => {
     return [
@@ -91,12 +93,14 @@ const ProfileSettingsPage: React.FC = () => {
 
   const handleSubmitProfileInfo = async (data: any) => {
     setIsFormLoading(true);
-    const updatedUser: User = {
-      ...(currentUser as User),
-      ...data,
-    };
-    if (!_.isEqual(updatedUser, currentUser)) {
-      await updateCurrentUser(updatedUser);
+    if(validateForm(data)){
+      const updatedUser: User = {
+        ...(currentUser as User),
+        ...data,
+      };
+      if (!_.isEqual(updatedUser, currentUser)) {
+        await updateCurrentUser(updatedUser);
+      }
     }
     setIsFormLoading(false);
   };

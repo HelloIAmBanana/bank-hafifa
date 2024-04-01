@@ -147,8 +147,9 @@ const SignUpPage: React.FC = () => {
           backgroundPosition: "bottom center",
         }}
       />
-      <Grid item xs={12} md={6} component={Paper} elevation={20} borderRadius={3}>
-        <Box sx={{ mt: 1, boxSizing: "100vh" }}>
+      <Grid item xs={2} md={6} component={Paper} elevation={20} borderRadius={3}>
+        <Box sx={{ mt: 1}}>
+
           <Grid container spacing={1}>
             <Grid item mx="auto" textAlign="center">
               <Grid item margin={"auto"}>
@@ -158,7 +159,6 @@ const SignUpPage: React.FC = () => {
                     fontSize: "50px",
                     fontWeight: "bold",
                     lineHeight: "50px",
-                    textAlign: "center",
                   }}
                 >
                   CREATE ACCOUNT
@@ -218,7 +218,6 @@ const SignUpPage: React.FC = () => {
               <GenericForm fields={fields} onSubmit={signUp} submitButtonLabel="Sign Up" schema={schema} />
             </Grid>
           </Grid>
-
           <NavLink
             to="/"
             style={{

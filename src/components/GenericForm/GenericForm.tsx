@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Box, Grid, MenuItem } from "@mui/material";
+import { Box, MenuItem } from "@mui/material";
 import FormHelperText from "@mui/material/FormHelperText";
 import Ajv, { Schema } from "ajv";
 import Button from "@mui/material/Button";
@@ -12,7 +12,7 @@ import { Field } from "../../models/field";
 const ajv = new Ajv({ allErrors: true, $data: true });
 
 ajvErrors(ajv);
-  
+
 interface GenericFormProps {
   fields: Field[];
   onSubmit: (data: Record<string, any>) => void;
@@ -77,7 +77,6 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
                     textAlign: "auto",
                   }}
                   defaultValue={field?.initValue}
-
                 >
                   {field.options?.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
@@ -85,25 +84,28 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
                     </MenuItem>
                   ))}
                 </FieldComponent>
+                <FormHelperText
+                  sx={{
+                    mx: "auto",
+                    color: "red",
+                    fontFamily: "Poppins",
+                  }}
+                >
+                  {customErrors[field.id]?.message}
+                </FormHelperText>
               </Box>
             </Box>
-            <Grid>
-              <FormHelperText
-                sx={{
-                  mx: 45,
-                  color: "red",
-                  fontFamily: "Poppins",
-                }}
-              >
-                {customErrors[field.id]?.message}
-              </FormHelperText>
-            </Grid>
           </Box>
         );
       })}
 
       <center>
-        <Button onClick={onClick} type="submit" disabled={Boolean(typeof submitButtonLabel !== "string")}>
+        <Button
+          onClick={onClick}
+          type="submit"
+          disabled={Boolean(typeof submitButtonLabel !== "string")}
+          sx={{ width: 150 }}
+        >
           {submitButtonLabel}
         </Button>
       </center>

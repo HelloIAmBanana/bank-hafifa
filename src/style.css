@@ -8,7 +8,7 @@ body {
   src: local('Poppins'), url(./fonts/Poppins-Regular.ttf) format('truetype');
 }
 
-Input[type="date"]::-webkit-calendar-picker-indicator {
+input[type="date"]::-webkit-calendar-picker-indicator {
   background: transparent;
   bottom: 0;
   color: transparent;
@@ -33,12 +33,11 @@ button[type="submit"], button[type="button"]  {
     display: block;
     appearance: none;
     border-radius: 50px;
-    width: 100%;
     transition: 0.3s all;
     max-width: 600px;
     cursor: pointer;
     font-family: Poppins;
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     line-height: 21px;
     letter-spacing: 0.1em;

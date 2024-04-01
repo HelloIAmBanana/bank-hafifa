@@ -68,9 +68,9 @@ const WelcomePage: React.FC = () => {
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
+  const [isFirstTimeLoading,setIsFirstTimeLoading]=useState<boolean>(true)
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
-  const [userBalance, setUserBalance] = useState<number | undefined>(undefined);
-
+  const [userOldBalance, setUserOldBalance] = useState<number | undefined|JSX.Element>();
   const updateBalance = async (user: User, amount: number) => {
     const updatedBalance = user.balance + amount;
     const updatedUser: User = {
@@ -79,18 +79,20 @@ const WelcomePage: React.FC = () => {
     };
     await updateUser(updatedUser);
     if (user.id === currentUser?.id) {
-      setUserBalance(updatedBalance);
       setCurrentUser(updatedUser);
     }
   };
 
   const openPaymentModal = () => {
+    setUserOldBalance(currentUser?.balance);
     setPaymentModal(true);
   };
 
   const closePaymentModal = () => {
     if (isButtonLoading) return;
     setPaymentModal(false);
+    setUserOldBalance(currentUser?.balance);
+
   };
   const createNewTransaction = async (data: any) => {
     const designatedUser = (await AuthService.getUserFromStorage(data.receiverID)) as User;
@@ -118,7 +120,6 @@ const WelcomePage: React.FC = () => {
           await updateBalance(receivingUser, +data.amount);
           await updateBalance(currentUser, -data.amount);
           await createNewTransaction(data);
-          await fetchUserTransactions();
           successAlert(`Transfered ${data.amount}$ to ${receivingUser.firstName}`);
         } else {
           errorAlert("Entered ID is WRONG");
@@ -158,7 +159,9 @@ const WelcomePage: React.FC = () => {
         console.error("Error fetching data:", error);
       }
       setIsTableLoading(false);
+      setIsFirstTimeLoading(false)
     }
+    
   };
 
   useEffect(() => {
@@ -171,51 +174,53 @@ const WelcomePage: React.FC = () => {
   return (
     <Box mx={30} sx={{ paddingTop: 8 }}>
       <NavBar />
-      {!currentUser ? (
+      {(!currentUser) ? (
         <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
           <CircularProgress />
         </Box>
       ) : (
         <center>
-        <Box>
-          <Grid container spacing={3} justifyContent="center">
-            <Grid item xs={12} md={6}>
-              <Paper
-                sx={{
-                  padding: 2,
-                  width: 250,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  backgroundColor: "#FAFBFF",
-                  borderRadius: 2,
-                }}
-              >
-                <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
-                  Your Balance💰
-                </Typography>
-                <Typography
-                  variant="h4"
+          <Box>
+            <Grid container spacing={3} justifyContent="center">
+              <Grid item xs={12} md={6}>
+                <Paper
                   sx={{
-                    fontFamily: "Poppins",
-                    fontWeight: "bold",
-                    marginTop: 2,
-                    fontSize: 18,
+                    padding: 2,
+                    width: 500,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    backgroundColor: "#FAFBFF",
+                    borderRadius: 2,
                   }}
                 >
-                  {currentUser && !isButtonLoading && !isTableLoading? (userBalance ? `${userBalance} $` : `${currentUser.balance} $`) : <CircularProgress />}
-                </Typography>
-                <Button onClick={openPaymentModal}>Make A Payment💸</Button>
-              </Paper>
+                  <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+                    Your Balance💰
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontFamily: "Poppins",
+                      fontWeight: "bold",
+                      marginTop: 2,
+                      fontSize: 36,
+                    }}
+                  >
+                    {!isFirstTimeLoading?(currentUser && !isButtonLoading && !isTableLoading && !isPaymentModalOpen
+                      ? `${currentUser.balance} $`
+                      : `${userOldBalance} $`):<CircularProgress/>}
+                  </Typography>
+                  <Button onClick={openPaymentModal}>Make A Payment💸</Button>
+                </Paper>
+              </Grid>
             </Grid>
-          </Grid>
-          <Box padding={0.5}>
-            <Typography variant="h3" fontFamily={"Poppins"}>
-              Recent Transaction
-            </Typography>
-            <UserTransactionsTable rows={transactions} isLoading={isTableLoading} currentUserID={currentUser.id} />
+            <Box padding={0.5}>
+              <Typography variant="h3" fontFamily={"Poppins"}>
+                Recent Transaction
+              </Typography>
+              <UserTransactionsTable rows={transactions} isLoading={isTableLoading} currentUserID={currentUser.id} />
+            </Box>
           </Box>
-        </Box>
         </center>
       )}
       <Modal
