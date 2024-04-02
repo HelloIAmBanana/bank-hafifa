@@ -1,13 +1,11 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Box, MenuItem } from "@mui/material";
-import FormHelperText from "@mui/material/FormHelperText";
+import { Box, MenuItem, Typography } from "@mui/material";
 import Ajv, { Schema } from "ajv";
 import Button from "@mui/material/Button";
 import ajvErrors from "ajv-errors";
-import { Typography } from "@mui/material";
-import fieldsRegistry from "./fieldsRegistry";
-import { Field } from "../../models/field";
+import fieldsRegistry from "../components/GenericForm/fieldsRegistry";
+import { Field } from "../models/field";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 
@@ -57,47 +55,44 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
       {fields.map((field) => {
         const FieldComponent = fieldsRegistry[field.type];
         return (
-          <Box>
-            <Box key={field.id}>
-              <Typography variant="h6" sx={{ fontFamily: "Poppins" }}>
-                {field.label}
-              </Typography>
-              <Box
-                sx={{
-                  border: "hidden",
-                  margin: "auto",
-                  textAlign: "auto",
-                }}
-              >
-                <FieldComponent
-                  {...field}
-                  {...register(field.id)}
+          <center>
+            <Box>
+              <Box key={field.id}>
+                <Box
                   sx={{
-                    fontFamily: "Poppins",
+                    border: "hidden",
+                    margin: "auto",
                     textAlign: "auto",
                   }}
-                  defaultValue={field?.initValue}
                 >
-                  {field.options?.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </FieldComponent>
+                  <FieldComponent
+                    {...field}
+                    {...register(field.id)}
+                    sx={{
+                      width: "221px",
+                      height: "46px",
+                      marginTop: "20px",
+                      borderStyle: "solid",
+                      backgroundColor: "#FAFBFC",
+                      borderWidth: "0.5px",
+                      borderRadius: "8px",
+                      fontFamily: "Poppins",
+                      padding: "20px",
+                    }}
+                    defaultValue={field?.initValue}
+                  >
+                    {field.options?.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </FieldComponent>
+                  <Typography fontSize={12} color={"red"} fontFamily={"Poppins"}>{customErrors[field.id]?.message}</Typography>
+
+                </Box>
               </Box>
             </Box>
-            <FormHelperText
-                  sx={{
-                    padding:"start",
-                    mx:-15,
-                    color: "red",
-                    fontFamily: "Poppins",
-                  }}
-                >
-                  {customErrors[field.id]?.message}
-                </FormHelperText>
-          </Box>
-          
+          </center>
         );
       })}
 
@@ -106,7 +101,7 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
           onClick={onClick}
           type="submit"
           disabled={Boolean(typeof submitButtonLabel !== "string")}
-          sx={{ width: 150 }}
+          sx={{ width: 225, fontSize: 16, height:57}}
         >
           {submitButtonLabel}
         </Button>

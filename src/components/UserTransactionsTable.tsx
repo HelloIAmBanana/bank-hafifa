@@ -2,7 +2,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { TransactionRow } from "../models/transactionRow";
 import { Box, Skeleton, Typography } from "@mui/material";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
-import transferIcon from "../imgs/trandferIcon.svg";
+import transferIcon from "../imgs/transaction.png";
 
 interface UserTransactionsTableProps {
   rows: TransactionRow[];
@@ -25,7 +25,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
           All
         </Typography>),
       renderCell:()=>(
-          <img src={transferIcon} alt="Transfer Icon" style={{ width: 40, height: 50 }} />
+          <img src={transferIcon} alt="Transfer Icon" color='red' style={{ width: 40, height: 50 , color:"red"}} />
       )
     },
     {

@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 export function successAlert(message:string){
   Swal.fire({
   toast: true,
-  position: "bottom-end",
+  position: "bottom",
   icon: "success",
   color: "green",
   title: message,
@@ -16,7 +16,7 @@ export function successAlert(message:string){
 export function errorAlert(message:string){
   Swal.fire({
   toast: true,
-  position: "bottom-end",
+  position: "bottom",
   icon: "error",
   color: "red",
   title: message,
@@ -29,7 +29,7 @@ export function errorAlert(message:string){
 export function warningAlert(message:string){
   Swal.fire({
   toast: true,
-  position: "bottom-end",
+  position: "bottom",
   icon: "warning",
   color: "yellow",
   title: message,
