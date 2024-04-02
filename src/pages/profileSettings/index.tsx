@@ -160,7 +160,7 @@ const ProfileSettingsPage: React.FC = () => {
                     submitButtonLabel={isFormLoading ? <CircularProgress /> : "Update Profile"}
                     schema={schema}
                   ></GenericForm>
-                  <Button onClick={openProfilePicModal}>Change Profile Photo🖼️</Button>
+                  <Button type="submit" onClick={openProfilePicModal}>Change Profile Photo🖼️</Button>
                 </center>
               </Grid>
             </Grid>

@@ -171,62 +171,96 @@ const WelcomePage: React.FC = () => {
   document.title = "Home";
 
   return (
-    <Box mx={30} sx={{ paddingTop: 8 }}>
+    <Box mx={30} >
       <NavBar />
       {!currentUser ? (
-        <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
           <CircularProgress />
         </Box>
       ) : (
-        <center>
-          <Box>
-            <Grid container spacing={3} justifyContent="center">
-              <Grid item xs={12} md={6}>
-                <Paper
+        <Box width={1000} >
+          <Typography variant="h4" fontFamily={"Poppins"} fontWeight={"bold"} mx={-3}>
+            Overview
+          </Typography>
+          <Grid container spacing={3} marginTop={0.5}>
+            <Grid item xs={12} md={6} >
+              <Paper
+                sx={{
+                  padding: 2,
+                  width: 250,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  backgroundColor: "#f7f7ff",
+                  borderRadius: 5,
+                  borderColor: "#F50057",
+                  borderStyle: "solid",
+                }}
+              >
+                <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+                  Your Balance💰
+                </Typography>
+                <Typography
+                  variant="h4"
                   sx={{
-                    padding: 2,
-                    width: 500,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    backgroundColor: "#FAFBFF",
-                    borderRadius: 2,
+                    fontFamily: "Poppins",
+                    fontWeight: "bold",
+                    marginTop: 2,
+                    fontSize: 36,
                   }}
                 >
-                  <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
-                    Your Balance💰
-                  </Typography>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontFamily: "Poppins",
-                      fontWeight: "bold",
-                      marginTop: 2,
-                      fontSize: 36,
-                    }}
-                  >
-                    {!isFirstTimeLoading ? (
-                      currentUser && !isButtonLoading && !isTableLoading && !isPaymentModalOpen ? (
-                        `${currentUser.balance} $`
-                      ) : (
-                        `${userOldBalance} $`
-                      )
-                    ) : (
-                      <Skeleton width={150} height={100}/>
-                    )}
-                  </Typography>
-                  <Button onClick={openPaymentModal}>Make A Payment💸</Button>
-                </Paper>
-              </Grid>
+                  {isFirstTimeLoading ? (
+                    <Skeleton width={150} height={100} />
+                  ) : currentUser && !isButtonLoading && !isTableLoading && !isPaymentModalOpen ? (
+                    `${currentUser.balance} $`
+                  ) : (
+                    `${userOldBalance} $`
+                  )}
+                </Typography>
+              </Paper>
+
+              <Button onClick={openPaymentModal} type="submit" sx={{ width: 290, borderRadius:2}} >
+                Make A Payment💸
+              </Button>
             </Grid>
-            <Box padding={0.5}>
-              <Typography variant="h3" fontFamily={"Poppins"}>
-                Recent Transaction
+            <Grid item xs={12} md={6} mx={-15}>
+              <Paper
+                sx={{
+                  padding: 2,
+                  width: 250,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  backgroundColor: "#f7f7ff",
+                  borderRadius: 5,
+                  borderColor: "#F50057",
+                  borderStyle: "solid",
+                }}
+              >
+                <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+                  Credit Limit🪙
+                </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontFamily: "Poppins",
+                    fontWeight: "bold",
+                    marginTop: 2,
+                    fontSize: 36,
+                  }}
+                >
+                  123,456 $
+                </Typography>
+              </Paper>
+            </Grid>
+            <Box  marginTop={0.5}>
+              <Typography variant="h6" fontWeight={"bold"} fontFamily={"Poppins"}>
+                Transaction
               </Typography>
               <UserTransactionsTable rows={transactions} isLoading={isTableLoading} currentUserID={currentUser.id} />
             </Box>
-          </Box>
-        </center>
+          </Grid>
+        </Box>
       )}
       <Modal
         open={isPaymentModalOpen}

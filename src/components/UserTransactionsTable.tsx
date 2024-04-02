@@ -1,7 +1,8 @@
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid } from '@mui/x-data-grid';
 import { TransactionRow } from "../models/transactionRow";
 import { Box, Skeleton, Typography } from "@mui/material";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
+import transferIcon from "../imgs/trandferIcon.svg";
 
 interface UserTransactionsTableProps {
   rows: TransactionRow[];
@@ -17,8 +18,15 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
   const columns = [
     {
       field: "Blank",
-      headerName: "",
-      width: 150,
+      headerName: "All",
+      width: 50,
+      renderHeader: () => (
+        <Typography sx={{ color: "red" }} fontWeight={"Bold"} fontFamily={"Poppins"}>
+          All
+        </Typography>),
+      renderCell:()=>(
+          <img src={transferIcon} alt="Transfer Icon" style={{ width: 40, height: 50 }} />
+      )
     },
     {
       field: "TitleAndField",
@@ -54,11 +62,11 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
     { field: "reason", headerName: "" },
   ];
 
-  return (
-    <Box sx={{ boxShadow: "5px 6px 7px #850230", borderRadius: 4, padding: 0.5, width: 750, alignItems: "center" }}>
-  
+  const reversedRows = [...rows].reverse();
 
-        {isTableLoading ? (
+  return (
+    <Box>
+      {isTableLoading ? (
         <Box>
           <Skeleton width={650} height={50} />
           <Skeleton width={650} height={100} />
@@ -68,29 +76,30 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
           <Skeleton width={650} height={75} />
           <Skeleton width={650} height={75} />
         </Box>
-      ) : (<DataGrid
-            rows={rows.slice(-10)}
-            columns={columns}
-            getRowId={(rowData) => rowData.id}
-            disableColumnMenu
-            autoHeight={true}
-            disableRowSelectionOnClick
-            disableColumnSorting
-            disableColumnSelector
-            autoPageSize={true}
-            disableColumnResize
-            disableColumnFilter
-            hideFooter
-            rowSelection={false}
-            disableDensitySelector
-            disableAutosize
-            sx={{
-              fontFamily: "Poppins",
-              borderTop: "transparent",
-              border: "hidden",
-              borderTopColor: "transparent",
-            }}
-          />
+      ) : (
+        <Box sx={{height:500, width:750}}>
+        <DataGrid
+          rows={reversedRows}
+          columns={columns}
+          getRowId={(rowData) => rowData.id}
+          disableColumnMenu
+          disableRowSelectionOnClick
+          disableColumnSorting
+          disableColumnSelector
+          disableColumnResize
+          disableColumnFilter
+          autoPageSize 
+          rowSelection={false}
+          disableDensitySelector
+          autoHeight={false}
+          sx={{
+            fontFamily: "Poppins",
+            borderTop: "transparent",
+            border: "hidden",
+            borderTopColor: "transparent",
+          }}
+        />
+        </Box>
       )}
     </Box>
   );

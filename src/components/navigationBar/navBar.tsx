@@ -85,8 +85,8 @@ export default function NavBar() {
               boxSizing: "border-box",
               fontFamily: "Poppins",
               marginTop: "64px",
-              boxShadow: 15,
               textShadow: "#f50057",
+              borderRightColor:"#ca0f50d0"
             },
           }}
         >
