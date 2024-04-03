@@ -1,7 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Box, MenuItem } from "@mui/material";
-import FormHelperText from "@mui/material/FormHelperText";
 import Ajv, { Schema } from "ajv";
 import Button from "@mui/material/Button";
 import ajvErrors from "ajv-errors";
@@ -57,11 +56,13 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
       {fields.map((field) => {
         const FieldComponent = fieldsRegistry[field.type];
         return (
+          <center>
+
           <Box>
             <Box key={field.id}>
-              <Typography variant="h6" sx={{ fontFamily: "Poppins" }}>
+            {field.label&&<Typography variant="h6" sx={{ fontFamily: "Poppins" }}>
                 {field.label}
-              </Typography>
+              </Typography>}
               <Box
                 sx={{
                   border: "hidden",
@@ -73,8 +74,15 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
                   {...field}
                   {...register(field.id)}
                   sx={{
+                    width: "221px",
+                    height: "46px",
+                    marginTop: "20px",
+                    borderStyle: field.type==="checkbox"?"hidden":"solid",
+                    backgroundColor: field.type==="checkbox"?"hidden":"#FAFBFC",
+                    borderWidth: "0.5px",
+                    borderRadius: "8px",
                     fontFamily: "Poppins",
-                    textAlign: "auto",
+                    padding: "20px",
                   }}
                   defaultValue={field?.initValue}
                 >
@@ -86,18 +94,11 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
                 </FieldComponent>
               </Box>
             </Box>
-            <FormHelperText
-                  sx={{
-                    padding:"start",
-                    mx:-15,
-                    color: "red",
-                    fontFamily: "Poppins",
-                  }}
-                >
-                  {customErrors[field.id]?.message}
-                </FormHelperText>
+            <Typography fontSize={12} color={"red"} fontFamily={"Poppins"}>{customErrors[field.id]?.message}</Typography>
+
           </Box>
-          
+          </center>
+
         );
       })}
 
@@ -106,7 +107,7 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
           onClick={onClick}
           type="submit"
           disabled={Boolean(typeof submitButtonLabel !== "string")}
-          sx={{ width: 150 }}
+          sx={{ width: 225 }}
         >
           {submitButtonLabel}
         </Button>

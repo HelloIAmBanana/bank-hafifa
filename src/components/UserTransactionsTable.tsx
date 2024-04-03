@@ -1,20 +1,21 @@
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid } from "@mui/x-data-grid";
 import { TransactionRow } from "../models/transactionRow";
 import { Box, Skeleton, Typography } from "@mui/material";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
 import transferIcon from "../imgs/transaction.png";
 
 interface UserTransactionsTableProps {
-  rows: TransactionRow[];
+  transactions: TransactionRow[];
   isLoading: boolean;
   currentUserID: string;
 }
 
 const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
-  rows,
+  transactions: transactionsRows,
   isLoading: isTableLoading,
   currentUserID: userID,
 }) => {
+
   const columns = [
     {
       field: "Blank",
@@ -23,10 +24,11 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
       renderHeader: () => (
         <Typography sx={{ color: "red" }} fontWeight={"Bold"} fontFamily={"Poppins"}>
           All
-        </Typography>),
-      renderCell:()=>(
-          <img src={transferIcon} alt="Transfer Icon" color='red' style={{ width: 40, height: 50 , color:"red"}} />
-      )
+        </Typography>
+      ),
+      renderCell: () => (
+        <img src={transferIcon} alt="Transfer Icon" color="red" style={{ width: 40, height: 50, color: "red" }} />
+      ),
     },
     {
       field: "TitleAndField",
@@ -50,7 +52,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
       headerName: "",
       width: 50,
       renderCell: (params: any) => {
-        if (params.row.amount[0] === "-") {
+        if (params.row.senderID === userID) {
           return <TrendingDown sx={{ color: "red" }} />;
         } else {
           return <TrendingUp sx={{ color: "green" }} />;
@@ -58,11 +60,20 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
       },
     },
 
-    { field: "amount", headerName: "", width: 100 },
+    {
+      field: "amount",
+      headerName: "",
+      width: 100,
+      renderCell: (params: any) => {
+        if (params.row.senderID === userID) {
+          return `-${params.row.amount}$` }else{return `+${params.row.amount}$`;
+        }
+      },
+    },
     { field: "reason", headerName: "" },
   ];
 
-  const reversedRows = [...rows].reverse();
+  const reversedRows = [...transactionsRows].reverse();
 
   return (
     <Box>
@@ -77,28 +88,29 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
           <Skeleton width={650} height={75} />
         </Box>
       ) : (
-        <Box sx={{height:500, width:750}}>
-        <DataGrid
-          rows={reversedRows}
-          columns={columns}
-          getRowId={(rowData) => rowData.id}
-          disableColumnMenu
-          disableRowSelectionOnClick
-          disableColumnSorting
-          disableColumnSelector
-          disableColumnResize
-          disableColumnFilter
-          autoPageSize 
-          rowSelection={false}
-          disableDensitySelector
-          autoHeight={false}
-          sx={{
-            fontFamily: "Poppins",
-            borderTop: "transparent",
-            border: "hidden",
-            borderTopColor: "transparent",
-          }}
-        />
+        <Box sx={{ height: 650, width: 750 }}>
+          
+          <DataGrid
+            rows={reversedRows}
+            columns={columns}
+            getRowId={(rowData) => rowData.id}
+            disableColumnMenu
+            disableRowSelectionOnClick
+            disableColumnSorting
+            disableColumnSelector
+            disableColumnResize
+            disableColumnFilter
+            autoPageSize
+            rowSelection={false}
+            disableDensitySelector
+            autoHeight={false}
+            sx={{
+              fontFamily: "Poppins",
+              borderTop: "transparent",
+              border: "hidden",
+              borderTopColor: "transparent",
+            }}
+          />
         </Box>
       )}
     </Box>

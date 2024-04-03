@@ -8,25 +8,14 @@ import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
 import UserTransactionsTable from "../../components/UserTransactionsTable";
 import { DateTime } from "luxon";
-import {
-  Button,
-  Grid,
-  Paper,
-  Typography,
-  Modal,
-  CircularProgress,
-  Box,
-  Skeleton,
-  Drawer,
-  Toolbar,
-} from "@mui/material";
+import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box, Skeleton } from "@mui/material";
 import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { TransactionRow } from "../../models/transactionRow";
 import NavBar from "../../components/NavigationBar/NavBar";
 import creditCard from "../../imgs/homeCreditCard.svg";
-import QuickTransfer from "../../components/QuickTransferForm";
+import GenericForm from "../../components/GenericForm/GenericForm";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -34,19 +23,16 @@ ajvErrors(ajv);
 const fields = [
   {
     id: "receiverID",
-    label: "Receiver ID",
     type: "text",
     placeholder: "Account ID",
   },
   {
     id: "amount",
-    label: "Amount",
     type: "number",
     placeholder: "Amount",
   },
   {
     id: "reason",
-    label: "Transaction Reason",
     type: "text",
     placeholder: "Reason",
   },
@@ -116,6 +102,7 @@ const WelcomePage: React.FC = () => {
 
     const newTransaction = {
       ...data,
+      amount: Number(data.amount),
       senderID: currentUser?.id,
       id: generateUniqueId(),
       senderName: AuthService.getUserFullName(currentUser as User),
@@ -154,10 +141,6 @@ const WelcomePage: React.FC = () => {
     }
   };
 
-  const styleAmount = (userID: string, amount: number) => {
-    return userID === currentUser?.id ? `-${amount}$` : `+${amount}$`;
-  };
-
   const fetchUserTransactions = async () => {
     setIsTableLoading(true);
     if (currentUser) {
@@ -165,13 +148,11 @@ const WelcomePage: React.FC = () => {
         const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
         const modifiedTransactions = await Promise.all(
           fetchedTransactions.map((transaction) => {
-            const styledAmount = styleAmount(transaction.senderID, Number(transaction.amount));
             const styledDate = DateTime.fromISO(transaction.date, {
               zone: "Asia/Jerusalem",
             }).toFormat("dd/MM/yyyy HH:mm");
             return {
               ...transaction,
-              amount: styledAmount,
               date: styledDate,
             };
           })
@@ -196,57 +177,21 @@ const WelcomePage: React.FC = () => {
   document.title = "Home";
 
   return (
-    <Box mx={30}>
-      <NavBar />
-      <Box>
-        <Box sx={{ display: "flex" }}>
-          <Drawer
-            variant="permanent"
-            anchor="right"
-            sx={{
-              flexShrink: 0,
-              [`& .MuiDrawer-paper`]: {
-                width: 300,
-                display: "flex",
-                boxSizing: "border-box",
-                fontFamily: "Poppins",
-                marginTop: "64px",
-                textShadow: "#f50057",
-                borderLeftStyle: "hidden",
-              },
-            }}
-          >
-            <Toolbar />
-            <Box sx={{ overflow: "auto" }}>
-              <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
-                Wallet
-              </Typography>
-              <img src={creditCard} alt="Credit Card" />
-              <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
-                Quick Transfer
-              </Typography>
-              <Box sx={{ backgroundColor: "#D3E1F5", width: "253px", height: "350px", borderRadius: 5 }}>
-                <QuickTransfer
-                  fields={fields}
-                  onSubmit={handleSubmitTransaction}
-                  schema={schema}
-                  submitButtonLabel={
-                    isButtonLoading ? <CircularProgress size={25} /> : "Send Money"
-                  }
-                />
-              </Box>
-            </Box>
-          </Drawer>
-        </Box>
-      </Box>
-
+    <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+      <Grid xs={2} md={2}>
+        <NavBar />
+      </Grid>
       {!currentUser ? (
         <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <CircularProgress />
+          <Grid xs={8} md={8}>
+            <center>
+              <CircularProgress />
+            </center>
+          </Grid>
         </Box>
       ) : (
-        <Box width={1000}>
-          <Typography variant="h4" fontFamily={"Poppins"} fontWeight={"bold"} mx={-3}>
+        <Grid xs={8} md={8}>
+          <Typography variant="h4" fontFamily={"Poppins"} fontWeight={"bold"}mx={-3}>
             Overview
           </Typography>
           <Grid container spacing={3} marginTop={0.5}>
@@ -296,7 +241,6 @@ const WelcomePage: React.FC = () => {
                   padding: 2,
                   width: 375,
                   height: 78,
-
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -325,10 +269,35 @@ const WelcomePage: React.FC = () => {
               <Typography variant="h6" fontWeight={"bold"} fontFamily={"Poppins"}>
                 Transactions
               </Typography>
-              <UserTransactionsTable rows={transactions} isLoading={isTableLoading} currentUserID={currentUser.id} />
+              <UserTransactionsTable
+                transactions={transactions}
+                isLoading={isTableLoading}
+                currentUserID={currentUser.id}
+              />
             </Box>
           </Grid>
-        </Box>
+        </Grid>
+      )}
+      {currentUser && (
+        <Grid xs={2} md={2}>
+            <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+              Wallet
+            </Typography>
+            <img src={creditCard} alt="Credit Card" />
+            <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+              Quick Transfer
+            </Typography>
+            <Box sx={{ backgroundColor: "#D3E1F5", width: "253px", height: "325px", borderRadius: 5 }}>
+              <GenericForm
+                fields={fields}
+                onSubmit={handleSubmitTransaction}
+                schema={schema}
+                submitButtonLabel={
+                  isButtonLoading && !isPaymentModalOpen ? <CircularProgress size={25} /> : "Send Money"
+                }
+              />
+            </Box>
+        </Grid>
       )}
       <Modal
         open={isPaymentModalOpen}
@@ -350,21 +319,19 @@ const WelcomePage: React.FC = () => {
           }}
         >
           <Typography id="modal-title" variant="h6" component="h2" gutterBottom sx={{ fontFamily: "Poppins" }}>
-            Create Transaction
+            New Transaction
           </Typography>
           <Grid item mx="auto">
-            <QuickTransfer
+            <GenericForm
               fields={fields}
               onSubmit={handleSubmitTransaction}
               schema={schema}
-              submitButtonLabel={
-                isButtonLoading ? <CircularProgress size={25} /> : "2 3 SHA-GER"
-              }
+              submitButtonLabel={isButtonLoading && isPaymentModalOpen ? <CircularProgress size={25} /> : "2 3 SHA-GER"}
             />
           </Grid>
         </Box>
       </Modal>
-    </Box>
+    </Grid>
   );
 };
 

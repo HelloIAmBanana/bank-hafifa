@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ag-grid-community/client-side-row-model": "^31.2.0",
+    "@ag-grid-community/core": "^31.2.0",
+    "@ag-grid-community/react": "^31.2.0",
+    "@ag-grid-community/styles": "^31.2.0",
     "@beekai/react": "^0.4.1",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
@@ -22,6 +26,7 @@
     "ajv": "^8.12.0",
     "ajv-errors": "^3.0.0",
     "dayjs": "^1.11.10",
+    "import": "^0.0.6",
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.4.4",
     "react": "^18.2.0",
@@ -60,7 +65,6 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.17.0",
-
     "@types/luxon": "^3.4.2"
   }
 }
