@@ -69,7 +69,7 @@ const WelcomePage: React.FC = () => {
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
   const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
-  const [userOldBalance, setUserOldBalance] = useState<number>();
+  const [userOldBalance, setUserOldBalance] = useState<number|undefined>();
 
   const updateBalance = async (user: User, amount: number) => {
     const updatedBalance = user.balance + amount;
@@ -84,14 +84,12 @@ const WelcomePage: React.FC = () => {
   };
 
   const openPaymentModal = () => {
-    setUserOldBalance(currentUser?.balance);
     setPaymentModal(true);
   };
 
   const closePaymentModal = async () => {
     if (isButtonLoading) return;
     setPaymentModal(false);
-    setUserOldBalance(currentUser?.balance);
   };
 
   const createNewTransaction = async (data: any) => {
@@ -113,6 +111,7 @@ const WelcomePage: React.FC = () => {
   };
 
   const handleSubmitTransaction = async (data: any) => {
+    setUserOldBalance(currentUser?.balance);
     if (validateForm(data)) {
       if (data.amount[0] !== "-") {
         setIsButtonLoading(true);
@@ -139,6 +138,7 @@ const WelcomePage: React.FC = () => {
         closePaymentModal();
       }
     }
+    setUserOldBalance(undefined);
   };
 
   const fetchUserTransactions = async () => {
@@ -167,6 +167,7 @@ const WelcomePage: React.FC = () => {
         setIsFirstTimeLoading(false);
       }
     }
+    console.log(transactions)
   };
 
   useEffect(() => {
@@ -221,9 +222,9 @@ const WelcomePage: React.FC = () => {
                     fontSize: 36,
                   }}
                 >
-                  {isFirstTimeLoading ? (
+                  {isFirstTimeLoading && userOldBalance===undefined? (
                     <Skeleton width={150} height={100} />
-                  ) : currentUser && !isButtonLoading && !isTableLoading && !isPaymentModalOpen ? (
+                  ) : currentUser && !isButtonLoading && !isTableLoading && !isPaymentModalOpen && userOldBalance===undefined? (
                     `${currentUser.balance} $`
                   ) : (
                     `${userOldBalance} $`
@@ -269,11 +270,12 @@ const WelcomePage: React.FC = () => {
               <Typography variant="h6" fontWeight={"bold"} fontFamily={"Poppins"}>
                 Transactions
               </Typography>
-              <UserTransactionsTable
+              {/* <UserTransactionsTable
                 transactions={transactions}
                 isLoading={isTableLoading}
                 currentUserID={currentUser.id}
-              />
+              /> */}
+              <UserTransactionsTable/>
             </Box>
           </Grid>
         </Grid>
