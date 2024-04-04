@@ -1,24 +1,28 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 import { ColDef, ModuleRegistry } from "@ag-grid-community/core";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 import { Box, Skeleton, Typography } from "@mui/material";
-import CRUDLocalStorage from "../CRUDLocalStorage";
 import transferIcon from "../imgs/transaction.png";
 import { Transaction } from "../models/transactions";
-import { DateTime } from "luxon";
-import { UserContext } from "../UserProvider";
+import { TransactionRow } from "../models/transactionRow";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
+import { formatIsoToDate } from "../utils/utils";
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
+interface UserTransactionsTableProps {
+  transactions: TransactionRow[];
+  isLoading: boolean;
+  UserID: string;
+}
 
-export default function UserTransactionsTable() {
-  const [currentUser] = useContext(UserContext);
-  const [isTableLoading, setIsTableLoading] = useState(true);
-  const [rowData, setRowData] = useState<Transaction[]>([]);
-
+const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
+  transactions: transactionsRows,
+  isLoading: isTableLoading,
+  UserID: userID,
+}) => {
   const [colDefs] = useState<ColDef<Transaction | any>[]>([
     {
       field: "",
@@ -35,15 +39,15 @@ export default function UserTransactionsTable() {
       field: "senderName",
       headerName: "",
       cellRenderer: (params: any) =>
-        params.data.senderID === currentUser?.id ? (
+        params.data.senderID === userID ? (
           <Box>
             <Typography fontWeight={"Bold"} fontFamily={"Poppins"}>{`${params.data.receiverName}`}</Typography>
-            <Typography fontFamily={"Poppins"}>{`At ${formatToHour(params.data.date)}`}</Typography>
+            <Typography fontFamily={"Poppins"}>{`At ${formatIsoToDate(params.data.date,"HH:mm")}`}</Typography>
           </Box>
         ) : (
           <Box>
             <Typography fontWeight={"Bold"} fontFamily={"Poppins"}>{`${params.data.senderName}`}</Typography>
-            <Typography fontFamily={"Poppins"}>{`At ${formatToHour(params.data.date)}`}</Typography>
+            <Typography fontFamily={"Poppins"}>{`At ${formatIsoToDate(params.data.date,"HH:mm")}`}</Typography>
           </Box>
         ),
     },
@@ -56,7 +60,7 @@ export default function UserTransactionsTable() {
       suppressHeaderMenuButton: true,
       suppressHeaderContextMenu: true,
       cellRenderer: (params: any) => {
-        return <Typography fontFamily={"Poppins"}>{`${formatToDate(params.data.date)}`}</Typography>;
+        return <Typography fontFamily={"Poppins"}>{`${formatIsoToDate(params.data.date,"dd/MM/yyyy")}`}</Typography>;
       },
     },
     {
@@ -67,7 +71,7 @@ export default function UserTransactionsTable() {
       suppressHeaderMenuButton: true,
       suppressHeaderContextMenu: true,
       cellRenderer: (params: any) => {
-        if (params.data.senderID === currentUser?.id) {
+        if (params.data.senderID === userID) {
           return <TrendingDown sx={{ color: "red" }} />;
         } else {
           return <TrendingUp sx={{ color: "green" }} />;
@@ -81,28 +85,25 @@ export default function UserTransactionsTable() {
       minWidth: 100,
       headerName: "",
       cellRenderer: (params: any) => {
-        if (params.data.senderID === currentUser?.id) {
+        if (params.data.senderID === userID) {
           return `${-params.data.amount}$`;
         } else {
           return `+${params.data.amount}$`;
         }
       },
+      filterParams: {
+        // note: ensure you escape as if you were creating a RegExp from a string
+        allowedCharPattern: "\\d\\-\\,\\$",
+        numberParser: (text: string | null) => {
+          return text == null ? null : parseFloat(text.replace(",", ".").replace("$", ""));
+        },
+        numberFormatter: (value: number | null) => {
+          return value == null ? null : value.toString().replace(".", ",");
+        },
+      },
     },
     { field: "reason", minWidth: 400, headerName: "" },
   ]);
-
-  const fetchUserTransactions = async () => {
-    setIsTableLoading(true);
-    if (currentUser) {
-      try {
-        const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
-        setRowData(fetchedTransactions.reverse());
-        setIsTableLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    }
-  };
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -111,40 +112,15 @@ export default function UserTransactionsTable() {
     };
   }, []);
 
-  const formatToHour = (date: string) => {
-    return DateTime.fromISO(date, {
-      zone: "Asia/Jerusalem",
-    }).toFormat("HH:mm");
-  };
-
-  const formatToDate = (date: string) => {
-    return DateTime.fromISO(date, {
-      zone: "Asia/Jerusalem",
-    }).toFormat("dd/MM/yyyy");
-  };
-
-  useEffect(() => {
-    fetchUserTransactions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser]);
-
   return (
     <Box>
       {isTableLoading ? (
-        <Box>
-          <Skeleton width={1000} height={50} />
-          <Skeleton width={1000} height={100} />
-          <Skeleton width={1000} height={75} />
-          <Skeleton width={1000} height={120} />
-          <Skeleton width={1000} height={75} />
-          <Skeleton width={1000} height={75} />
-          <Skeleton width={1000} height={75} />
-        </Box>
+        <Skeleton width={1000} height={570} />
       ) : (
         <Box sx={{ height: 600, width: 1000 }}>
           <div className={"ag-theme-quartz"} style={{ width: "100%", height: "100%" }}>
             <AgGridReact
-              rowData={rowData}
+              rowData={transactionsRows}
               columnDefs={colDefs}
               rowHeight={48}
               pagination={true}
@@ -157,4 +133,6 @@ export default function UserTransactionsTable() {
       )}
     </Box>
   );
-}
+};
+
+export default UserTransactionsTable;

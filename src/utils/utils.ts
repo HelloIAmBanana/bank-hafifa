@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import CRUDLocalStorage from "../CRUDLocalStorage";
 import { User } from "../models/user";
 
@@ -15,3 +16,9 @@ export async function updateUser(user: User) {
   updatedUsers.push(user);
   await CRUDLocalStorage.setAsyncData("users", updatedUsers);
 }
+
+export const formatIsoToDate = (date: string,format:string) => {
+  return DateTime.fromISO(date, {
+    zone: "Asia/Jerusalem",
+  }).toFormat(`${format}`);
+};

@@ -7,8 +7,7 @@ import { generateUniqueId, updateUser } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
 import UserTransactionsTable from "../../components/UserTransactionsTable";
-import { DateTime } from "luxon";
-import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box, Skeleton } from "@mui/material";
+import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box, Skeleton, Drawer } from "@mui/material";
 import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
@@ -64,12 +63,11 @@ const validateForm = ajv.compile(schema);
 
 const WelcomePage: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
-  const [isTableLoading, setIsTableLoading] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
+  const [isTableLoading, setIsTableLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
-  const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
-  const [userOldBalance, setUserOldBalance] = useState<number|undefined>();
+  const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
 
   const updateBalance = async (user: User, amount: number) => {
     const updatedBalance = user.balance + amount;
@@ -138,7 +136,6 @@ const WelcomePage: React.FC = () => {
         closePaymentModal();
       }
     }
-    setUserOldBalance(undefined);
   };
 
   const fetchUserTransactions = async () => {
@@ -146,30 +143,13 @@ const WelcomePage: React.FC = () => {
     if (currentUser) {
       try {
         const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
-        const modifiedTransactions = await Promise.all(
-          fetchedTransactions.map((transaction) => {
-            const styledDate = DateTime.fromISO(transaction.date, {
-              zone: "Asia/Jerusalem",
-            }).toFormat("dd/MM/yyyy HH:mm");
-            return {
-              ...transaction,
-              date: styledDate,
-            };
-          })
-        );
-        setTransactions(modifiedTransactions);
+        setTransactions(fetchedTransactions.reverse());
+        setIsTableLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-      setIsTableLoading(false);
-      if (isFirstTimeLoading) {
-        setUserOldBalance(currentUser.balance);
-        setIsFirstTimeLoading(false);
-      }
     }
-    console.log(transactions)
   };
-
   useEffect(() => {
     fetchUserTransactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -191,8 +171,8 @@ const WelcomePage: React.FC = () => {
           </Grid>
         </Box>
       ) : (
-        <Grid xs={8} md={8}>
-          <Typography variant="h4" fontFamily={"Poppins"} fontWeight={"bold"}mx={-3}>
+        <Grid xs={8} md={8} marginRight={-5}>
+          <Typography variant="h4" fontFamily={"Poppins"} fontWeight={"bold"} mx={-3}>
             Overview
           </Typography>
           <Grid container spacing={3} marginTop={0.5}>
@@ -222,9 +202,9 @@ const WelcomePage: React.FC = () => {
                     fontSize: 36,
                   }}
                 >
-                  {isFirstTimeLoading && userOldBalance===undefined? (
+                  {isTableLoading ? (
                     <Skeleton width={150} height={100} />
-                  ) : currentUser && !isButtonLoading && !isTableLoading && !isPaymentModalOpen && userOldBalance===undefined? (
+                  ) : !isButtonLoading ? (
                     `${currentUser.balance} $`
                   ) : (
                     `${userOldBalance} $`
@@ -240,6 +220,7 @@ const WelcomePage: React.FC = () => {
               <Paper
                 sx={{
                   padding: 2,
+                  marginLeft:1,
                   width: 375,
                   height: 78,
                   display: "flex",
@@ -270,36 +251,44 @@ const WelcomePage: React.FC = () => {
               <Typography variant="h6" fontWeight={"bold"} fontFamily={"Poppins"}>
                 Transactions
               </Typography>
-              {/* <UserTransactionsTable
-                transactions={transactions}
-                isLoading={isTableLoading}
-                currentUserID={currentUser.id}
-              /> */}
-              <UserTransactionsTable/>
+              <UserTransactionsTable transactions={transactions} isLoading={isTableLoading} UserID={currentUser.id} />
             </Box>
           </Grid>
         </Grid>
       )}
-      {currentUser && (
+      {currentUser && (<Drawer
+            variant="permanent"
+            anchor="right"
+            sx={{
+              flexShrink: 0,
+              [`& .MuiDrawer-paper`]: {
+                width: 300,
+                display: "flex",
+                boxSizing: "border-box",
+                fontFamily: "Poppins",
+                textShadow: "#f50057",
+                borderRightColor: "#ca0f50d0",
+              },
+            }}
+          >
         <Grid xs={2} md={2}>
-            <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
-              Wallet
-            </Typography>
-            <img src={creditCard} alt="Credit Card" />
-            <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
-              Quick Transfer
-            </Typography>
-            <Box sx={{ backgroundColor: "#D3E1F5", width: "253px", height: "325px", borderRadius: 5 }}>
-              <GenericForm
-                fields={fields}
-                onSubmit={handleSubmitTransaction}
-                schema={schema}
-                submitButtonLabel={
-                  isButtonLoading && !isPaymentModalOpen ? <CircularProgress size={25} /> : "Send Money"
-                }
-              />
-            </Box>
+          <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+            Wallet
+          </Typography>
+          <img src={creditCard} alt="Credit Card" />
+          <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+            Quick Transfer
+          </Typography>
+          <Box sx={{ backgroundColor: "#D3E1F5", width: "253px", height: "325px", borderRadius: 5 }}>
+            <GenericForm
+              fields={fields}
+              onSubmit={handleSubmitTransaction}
+              schema={schema}
+              submitButtonLabel={isButtonLoading && !isPaymentModalOpen ? <CircularProgress size={25} /> : "Send Money"}
+            />
+          </Box>
         </Grid>
+        </Drawer>
       )}
       <Modal
         open={isPaymentModalOpen}
