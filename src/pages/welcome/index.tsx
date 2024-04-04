@@ -7,7 +7,7 @@ import { generateUniqueId, updateUser } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
 import UserTransactionsTable from "../../components/UserTransactionsTable";
-import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box, Skeleton } from "@mui/material";
+import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box, Skeleton, useMediaQuery } from "@mui/material";
 import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
@@ -68,6 +68,7 @@ const WelcomePage: React.FC = () => {
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
   const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
+  const isSmallScreen = useMediaQuery("(max-width:1200px)");
 
   const updateBalance = async (user: User, amount: number) => {
     const updatedBalance = user.balance + amount;
@@ -160,8 +161,9 @@ const WelcomePage: React.FC = () => {
   return (
     <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
       <Grid xs={2} md={2} zIndex={2000} spacing={50}>
-        <Box sx={{backgroundColor:"white"}}>        <NavBar/>
-</Box>
+        <Box sx={{ backgroundColor: "white" }}>
+          <NavBar />
+        </Box>
       </Grid>
       {!currentUser ? (
         <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -256,7 +258,7 @@ const WelcomePage: React.FC = () => {
           </Grid>
         </Grid>
       )}
-      {currentUser && (
+      {currentUser && !isSmallScreen && (
         <Grid xs={2} md={2} zIndex={1200}>
           <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
             Wallet
@@ -265,14 +267,43 @@ const WelcomePage: React.FC = () => {
           <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
             Quick Transfer
           </Typography>
-          <Box sx={{ backgroundColor: "#D3E1F5", width: "253px", height: "325px", borderRadius: 5,}}>
+          <Box sx={{ backgroundColor: "#D3E1F5", width: "253px", height: "325px", borderRadius: 5 }}>
             <GenericForm
               fields={fields}
               onSubmit={handleSubmitTransaction}
               schema={schema}
-              submitButtonLabel={isButtonLoading && !isPaymentModalOpen ? <CircularProgress size={17} sx={{color:"white"}} /> : "Send Money"}
+              submitButtonLabel={
+                isButtonLoading && !isPaymentModalOpen ? (
+                  <CircularProgress size={17} sx={{ color: "white" }} />
+                ) : (
+                  "Send Money"
+                )
+              }
             />
           </Box>
+        </Grid>
+      )}
+      {currentUser && isSmallScreen && (
+        <Grid marginLeft={25}>
+          <Grid xs={4} md={8} zIndex={1200}>
+            <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+              Quick Transfer
+            </Typography>
+            <Box sx={{ backgroundColor: "#D3E1F5", width: "253px", height: "325px", borderRadius: 5 }}>
+              <GenericForm
+                fields={fields}
+                onSubmit={handleSubmitTransaction}
+                schema={schema}
+                submitButtonLabel={
+                  isButtonLoading && !isPaymentModalOpen ? (
+                    <CircularProgress size={17} sx={{ color: "white" }} />
+                  ) : (
+                    "Send Money"
+                  )
+                }
+              />
+            </Box>
+          </Grid>
         </Grid>
       )}
       <Modal
@@ -302,7 +333,13 @@ const WelcomePage: React.FC = () => {
               fields={fields}
               onSubmit={handleSubmitTransaction}
               schema={schema}
-              submitButtonLabel={isButtonLoading && isPaymentModalOpen ? <CircularProgress size={17} sx={{color:"white"}} /> : "2 3 SHA-GER"}
+              submitButtonLabel={
+                isButtonLoading && isPaymentModalOpen ? (
+                  <CircularProgress size={17} sx={{ color: "white" }} />
+                ) : (
+                  "2 3 SHA-GER"
+                )
+              }
             />
           </Grid>
         </Box>
