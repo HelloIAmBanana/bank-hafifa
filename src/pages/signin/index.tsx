@@ -1,8 +1,6 @@
 import * as React from "react";
 import Ajv, { JSONSchemaType } from "ajv";
-import Grid from "@mui/material/Grid";
-import { Box } from "@mui/material";
-import Paper from "@mui/material/Paper";
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import loginImage from "../../imgs/loginPage.svg";
 import GenericForm from "../../components/GenericForm/GenericForm";
@@ -11,8 +9,7 @@ import { User } from "../../models/user";
 import { useNavigate } from "react-router-dom";
 import AuthService, { UserAndRemembered } from "../../AuthService";
 import { validateLogin } from "./login";
-import { Typography } from "@mui/material";
-
+import { Typography, Box, Grid, Paper } from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
@@ -49,6 +46,7 @@ const validateForm = ajv.compile(schema);
 
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const fields = [
     {
@@ -76,6 +74,7 @@ const SignInPage: React.FC = () => {
   const login = async (data: Record<string, any>) => {
     if (validateForm(data)) {
       const isRemembered = (data as UserAndRemembered).rememberMe;
+      setIsLoading(true)
       const validUser = await validateLogin(data as UserAndRemembered);
       if (validUser) {
         if (isRemembered) {
@@ -88,6 +87,7 @@ const SignInPage: React.FC = () => {
       } else {
         errorAlert("Wrong Credentials!");
       }
+      setIsLoading(false)
     }
   };
 
@@ -132,7 +132,7 @@ const SignInPage: React.FC = () => {
             </Grid>
           </Grid>
           <Grid item mx="auto" textAlign="center" mt={7}>
-            <GenericForm fields={fields} onSubmit={login} submitButtonLabel="Sign In" schema={schema} />
+            <GenericForm fields={fields} onSubmit={login} submitButtonLabel="Sign In" schema={schema} isLoading={isLoading} />
           </Grid>
           <Grid container justifyContent="flex-start">
             <Grid

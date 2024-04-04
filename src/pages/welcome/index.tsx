@@ -3,10 +3,11 @@ import AuthService from "../../AuthService";
 import { useState, useContext, useEffect } from "react";
 import { User } from "../../models/user";
 import { Transaction } from "../../models/transactions";
+import { DateTime } from "luxon";
 import { generateUniqueId, updateUser } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
-import UserTransactionsTable from "../../components/UserTransactionsTable";
+import TransactionsTable from "../../components/UserTransactionsTable";
 import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box, Skeleton, useMediaQuery } from "@mui/material";
 import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
@@ -110,33 +111,41 @@ const WelcomePage: React.FC = () => {
   };
 
   const handleSubmitTransaction = async (data: any) => {
-    setUserOldBalance(currentUser?.balance);
-    if (validateForm(data)) {
-      if (data.amount[0] !== "-") {
-        setIsButtonLoading(true);
-        if (currentUser) {
-          if (data.receiverID !== currentUser.id) {
-            const receivingUser = await AuthService.getUserFromStorage(data.receiverID);
-            if (receivingUser != null) {
-              await createNewTransaction(data);
+    setUserOldBalance(currentUser!.balance);
+    if (!validateForm(data)) return;
 
-              await updateBalance(receivingUser, +data.amount);
-              await updateBalance(currentUser, -data.amount);
-              successAlert(`Transfered ${data.amount}$ to ${receivingUser.firstName}`);
-            } else {
-              errorAlert("Entered ID is WRONG");
-            }
-          } else {
-            errorAlert("You can't enter your own ID!");
-          }
-        }
-        setIsButtonLoading(false);
-        closePaymentModal();
-      } else {
-        errorAlert("You can't enter a negative transaction amount!");
-        closePaymentModal();
-      }
+    const amount = +data.amount;
+
+    if (amount <= 0) {
+      errorAlert("You can't enter a negative transaction amount!");
+      closePaymentModal();
+      return;
     }
+
+    setIsButtonLoading(true);
+
+    if (data.receiverID === currentUser!.id) {
+      errorAlert("You can't enter your own ID!");
+      setIsButtonLoading(false);
+      closePaymentModal();
+      return;
+    }
+
+    const receivingUser = await AuthService.getUserFromStorage(data.receiverID);
+    if (!receivingUser) {
+      errorAlert("Entered ID is WRONG");
+      setIsButtonLoading(false);
+      closePaymentModal();
+      return;
+    }
+    await createNewTransaction(data);
+    await updateBalance(receivingUser, amount);
+    await updateBalance(currentUser!, -amount);
+
+    successAlert(`Transferred ${amount}$ to ${receivingUser.firstName}`);
+
+    setIsButtonLoading(false);
+    closePaymentModal();
   };
 
   const fetchUserTransactions = async () => {
@@ -144,7 +153,10 @@ const WelcomePage: React.FC = () => {
     if (currentUser) {
       try {
         const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
-        setTransactions(fetchedTransactions);
+        const sortedTransactions =fetchedTransactions.sort((a,b)=>{
+          return DateTime.fromISO(b.date).toMillis()-DateTime.fromISO(a.date).toMillis();
+        })
+        setTransactions(sortedTransactions);
         setIsTableLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -197,22 +209,20 @@ const WelcomePage: React.FC = () => {
                 <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
                   Your Balance💰
                 </Typography>
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontFamily: "Poppins",
-                    fontWeight: "bold",
-                    fontSize: 36,
-                  }}
-                >
-                  {isTableLoading ? (
-                    <Skeleton width={150} height={100} />
-                  ) : !isButtonLoading ? (
-                    `${currentUser.balance} $`
-                  ) : (
-                    `${userOldBalance} $`
-                  )}
-                </Typography>
+                {isTableLoading ? (
+                  <Skeleton width={150} height={100} />
+                ) : (
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontFamily: "Poppins",
+                      fontWeight: "bold",
+                      fontSize: 36,
+                    }}
+                  >
+                    {!isButtonLoading ? `${currentUser.balance} $` : `${userOldBalance} $`}
+                  </Typography>
+                )}
               </Paper>
 
               <Button onClick={openPaymentModal} type="submit" sx={{ width: 415, borderRadius: 2 }}>
@@ -253,7 +263,7 @@ const WelcomePage: React.FC = () => {
               <Typography variant="h6" fontWeight={"bold"} fontFamily={"Poppins"}>
                 Transactions
               </Typography>
-              <UserTransactionsTable transactions={transactions} isLoading={isTableLoading} UserID={currentUser.id} />
+              <TransactionsTable transactions={transactions} isLoading={isTableLoading} userID={currentUser.id} />
             </Box>
           </Grid>
         </Grid>
@@ -272,13 +282,8 @@ const WelcomePage: React.FC = () => {
               fields={fields}
               onSubmit={handleSubmitTransaction}
               schema={schema}
-              submitButtonLabel={
-                isButtonLoading && !isPaymentModalOpen ? (
-                  <CircularProgress size={17} sx={{ color: "white" }} />
-                ) : (
-                  "Send Money"
-                )
-              }
+              isLoading={isButtonLoading && !isPaymentModalOpen}
+              submitButtonLabel={"Send Money"}
             />
           </Box>
         </Grid>
@@ -294,13 +299,8 @@ const WelcomePage: React.FC = () => {
                 fields={fields}
                 onSubmit={handleSubmitTransaction}
                 schema={schema}
-                submitButtonLabel={
-                  isButtonLoading && !isPaymentModalOpen ? (
-                    <CircularProgress size={17} sx={{ color: "white" }} />
-                  ) : (
-                    "Send Money"
-                  )
-                }
+                isLoading={isButtonLoading && !isPaymentModalOpen}
+                submitButtonLabel={"Send Money"}
               />
             </Box>
           </Grid>
@@ -333,13 +333,8 @@ const WelcomePage: React.FC = () => {
               fields={fields}
               onSubmit={handleSubmitTransaction}
               schema={schema}
-              submitButtonLabel={
-                isButtonLoading && isPaymentModalOpen ? (
-                  <CircularProgress size={17} sx={{ color: "white" }} />
-                ) : (
-                  "2 3 SHA-GER"
-                )
-              }
+              isLoading={isButtonLoading && isPaymentModalOpen}
+              submitButtonLabel={"2 3 SHA-GER"}
             />
           </Grid>
         </Box>

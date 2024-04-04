@@ -1,7 +1,4 @@
-body {
-  padding: 70px;
-  background: #ffffff;
-}
+
 
 @font-face {
   font-family: 'Poppins';
@@ -32,7 +29,6 @@ button[type="submit"] {
     appearance: none;
     border-radius: 15px;
     transition: 0.3s all;
-    max-width: 600px;
     cursor: pointer;
     font-family: Poppins;
     font-size: 20px;
@@ -56,4 +52,10 @@ button[type="submit"] {
 
     --ag-font-size: 17px;
     --ag-font-family: monospace;
+}
+.loader-hidden {
+  display: none;
+}
+.loader-active {
+  display: block;
 }

@@ -28,23 +28,21 @@ export default function NavBar() {
   }, [currentUser]);
 
   return (
-    <Box>
       <Box sx={{ display: "flex" }}>
         {!currentUser ? (
           <Box></Box>
         ) : (
           <Drawer
             variant="permanent"
-            anchor="left"
             sx={{
               flexShrink: 0,
+              borderRight: "2px solid #ca0f50d0",
               [`& .MuiDrawer-paper`]: {
-                width: 240,
                 display: "flex",
-                boxSizing: "border-box",
+                height:"100vh",
                 fontFamily: "Poppins",
                 textShadow: "#f50057",
-                borderRightColor: "#ca0f50d0",
+                position: 'relative',
               },
             }}
           >
@@ -72,6 +70,5 @@ export default function NavBar() {
           </Drawer>
         )}
       </Box>
-    </Box>
   );
 }

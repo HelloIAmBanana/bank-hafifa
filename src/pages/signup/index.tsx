@@ -108,6 +108,7 @@ const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
   const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
+  const [isLoading,setIsLoading]= useState(false);
   const navigate = useNavigate();
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,8 +127,10 @@ const SignUpPage: React.FC = () => {
       balance: 0,
     };
     if (validateForm(newUser)) {
-      successAlert("Account Created! Navigating to Signin Page!");
+      setIsLoading(true)
       await CRUDLocalStorage.addItemToList<User>("users", newUser);
+      successAlert("Account Created! Navigating to Signin Page!");
+      setIsLoading(false)
       navigate("/signin");
     }
   };
@@ -215,7 +218,7 @@ const SignUpPage: React.FC = () => {
               >
                 Upload profile image
               </Typography>
-              <GenericForm fields={fields} onSubmit={signUp} submitButtonLabel="Sign Up" schema={schema} />
+              <GenericForm fields={fields} onSubmit={signUp} submitButtonLabel="Sign Up" schema={schema} isLoading={isLoading} />
             </Grid>
           </Grid>
           <NavLink

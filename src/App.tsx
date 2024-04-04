@@ -10,6 +10,7 @@ import { AuthHandlerRoute } from "./ProtectedRoutes";
 import ProfileSettingsPage from "./pages/profileSettings";
 import LoansPage from "./pages/loans";
 import DepositsPage from "./pages/deposits";
+import Welcome from "./pages/welcomePage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="/cards" element={<WelcomePage />} />
             <Route path="/deposits" element={<DepositsPage />} />
             <Route path="/account" element={<ProfileSettingsPage />} />
+            <Route path="/test" element={<Welcome/>}/>
           </Route>
         </Routes>
       </div>

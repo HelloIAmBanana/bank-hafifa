@@ -147,8 +147,9 @@ const ProfileSettingsPage: React.FC = () => {
                   <GenericForm
                     fields={fields}
                     onSubmit={handleSubmitProfileInfo}
-                    submitButtonLabel={isFormLoading ? <CircularProgress /> : "Update Profile"}
+                    submitButtonLabel="Update Profile"
                     schema={schema}
+                    isLoading={isFormLoading}
                   ></GenericForm>
                   <Button type="submit" onClick={openProfilePicModal}>Change Profile Photo🖼️</Button>
                 </center>
