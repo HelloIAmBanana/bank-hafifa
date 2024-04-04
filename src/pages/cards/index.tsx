@@ -3,9 +3,9 @@ import AuthService from "../../AuthService";
 import NavBar from "../../components/NavigationBar/NavBar";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useState, useEffect, useContext, useMemo } from "react";
-import { Card } from "../../models/card";
+import { Card } from "../../models/card"
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import { generateUniqueNumber, updateUser } from "../../utils/utils";
+import { generateUniqueNumber, updateUser } from "../../utils/utils"
 import { DataGrid } from "@mui/x-data-grid";
 import { Button, Grid, Modal, CircularProgress, Box, Typography } from "@mui/material";
 import Ajv, { JSONSchemaType } from "ajv";
@@ -210,8 +210,9 @@ const CardsPage: React.FC = () => {
             <GenericForm
               fields={fields}
               onSubmit={handleCardModalSubmit}
-              submitButtonLabel={isButtonLoading?<CircularProgress />:"Create Card"}
+              submitButtonLabel={"Create Card"}
               schema={schema}
+              isLoading={isButtonLoading}
             ></GenericForm>
           </center>
         </Box>

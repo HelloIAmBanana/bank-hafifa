@@ -1,6 +1,6 @@
 export type Field = {
   id: string;
-  label: string;
+  label?: string;
   type: string;
   placeholder?: string;
   checked?: boolean;

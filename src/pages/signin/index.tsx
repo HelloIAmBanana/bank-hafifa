@@ -34,7 +34,8 @@ const schema: JSONSchemaType<User> = {
     accountType: { type: "string", enum: ["business", "personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
-    cardsAmount:{ type: "number" },
+    cardsAmount: { type: "number" },
+
   },
   required: ["email", "password"],
   additionalProperties: true,
@@ -133,7 +134,7 @@ const SignInPage: React.FC = () => {
             </Grid>
           </Grid>
           <Grid item mx="auto" textAlign="center" mt={7}>
-            <GenericForm fields={fields} onSubmit={login} submitButtonLabel="Sign In" schema={schema} />
+            <GenericForm fields={fields} onSubmit={login} submitButtonLabel="Sign In" schema={schema} isLoading={false} />
           </Grid>
           <Grid container justifyContent="flex-start">
             <Grid
@@ -145,7 +146,7 @@ const SignInPage: React.FC = () => {
               }}
             >
               <NavLink
-                to="/"
+                to="/signup"
                 style={{
                   padding: "20px",
                   textDecoration: "none",
@@ -154,7 +155,7 @@ const SignInPage: React.FC = () => {
                   fontSize: "18px",
                 }}
               >
-                First Time? Join Us Here!
+                Forgot password?
               </NavLink>
             </Grid>
           </Grid>

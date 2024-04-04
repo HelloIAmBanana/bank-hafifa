@@ -11,6 +11,7 @@ class AuthService {
 
   static async getUserFromStorage(id: string) {
     const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
+
     try {
       const user = users.find((user) => user.id === id);
       return user;
@@ -22,9 +23,12 @@ class AuthService {
   static getRememberedToken() {
     return localStorage.getItem("rememberedAuthToken");
   }
+
   static getUserFullName(user: User) {
     if (user) {
-      return `${capitalizeFirstLetter(user.firstName)} ${capitalizeFirstLetter(user.lastName)}`;
+      return `${capitalizeFirstLetter(user.firstName)} ${capitalizeFirstLetter(
+        user.lastName
+      )}`;
     }
   }
   static async getCurrentUser(): Promise<User | null> {
@@ -34,12 +38,11 @@ class AuthService {
     }
     return null;
   }
-
   static isUserAuthenticated() {
     return Boolean(AuthService.getAuthToken());
   }
 
-  static getAuthToken() {
+  static getAuthToken(): string | null {
     const rememberedUser = AuthService.getRememberedToken();
     const sessionToken = sessionStorage.getItem("currentAuthToken");
     const user = rememberedUser ?? sessionToken;

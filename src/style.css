@@ -8,7 +8,7 @@ body {
   src: local('Poppins'), url(./fonts/Poppins-Regular.ttf) format('truetype');
 }
 
-Input[type="date"]::-webkit-calendar-picker-indicator {
+input[type="date"]::-webkit-calendar-picker-indicator {
   background: transparent;
   bottom: 0;
   color: transparent;
@@ -21,31 +21,39 @@ Input[type="date"]::-webkit-calendar-picker-indicator {
   width: auto;
   }
 
-button[type="submit"], button[type="button"]  {
+button[type="submit"] {
     position: relative;
     background: #f50057;
-    box-shadow: 0px 4px 10px 7px #62474940;
     color: white;
-    text-transform: uppercase;
     border: none;
     margin-top: 20px;
     padding: 20px;
     display: block;
     appearance: none;
-    border-radius: 50px;
-    width: 100%;
+    border-radius: 15px;
     transition: 0.3s all;
     max-width: 600px;
     cursor: pointer;
     font-family: Poppins;
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     line-height: 21px;
     letter-spacing: 0.1em;
     text-align: center;
   }
   
-  button[type="submit"]:hover,button[type="button"]:hover {
+  button[type="submit"]:hover{
     background: #d6044e;
   }
   
+  .ag-theme-quartz, .ag-theme-quartz-dark {
+    --ag-foreground-color: rgb(126, 46, 132);
+    --ag-background-color: rgb(249, 245, 227);
+    --ag-header-foreground-color: rgb(204, 245, 172);
+    --ag-header-background-color: rgb(209, 64, 129);
+    --ag-odd-row-background-color: rgb(0, 0, 0, 0.03);
+    --ag-header-column-resize-handle-color: rgb(126, 46, 132);
+
+    --ag-font-size: 17px;
+    --ag-font-family: monospace;
+}

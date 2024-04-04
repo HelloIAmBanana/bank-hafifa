@@ -1,7 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Box, Grid, MenuItem } from "@mui/material";
-import FormHelperText from "@mui/material/FormHelperText";
+import { Box, CircularProgress, MenuItem } from "@mui/material";
 import Ajv, { Schema } from "ajv";
 import Button from "@mui/material/Button";
 import ajvErrors from "ajv-errors";
@@ -18,9 +17,10 @@ interface GenericFormProps {
   onSubmit: (data: Record<string, any>) => void;
   submitButtonLabel: string | JSX.Element;
   schema: Schema;
+  isLoading:boolean;
 }
 
-const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButtonLabel, schema }) => {
+const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButtonLabel, schema,isLoading }) => {
   const validate = ajv.compile(schema);
 
   const {
@@ -59,51 +59,59 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
         return (
           <Box>
             <Box key={field.id}>
-              <Typography variant="h6" sx={{ fontFamily: "Poppins" }}>
-                {field.label}
-              </Typography>
-              <Box
-                sx={{
-                  border: "hidden",
-                  margin: "auto",
-                  textAlign: "auto",
-                }}
-              >
-                <FieldComponent
-                  {...field}
-                  {...register(field.id)}
+              <center>
+                {field.label && (
+                  <Typography variant="h6" sx={{ fontFamily: "Poppins" }}>
+                    {field.label}
+                  </Typography>
+                )}
+                <Box
                   sx={{
-                    fontFamily: "Poppins",
+                    border: "hidden",
+                    margin: "auto",
                     textAlign: "auto",
                   }}
-                  defaultValue={field?.initValue}
                 >
-                  {field.options?.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </FieldComponent>
-              </Box>
+                  <FieldComponent
+                    {...field}
+                    {...register(field.id)}
+                    sx={{
+                      width: "442",
+                      height: "46px",
+                      marginTop: "20px",
+                      borderStyle: field.type === "checkbox" ? "hidden" : "solid",
+                      backgroundColor: field.type === "checkbox" ? "hidden" : "#FAFBFC",
+                      borderWidth: "0.5px",
+                      borderRadius: "8px",
+                      fontFamily: "Poppins",
+                      padding: "20px",
+                    }}
+                    defaultValue={field?.initValue}
+                  >
+                    {field.options?.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </FieldComponent>
+                </Box>
+              </center>
             </Box>
-            <Grid>
-              <FormHelperText
-                sx={{
-                  mx: 45,
-                  color: "red",
-                  fontFamily: "Poppins",
-                }}
-              >
-                {customErrors[field.id]?.message}
-              </FormHelperText>
-            </Grid>
+            <Typography fontSize={12} color={"red"} fontFamily={"Poppins"} textAlign={"start"}>
+              {customErrors[field.id]?.message}
+            </Typography>
           </Box>
         );
       })}
 
       <center>
-        <Button onClick={onClick} type="submit" disabled={Boolean(typeof submitButtonLabel !== "string")}>
-          {submitButtonLabel}
+        <Button
+          onClick={onClick}
+          type="submit"
+          disabled={isLoading}
+          sx={{ width: 225 }}
+        >
+          {isLoading?<CircularProgress size={17} sx={{ color: "white" }} />:submitButtonLabel}
         </Button>
       </center>
     </Box>

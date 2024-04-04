@@ -88,7 +88,8 @@ const schema: JSONSchemaType<User> = {
     },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
-    cardsAmount:{ type: "number" },
+    cardsAmount: { type: "number" },
+
   },
   required: ["id", "birthDate", "email", "firstName", "lastName", "password", "gender", "accountType"],
   additionalProperties: true,
@@ -149,8 +150,9 @@ const SignUpPage: React.FC = () => {
           backgroundPosition: "bottom center",
         }}
       />
-      <Grid item xs={12} md={6} component={Paper} elevation={20} borderRadius={3}>
-        <Box sx={{ mt: 1, boxSizing: "100vh" }}>
+      <Grid item xs={2} md={6} component={Paper} elevation={20} borderRadius={3}>
+        <Box sx={{ mt: 1}}>
+
           <Grid container spacing={1}>
             <Grid item mx="auto" textAlign="center">
               <Grid item margin={"auto"}>
@@ -160,7 +162,6 @@ const SignUpPage: React.FC = () => {
                     fontSize: "50px",
                     fontWeight: "bold",
                     lineHeight: "50px",
-                    textAlign: "center",
                   }}
                 >
                   CREATE ACCOUNT
@@ -217,12 +218,11 @@ const SignUpPage: React.FC = () => {
               >
                 Upload profile image
               </Typography>
-              <GenericForm fields={fields} onSubmit={signUp} submitButtonLabel="Sign Up" schema={schema} />
+              <GenericForm fields={fields} onSubmit={signUp} submitButtonLabel="Sign Up" schema={schema} isLoading={false}/>
             </Grid>
           </Grid>
-
           <NavLink
-            to="/signin"
+            to="/"
             style={{
               padding: "20px",
               textDecoration: "none",

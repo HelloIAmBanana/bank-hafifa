@@ -8,6 +8,8 @@ import WelcomePage from "./pages/welcome";
 import "./fonts/Poppins-Regular.ttf";
 import { AuthHandlerRoute } from "./ProtectedRoutes";
 import ProfileSettingsPage from "./pages/profileSettings";
+import LoansPage from "./pages/loans";
+import DepositsPage from "./pages/deposits";
 import CardsPage from "./pages/cards";
 function App() {
   return (
@@ -15,12 +17,12 @@ function App() {
       <div>
         <Routes>
           <Route element={<AuthHandlerRoute />}>
-            <Route path="/" element={<SignUpPage />} />
-            <Route path="/signin" element={<SignInPage />} />
+            <Route path="/" element={<SignInPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
             <Route path="/home" element={<WelcomePage />} />
-            <Route path="/loans" element={<WelcomePage />} />
+            <Route path="/loans" element={<LoansPage />} />
             <Route path="/cards" element={<CardsPage />} />
-            <Route path="/deposits" element={<WelcomePage />} />
+            <Route path="/deposits" element={<DepositsPage />} />
             <Route path="/account" element={<ProfileSettingsPage />} />
           </Route>
         </Routes>
