@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
@@ -6,7 +6,6 @@ import { ColDef, ModuleRegistry } from "@ag-grid-community/core";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 import { Box, Skeleton, Typography } from "@mui/material";
 import transferIcon from "../imgs/transaction.png";
-import { Transaction } from "../models/transactions";
 import { TransactionRow } from "../models/transactionRow";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
 import { formatIsoToDate } from "../utils/utils";
@@ -23,7 +22,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
   isLoading: isTableLoading,
   UserID: userID,
 }) => {
-  const [colDefs] = useState<ColDef<Transaction | any>[]>([
+  const colDefs = useMemo(() =>[
     {
       field: "",
       cellRenderer: () => (
@@ -62,6 +61,9 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
       cellRenderer: (params: any) => {
         return <Typography fontFamily={"Poppins"}>{`${formatIsoToDate(params.data.date,"dd/MM/yyyy")}`}</Typography>;
       },
+
+      
+      
     },
     {
       field: "",
@@ -92,7 +94,6 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
         }
       },
       filterParams: {
-        // note: ensure you escape as if you were creating a RegExp from a string
         allowedCharPattern: "\\d\\-\\,\\$",
         numberParser: (text: string | null) => {
           return text == null ? null : parseFloat(text.replace(",", ".").replace("$", ""));
@@ -103,7 +104,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
       },
     },
     { field: "reason", minWidth: 400, headerName: "" },
-  ]);
+  ],[userID]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -127,6 +128,7 @@ const UserTransactionsTable: React.FC<UserTransactionsTableProps> = ({
               paginationPageSize={10}
               paginationPageSizeSelector={[10, 25, 50]}
               defaultColDef={defaultColDef}
+              animateRows={true}
             />
           </div>
         </Box>

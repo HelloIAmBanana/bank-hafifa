@@ -131,26 +131,16 @@ const ProfileSettingsPage: React.FC = () => {
   document.title = "Porfile Settings";
 
   return (
-    <Box mx={30} sx={{ paddingTop: 8 }}>
-      <NavBar />
+    <Grid>
+      <Grid xs={2} md={2}>
+        <NavBar/>
+      </Grid>
       {!currentUser ? (
         <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
           <CircularProgress />
         </Box>
       ) : (
-        <Box>
-          <Box
-            sx={{
-              width: 450,
-              bgcolor: "background.paper",
-              p: 4,
-              borderRadius: 2,
-              justifyContent: "center",
-              display: "flex",
-              margin: "auto",
-              fontFamily: "Poppins",
-            }}
-          >
+
             <Grid container spacing={4} justifyContent="center">
               <Grid item>
                 <center>
@@ -164,8 +154,6 @@ const ProfileSettingsPage: React.FC = () => {
                 </center>
               </Grid>
             </Grid>
-          </Box>
-        </Box>
       )}
 
       <Modal
@@ -206,7 +194,7 @@ const ProfileSettingsPage: React.FC = () => {
           )}
         </Box>
       </Modal>
-    </Box>
+    </Grid>
   );
 };
 

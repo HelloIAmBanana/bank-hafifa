@@ -7,7 +7,7 @@ import { generateUniqueId, updateUser } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
 import UserTransactionsTable from "../../components/UserTransactionsTable";
-import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box, Skeleton, Drawer } from "@mui/material";
+import { Button, Grid, Paper, Typography, Modal, CircularProgress, Box, Skeleton } from "@mui/material";
 import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
@@ -143,7 +143,7 @@ const WelcomePage: React.FC = () => {
     if (currentUser) {
       try {
         const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
-        setTransactions(fetchedTransactions.reverse());
+        setTransactions(fetchedTransactions);
         setIsTableLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -159,8 +159,9 @@ const WelcomePage: React.FC = () => {
 
   return (
     <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-      <Grid xs={2} md={2}>
-        <NavBar />
+      <Grid xs={2} md={2} zIndex={2000} spacing={50}>
+        <Box sx={{backgroundColor:"white"}}>        <NavBar/>
+</Box>
       </Grid>
       {!currentUser ? (
         <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -171,12 +172,12 @@ const WelcomePage: React.FC = () => {
           </Grid>
         </Box>
       ) : (
-        <Grid xs={8} md={8} marginRight={-5}>
+        <Grid xs={8} md={8} spacing={-5} zIndex={1200}>
           <Typography variant="h4" fontFamily={"Poppins"} fontWeight={"bold"} mx={-3}>
             Overview
           </Typography>
           <Grid container spacing={3} marginTop={0.5}>
-            <Grid item xs={12} md={6} mx={-3}>
+            <Grid item xs={12} md={6} mx={-3} spacing={20}>
               <Paper
                 sx={{
                   padding: 2,
@@ -216,11 +217,10 @@ const WelcomePage: React.FC = () => {
                 Make A Payment💸
               </Button>
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item spacing={50}>
               <Paper
                 sx={{
                   padding: 2,
-                  marginLeft:1,
                   width: 375,
                   height: 78,
                   display: "flex",
@@ -256,22 +256,8 @@ const WelcomePage: React.FC = () => {
           </Grid>
         </Grid>
       )}
-      {currentUser && (<Drawer
-            variant="permanent"
-            anchor="right"
-            sx={{
-              flexShrink: 0,
-              [`& .MuiDrawer-paper`]: {
-                width: 300,
-                display: "flex",
-                boxSizing: "border-box",
-                fontFamily: "Poppins",
-                textShadow: "#f50057",
-                borderRightColor: "#ca0f50d0",
-              },
-            }}
-          >
-        <Grid xs={2} md={2}>
+      {currentUser && (
+        <Grid xs={2} md={2} zIndex={1200}>
           <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
             Wallet
           </Typography>
@@ -279,16 +265,15 @@ const WelcomePage: React.FC = () => {
           <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
             Quick Transfer
           </Typography>
-          <Box sx={{ backgroundColor: "#D3E1F5", width: "253px", height: "325px", borderRadius: 5 }}>
+          <Box sx={{ backgroundColor: "#D3E1F5", width: "253px", height: "325px", borderRadius: 5,}}>
             <GenericForm
               fields={fields}
               onSubmit={handleSubmitTransaction}
               schema={schema}
-              submitButtonLabel={isButtonLoading && !isPaymentModalOpen ? <CircularProgress size={25} /> : "Send Money"}
+              submitButtonLabel={isButtonLoading && !isPaymentModalOpen ? <CircularProgress size={17} sx={{color:"white"}} /> : "Send Money"}
             />
           </Box>
         </Grid>
-        </Drawer>
       )}
       <Modal
         open={isPaymentModalOpen}
@@ -317,7 +302,7 @@ const WelcomePage: React.FC = () => {
               fields={fields}
               onSubmit={handleSubmitTransaction}
               schema={schema}
-              submitButtonLabel={isButtonLoading && isPaymentModalOpen ? <CircularProgress size={25} /> : "2 3 SHA-GER"}
+              submitButtonLabel={isButtonLoading && isPaymentModalOpen ? <CircularProgress size={17} sx={{color:"white"}} /> : "2 3 SHA-GER"}
             />
           </Grid>
         </Box>

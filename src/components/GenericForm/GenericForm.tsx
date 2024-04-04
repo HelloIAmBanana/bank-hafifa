@@ -56,49 +56,50 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
       {fields.map((field) => {
         const FieldComponent = fieldsRegistry[field.type];
         return (
-          <center>
-
           <Box>
             <Box key={field.id}>
-            {field.label&&<Typography variant="h6" sx={{ fontFamily: "Poppins" }}>
-                {field.label}
-              </Typography>}
-              <Box
-                sx={{
-                  border: "hidden",
-                  margin: "auto",
-                  textAlign: "auto",
-                }}
-              >
-                <FieldComponent
-                  {...field}
-                  {...register(field.id)}
+              <center>
+                {field.label && (
+                  <Typography variant="h6" sx={{ fontFamily: "Poppins" }}>
+                    {field.label}
+                  </Typography>
+                )}
+                <Box
                   sx={{
-                    width: "221px",
-                    height: "46px",
-                    marginTop: "20px",
-                    borderStyle: field.type==="checkbox"?"hidden":"solid",
-                    backgroundColor: field.type==="checkbox"?"hidden":"#FAFBFC",
-                    borderWidth: "0.5px",
-                    borderRadius: "8px",
-                    fontFamily: "Poppins",
-                    padding: "20px",
+                    border: "hidden",
+                    margin: "auto",
+                    textAlign: "auto",
                   }}
-                  defaultValue={field?.initValue}
                 >
-                  {field.options?.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </FieldComponent>
-              </Box>
+                  <FieldComponent
+                    {...field}
+                    {...register(field.id)}
+                    sx={{
+                      width: "442",
+                      height: "46px",
+                      marginTop: "20px",
+                      borderStyle: field.type === "checkbox" ? "hidden" : "solid",
+                      backgroundColor: field.type === "checkbox" ? "hidden" : "#FAFBFC",
+                      borderWidth: "0.5px",
+                      borderRadius: "8px",
+                      fontFamily: "Poppins",
+                      padding: "20px",
+                    }}
+                    defaultValue={field?.initValue}
+                  >
+                    {field.options?.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </FieldComponent>
+                </Box>
+              </center>
             </Box>
-            <Typography fontSize={12} color={"red"} fontFamily={"Poppins"}>{customErrors[field.id]?.message}</Typography>
-
+            <Typography fontSize={12} color={"red"} fontFamily={"Poppins"} textAlign={"start"}>
+              {customErrors[field.id]?.message}
+            </Typography>
           </Box>
-          </center>
-
         );
       })}
 
