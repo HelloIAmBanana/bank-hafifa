@@ -23,7 +23,7 @@ function App() {
             <Route path="/loans" element={<LoansPage />} />
             <Route path="/cards" element={<Welcome />} />
             <Route path="/deposits" element={<DepositsPage />} />
-            <Route path="/account" element={<ProfileSettingsPage />} />
+            <Route path="/settings" element={<ProfileSettingsPage />} />
           </Route>
         </Routes>
       </div>

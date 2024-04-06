@@ -245,8 +245,6 @@ export default function Welcome() {
       <Modal
         open={isPaymentModalOpen}
         onClose={closePaymentModal}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
         sx={{
           display: "flex",
           alignItems: "center",
@@ -255,13 +253,13 @@ export default function Welcome() {
       >
         <Box
           sx={{
-            width: 600,
+            width: 360,
             bgcolor: "background.paper",
             p: 4,
-            borderRadius: 2,
+            borderRadius: 5,
           }}
         >
-          <Typography id="modal-title" variant="h6" component="h2" gutterBottom sx={{ fontFamily: "Poppins" }}>
+          <Typography variant="h6" gutterBottom sx={{ fontFamily: "Poppins" }}>
             New Transaction
           </Typography>
           <Grid item mx="auto">
