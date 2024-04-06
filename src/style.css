@@ -1,8 +1,10 @@
-
+body {
+  background: #ffffff;
+}
 
 @font-face {
-  font-family: 'Poppins';
-  src: local('Poppins'), url(./fonts/Poppins-Regular.ttf) format('truetype');
+  font-family: "Poppins";
+  src: local("Poppins"), url(./fonts/Poppins-Regular.ttf) format("truetype");
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -16,46 +18,39 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   right: 0;
   top: 0;
   width: auto;
-  }
+}
 
 button[type="submit"] {
-    position: relative;
-    background: #f50057;
-    color: white;
-    border: none;
-    margin-top: 20px;
-    padding: 20px;
-    display: block;
-    appearance: none;
-    border-radius: 15px;
-    transition: 0.3s all;
-    cursor: pointer;
-    font-family: Poppins;
-    font-size: 20px;
-    font-weight: bold;
-    line-height: 21px;
-    letter-spacing: 0.1em;
-    text-align: center;
-  }
-  
-  button[type="submit"]:hover{
-    background: #d6044e;
-  }
-  
-  .ag-theme-quartz, .ag-theme-quartz-dark {
-    --ag-foreground-color: rgb(126, 46, 132);
-    --ag-background-color: rgb(249, 245, 227);
-    --ag-header-foreground-color: rgb(204, 245, 172);
-    --ag-header-background-color: rgb(209, 64, 129);
-    --ag-odd-row-background-color: rgb(0, 0, 0, 0.03);
-    --ag-header-column-resize-handle-color: rgb(126, 46, 132);
-
-    --ag-font-size: 17px;
-    --ag-font-family: monospace;
-}
-.loader-hidden {
-  display: none;
-}
-.loader-active {
+  position: relative;
+  background: #f50057;
+  color: white;
+  border: none;
+  margin-top: 20px;
+  padding: 20px;
   display: block;
+  appearance: none;
+  border-radius: 15px;
+  transition: 0.3s all;
+  cursor: pointer;
+  font-family: Poppins;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 21px;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+button[type="submit"]:hover {
+  background: #d6044e;
+}
+
+.ag-theme-quartz,
+.ag-theme-quartz-dark {
+  --ag-foreground-color: #d6044e;
+  --ag-border-color:white;
+  --ag-background-color: white;
+  --ag-header-background-color: #d6044e;
+  --ag-header-column-resize-handle-color: transparent;
+  --ag-font-size: 17px;
+  --ag-font-family:Poppins;
 }

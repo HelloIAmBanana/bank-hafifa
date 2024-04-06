@@ -4,7 +4,7 @@ import { useState, useContext, useEffect } from "react";
 import { User } from "../../models/user";
 import { Transaction } from "../../models/transactions";
 import { DateTime } from "luxon";
-import { generateUniqueId, updateUser } from "../../utils/utils";
+import { generateUniqueId,getUserFullName} from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { UserContext } from "../../UserProvider";
 import TransactionsTable from "../../components/UserTransactionsTable";
@@ -77,7 +77,7 @@ const WelcomePage: React.FC = () => {
       ...user,
       balance: updatedBalance,
     };
-    await updateUser(updatedUser);
+    await CRUDLocalStorage.updateItemInList<User>("users",updatedUser);
     if (user.id === currentUser?.id) {
       setCurrentUser(updatedUser);
     }
@@ -94,7 +94,7 @@ const WelcomePage: React.FC = () => {
 
   const createNewTransaction = async (data: any) => {
     const designatedUser = (await AuthService.getUserFromStorage(data.receiverID)) as User;
-    const designatedUserName = AuthService.getUserFullName(designatedUser);
+    const designatedUserName = getUserFullName(designatedUser);
 
     const currentDateTime = new Date();
 
@@ -103,7 +103,7 @@ const WelcomePage: React.FC = () => {
       amount: Number(data.amount),
       senderID: currentUser?.id,
       id: generateUniqueId(),
-      senderName: AuthService.getUserFullName(currentUser as User),
+      senderName: getUserFullName(currentUser as User),
       receiverName: designatedUserName,
       date: currentDateTime.toISOString(),
     };
@@ -263,7 +263,7 @@ const WelcomePage: React.FC = () => {
               <Typography variant="h6" fontWeight={"bold"} fontFamily={"Poppins"}>
                 Transactions
               </Typography>
-              <TransactionsTable transactions={transactions} isLoading={isTableLoading} userID={currentUser.id} />
+              <TransactionsTable transactions={transactions} userID={currentUser.id} />
             </Box>
           </Grid>
         </Grid>

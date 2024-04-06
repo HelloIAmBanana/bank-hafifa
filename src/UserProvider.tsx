@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
-import { User } from "./models/user";
 import AuthService from "./AuthService";
+import { User } from "./models";
 
 export const UserContext = createContext<[User | undefined, React.Dispatch<React.SetStateAction<User | undefined>>]>([
   null!,

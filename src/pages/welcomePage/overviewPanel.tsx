@@ -1,6 +1,6 @@
 import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
-import { User } from "../../models/user";
 import { Fragment } from "react/jsx-runtime";
+import { User } from "../../models";
 
 interface OverviewGridPanel {
   isTableLoading: boolean;
@@ -52,7 +52,7 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
                   fontSize: 36,
                 }}
               >
-                {!isButtonLoading ? `${currentUser.balance} $` : `${userOldBalance} $`}
+                {!isButtonLoading ? `$${currentUser.balance}` : `$${userOldBalance}`}
               </Typography>
             )}
           </Paper>
@@ -85,7 +85,7 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
                 fontSize: 36,
               }}
             >
-              123,456 $
+              $123,456
             </Typography>
           </Paper>
         </Grid>
