@@ -1,4 +1,4 @@
-import { ListItem, ListItemButton, ListItemIcon, Typography } from "@mui/material";
+import { ListItem, ListItemButton, Typography } from "@mui/material";
 import { FunctionComponent } from "react";
 import { useLocation } from "react-router-dom";
 import { IconContext } from "react-icons";
