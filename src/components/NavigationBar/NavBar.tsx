@@ -1,99 +1,79 @@
-import { Box, Drawer, AppBar, Toolbar, List, Typography, Avatar } from "@mui/material";
-import { CreditCard, Home, RequestQuote, Receipt, AccountCircle, ExitToApp } from "@mui/icons-material";
-import { useState, useEffect, useContext, useMemo } from "react";
-import { User } from "../../models/user";
+import { Box, Drawer, Toolbar, List, Typography, Avatar } from "@mui/material";
+import { useContext, useMemo } from "react";
+import { User } from "../../models";
+import { getUserFullName } from "../../utils/utils";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserProvider";
 import NavBarItem from "./NavBarItem";
-import AuthService from "../../AuthService";
-
+import { GiPayMoney, GiSwipeCard, GiHouse, GiPiggyBank, GiGears, GiExitDoor } from "react-icons/gi";
 export default function NavBar() {
   const navigate = useNavigate();
-  const [timeMessage, setTimeMessage] = useState("");
-  const [currentUser, setCurrentUser] = useContext(UserContext);
+  const [currentUser] = useContext(UserContext);
 
-  const icons = [<Home />, <RequestQuote />, <CreditCard />, <Receipt />, <AccountCircle />];
+  const icons = [<GiHouse />, <GiPayMoney />, <GiSwipeCard />, <GiPiggyBank />, <GiGears />];
 
   function logUserOut() {
     sessionStorage.clear();
     localStorage.removeItem("rememberedAuthToken");
-    navigate("/signin");
+    navigate("/");
   }
 
-  const currentHour = new Date().getHours();
   const userName = useMemo(() => {
-    return AuthService.getUserFullName(currentUser as User);
+    return getUserFullName(currentUser as User);
   }, [currentUser]);
-  useEffect(() => {
-    switch (Math.floor(currentHour / 6)) {
-      default: {
-        setTimeMessage("Good morning☀️, ");
-        break;
-      }
-      case 2: {
-        setTimeMessage("Good afternoon🌇, ");
-        break;
-      }
-      case 3: {
-        setTimeMessage("Good evening🌆, ");
-        break;
-      }
-      case 0: {
-        setTimeMessage("Good night🌙, ");
-        break;
-      }
-    }
-  }, [currentUser, currentHour]);
+
+  const avatarIMG = useMemo(() => {
+    return currentUser?.avatarUrl;
+  }, [currentUser]);
 
   return (
-    <Box>
-      <Box sx={{ display: "flex" }}>
-        <AppBar
-          position="fixed"
-          sx={{
-            zIndex: (theme: { zIndex: { drawer: number } }) => theme.zIndex.drawer + 1,
-            backgroundColor: "#F50057",
-          }}
-        >
-          <Toolbar>
-            {!currentUser ? (
-              <Box></Box>
-            ) : (
-              <>
-                <Avatar src={(currentUser as User).avatarUrl} />
-                <Typography variant="h6" noWrap component="div" sx={{ fontFamily: "Poppins" }}>
-                  {`${timeMessage} ${userName}`}
-                </Typography>
-              </>
-            )}
-          </Toolbar>
-        </AppBar>
+    <Box sx={{ display: "flex" }}>
+      {!userName ? (
+        <Box></Box>
+      ) : (
         <Drawer
           variant="permanent"
           sx={{
-            flexShrink: 0,
+            borderRight: "2px solid #ca0f50d0",
             [`& .MuiDrawer-paper`]: {
-              width: 240,
               display: "flex",
-              boxSizing: "border-box",
+              height: "100vh",
               fontFamily: "Poppins",
-              marginTop: "64px",
-              boxShadow: 15,
-              textShadow: "#f50057",
+              borderTopLeftRadius: 16,
+              borderLeftRadius: 16,
+              position: "relative",
             },
           }}
         >
+          <Box sx={{ marginTop: "15px", marginLeft: 1 }}>
+            <Avatar
+              src={avatarIMG}
+              sx={{ border: "1px solid black", backgroundColor: "#f50057", width: 35, height: 35 }}
+            >
+              {userName.split(" ")[0][0]}
+              {userName.split(" ")[1][0]}
+            </Avatar>
+            <Typography
+              component="div"
+              sx={{ fontFamily: "Poppins", fontSize: "15px", fontWeight: "bold" }}
+              marginLeft={6}
+              marginTop={-3.5}
+              marginRight={1}
+            >
+              {`Welcome, ${userName}`}
+            </Typography>
+          </Box>
           <Toolbar />
           <Box sx={{ overflow: "auto" }}>
             <List>
-              {["Home", "Loans", "Cards", "Deposits", "Account"].map((text, index) => (
+              {["Home", "Loans", "Cards", "Deposits", "Settings"].map((text, index) => (
                 <NavBarItem label={text} icon={icons[index]} onClick={() => navigate(`/${text.toLowerCase()} `)} />
               ))}
-              <NavBarItem label={"Logout"} icon={<ExitToApp />} onClick={logUserOut} />
+              <NavBarItem label={"Logout"} icon={<GiExitDoor />} onClick={logUserOut} />
             </List>
           </Box>
         </Drawer>
-      </Box>
+      )}
     </Box>
   );
 }
