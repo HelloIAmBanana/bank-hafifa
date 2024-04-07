@@ -30,7 +30,6 @@ const NavBarItem: FunctionComponent<NavBarItemProps> = ({ label, icon, onClick }
           sx={{
             fontFamily: "Poppins",
             fontSize: "1.5rem",
-            marginLeft:"64px"
           }}
         >
           {label}
