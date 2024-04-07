@@ -5,12 +5,12 @@ import { getUserFullName } from "../../utils/utils";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserProvider";
 import NavBarItem from "./NavBarItem";
-import { GiPayMoney,GiSwipeCard,GiHouse ,GiPiggyBank,GiGears,GiExitDoor   } from "react-icons/gi";
+import { GiPayMoney, GiSwipeCard, GiHouse, GiPiggyBank, GiGears, GiExitDoor } from "react-icons/gi";
 export default function NavBar() {
   const navigate = useNavigate();
   const [currentUser] = useContext(UserContext);
 
-  const icons = [<GiHouse  />, <GiPayMoney />  , <GiSwipeCard />, <GiPiggyBank />, <GiGears />];
+  const icons = [<GiHouse />, <GiPayMoney />, <GiSwipeCard />, <GiPiggyBank />, <GiGears />];
 
   function logUserOut() {
     sessionStorage.clear();
@@ -46,13 +46,16 @@ export default function NavBar() {
           }}
         >
           <Box sx={{ marginTop: "15px", marginLeft: 1 }}>
-            <Avatar src={avatarIMG} sx={{ border:"1px solid black",backgroundColor: "#f50057", width: 35, height: 35 }}>
+            <Avatar
+              src={avatarIMG}
+              sx={{ border: "1px solid black", backgroundColor: "#f50057", width: 35, height: 35 }}
+            >
               {userName.split(" ")[0][0]}
               {userName.split(" ")[1][0]}
             </Avatar>
             <Typography
               component="div"
-              sx={{ fontFamily: "Poppins", fontSize: "15px",fontWeight:"bold" }}
+              sx={{ fontFamily: "Poppins", fontSize: "15px", fontWeight: "bold" }}
               marginLeft={6}
               marginTop={-3.5}
               marginRight={1}
@@ -64,7 +67,7 @@ export default function NavBar() {
           <Box sx={{ overflow: "auto" }}>
             <List>
               {["Home", "Loans", "Cards", "Deposits", "Settings"].map((text, index) => (
-                <NavBarItem label={text} icon={icons[index] } onClick={() => navigate(`/${text.toLowerCase()} `)} />
+                <NavBarItem label={text} icon={icons[index]} onClick={() => navigate(`/${text.toLowerCase()} `)} />
               ))}
               <NavBarItem label={"Logout"} icon={<GiExitDoor />} onClick={logUserOut} />
             </List>

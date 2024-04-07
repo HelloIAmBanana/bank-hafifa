@@ -136,7 +136,7 @@ const ProfileSettingsPage: React.FC = () => {
   ) : (
     <Box sx={{ display: "flex", backgroundColor: "white"}}>
       <NavBar />
-      <Grid container direction="column" justifyContent="flex-start" alignItems="center">
+      <Grid container direction="column" justifyContent="flex-start" alignItems="center"  marginTop={25}>
         <Grid item>
           <GenericForm
             fields={fields}
