@@ -1,6 +1,6 @@
 import { Box, Drawer, Toolbar, List, Typography, Avatar } from "@mui/material";
 import { useContext, useMemo } from "react";
-import { User } from "../../models";
+import { User } from "../../models/user";
 import { getUserFullName } from "../../utils/utils";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserProvider";
@@ -48,7 +48,7 @@ export default function NavBar() {
           <Box sx={{ marginTop: "15px", marginLeft: 1 }}>
             <Avatar
               src={avatarIMG}
-              sx={{ border: "1px solid black", backgroundColor: "#f50057", width: 35, height: 35 }}
+              sx={{backgroundColor: "#f50057", width: 35, height: 35 }}
             >
               {userName.split(" ")[0][0]}
               {userName.split(" ")[1][0]}
