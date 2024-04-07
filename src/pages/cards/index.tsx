@@ -3,17 +3,17 @@ import AuthService from "../../AuthService";
 import NavBar from "../../components/NavigationBar/NavBar";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useState, useEffect, useContext, useMemo } from "react";
-import { Card } from "../../models/card"
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import { generateUniqueNumber, updateUser } from "../../utils/utils"
-import { DataGrid } from "@mui/x-data-grid";
-import { Button, Grid, Modal, CircularProgress, Box, Typography } from "@mui/material";
+import { generateUniqueNumber, getUserFullName } from "../../utils/utils";
+import { Button, Grid, Modal, Box, Container, Typography, Skeleton } from "@mui/material";
 import Ajv, { JSONSchemaType } from "ajv";
 import ajvErrors from "ajv-errors";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { UserContext } from "../../UserProvider";
 import { User } from "../../models/user";
-
+import { Card } from "../../models/card";
+import { PacmanLoader } from "react-spinners";
+import CardGenerator from "../../components/CreditCard";
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
@@ -23,12 +23,12 @@ const schema: JSONSchemaType<Card> = {
     cardNumber: { type: "number" },
     accountID: { type: "string" },
     type: { type: "string", enum: ["Visa", "Mastercard", "American Express"] },
-    expireDate: { type: "string", minLength:1},
+    expireDate: { type: "string", minLength: 1 },
     hiddenPin: { type: "number" },
     status: { type: "string" },
     rejectedMessage: { type: "string" },
   },
-  required: ["accountID","type","expireDate"],
+  required: ["accountID", "type", "expireDate"],
   additionalProperties: true,
   errorMessage: {
     properties: {
@@ -48,15 +48,6 @@ const CardsPage: React.FC = () => {
   const [cards, setCards] = useState<Card[]>([]);
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
 
-  const columns = [
-    { field: "cardNumber", headerName: "Number", width: 200 },
-    { field: "cardOwnerName", headerName: "Owner Name", width: 200 },
-    { field: "type", headerName: "Type", width: 150 },
-    { field: "expireDate", headerName: "Expire Date", width: 150 },
-    { field: "hiddenPin", headerName: "Hidden PIN", width: 150 },
-    { field: "status", headerName: "Status", width: 150 },
-  ];
-
   const fields = useMemo(() => {
     return [
       {
@@ -64,7 +55,7 @@ const CardsPage: React.FC = () => {
         label: "Account ID",
         type: "text",
         placeholder: "Enter Account ID",
-        initValue: `${currentUser?.id}`
+        initValue: `${currentUser?.id}`,
       },
       {
         id: "type",
@@ -97,8 +88,8 @@ const CardsPage: React.FC = () => {
             .map((cards) => {
               return {
                 ...cards,
-                cardOwnerName: AuthService.getUserFullName(currentUser),
-                expireDate: cards.expireDate.slice(0,7).replace("-","/"),
+                cardOwnerName: getUserFullName(currentUser),
+                expireDate: cards.expireDate.slice(0, 7).replace("-", "/"),
               };
             })
         );
@@ -124,7 +115,7 @@ const CardsPage: React.FC = () => {
       ...cardOwner,
       cardsAmount: updatedCardsAmount,
     };
-    await updateUser(updatedUser);
+    await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
     if (cardOwner.id === currentUser?.id) {
       setCurrentUser(updatedUser);
     }
@@ -136,8 +127,8 @@ const CardsPage: React.FC = () => {
     if (cardOwner) {
       const newCard: Card = {
         ...data,
-        cardNumber: Number(generateUniqueNumber(16)),
-        hiddenPin: Number(generateUniqueNumber(16).slice(1,4)),
+        cardNumber: +generateUniqueNumber(16),
+        hiddenPin:+generateUniqueNumber(16).slice(1, 4),
         status: "Appending",
         rejectedMessage: "",
       };
@@ -156,36 +147,48 @@ const CardsPage: React.FC = () => {
 
   useEffect(() => {
     fetchUserCards();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
-  return (
-    <Box mx={30} sx={{ paddingTop: 8 }}>
+  return !currentUser ? (
+    <Grid container direction="column" justifyContent="flex-end" alignItems="center" marginTop={45}>
+      <PacmanLoader color="#ffe500" size={50} />
+    </Grid>
+  ) : (
+    <Box sx={{ display: "flex", backgroundColor: "white", boxShadow: 16 }}>
       <NavBar />
-      {!currentUser ? (
-        <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Box>
-          <Grid container spacing={3} justifyContent="center">
-            <Grid item xs={12} md={6}>
-              <Button onClick={openCardModal}>CREATE NEW CARD (TEST)</Button>
+      <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>
+        <Container sx={{ mt: 2 }}>
+          <Grid container spacing={5}>
+            <Grid item>
+              <Button onClick={openCardModal}>CREATE NEW CARD (JUST FOR TESTING)</Button>
             </Grid>
+            <Box sx={{ flexGrow: 1 }}>
+              <Grid container direction="row" justifyContent="center" alignItems="baseline" mb={3}>
+                <Grid item xs={12} md={12} xl={12} ml={16}>
+                  <Typography variant="h3" fontFamily="Poppins">
+                    Owned
+                  </Typography>
+                </Grid>
+                {isTableLoading ? (
+                  <Skeleton height={700} width={1400} />
+                ) : (
+                  cards.map((_, index) => (
+                    <Grid item xs={12} sm={6} md={6} lg={4} xl={3} key={index} ml={5} mt={5}>
+                      <CardGenerator
+                        cardOwnerName={getUserFullName(currentUser)}
+                        cardNumber={`${_.cardNumber}`}
+                        expireDate={_.expireDate}
+                        cardType={_.type}
+                      />
+                    </Grid>
+                  ))
+                )}
+              </Grid>
+            </Box>
           </Grid>
-          <Typography id="modal-title" variant="h6" component="h2" gutterBottom sx={{ fontFamily: "Poppins" }}>
-            Create Transaction
-          </Typography>
-          <DataGrid
-            rows={cards}
-            columns={columns}
-            autoHeight={true}
-            getRowId={(rowData) => rowData.cardNumber}
-            disableColumnSorting
-            disableColumnMenu
-            loading={isTableLoading}
-          />
-        </Box>
-      )}
+        </Container>
+      </Box>
       <Modal
         id="CardModal"
         open={isNewCardModalOpen}

@@ -1,7 +1,7 @@
 export type Field = {
   id: string;
-  label?: string;
   type: string;
+  label?: string;
   placeholder?: string;
   checked?: boolean;
   options?: { value: string; label: string }[];

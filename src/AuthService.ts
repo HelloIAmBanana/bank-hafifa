@@ -1,17 +1,9 @@
-import { User } from "./models/user";
 import CRUDLocalStorage from "./CRUDLocalStorage";
-import { capitalizeFirstLetter } from "./utils/utils";
-
-export type UserAndRemembered = User & { rememberMe: Boolean };
+import { User } from "./models/user";
 
 class AuthService {
-  static storeAuthTokenToStorage(userId: string) {
-    sessionStorage.setItem("currentAuthToken", userId);
-  }
-
   static async getUserFromStorage(id: string) {
     const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-
     try {
       const user = users.find((user) => user.id === id);
       return user;
@@ -24,13 +16,6 @@ class AuthService {
     return localStorage.getItem("rememberedAuthToken");
   }
 
-  static getUserFullName(user: User) {
-    if (user) {
-      return `${capitalizeFirstLetter(user.firstName)} ${capitalizeFirstLetter(
-        user.lastName
-      )}`;
-    }
-  }
   static async getCurrentUser(): Promise<User | null> {
     const authToken = AuthService.getAuthToken();
     if (authToken) {

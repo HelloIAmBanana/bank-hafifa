@@ -1,16 +1,14 @@
-import * as React from "react";
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import Ajv, { JSONSchemaType } from "ajv";
 import { Box, Button, Input, Typography, Grid, Paper } from "@mui/material";
 import signupImage from "../../imgs/signupPage.svg";
-import { User } from "../../models/user";
 import ajvErrors from "ajv-errors";
-import { useNavigate } from "react-router-dom";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
-import { successAlert } from "../../utils/swalAlerts";
+import { errorAlert, successAlert } from "../../utils/swalAlerts";
+import { User } from "../../models/user"; 
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -76,7 +74,7 @@ const schema: JSONSchemaType<User> = {
     firstName: { type: "string", minLength: 1 },
     lastName: { type: "string", minLength: 1 },
     hobbies: { type: "array", items: { type: "string" } },
-    email: { type: "string", pattern: "[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,}$" },
+    email: { type: "string", pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$" },
     password: { type: "string", minLength: 6 },
     birthDate: { type: "string", minLength: 1 },
     avatarUrl: { type: "string" },
@@ -88,7 +86,7 @@ const schema: JSONSchemaType<User> = {
     },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
-    cardsAmount: { type: "number" },
+    cardsAmount:{ type: "number" },
 
   },
   required: ["id", "birthDate", "email", "firstName", "lastName", "password", "gender", "accountType"],
@@ -110,7 +108,9 @@ const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
   const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -118,6 +118,12 @@ const SignUpPage: React.FC = () => {
       setAvatarImgURL(imageUrl);
     }
   };
+
+  async function doesUserExist(userEmail: string) {
+    const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
+    return Boolean(users.find((user) => user.email === userEmail));
+  }
+
   const signUp = async (data: any) => {
     const newUser: User = {
       ...data,
@@ -126,19 +132,24 @@ const SignUpPage: React.FC = () => {
       email: data.email.toLowerCase(),
       avatarUrl: avatarImgURL,
       balance: 0,
-      cardsAmount:0,
     };
     if (validateForm(newUser)) {
-      successAlert("Account Created! Navigating to Signin Page!");
-      await CRUDLocalStorage.addItemToList<User>("users", newUser);
-      navigate("/signin");
+      setIsLoading(true);
+      if (await doesUserExist(newUser.email)) {
+        errorAlert("User already exists!");
+      } else {
+        await CRUDLocalStorage.addItemToList<User>("users", newUser);
+        successAlert("Account Created! Navigating to Signin Page!");
+        navigate("/");
+      }
+      setIsLoading(false);
     }
   };
 
   document.title = "Sign Up";
 
   return (
-    <Grid container component="main" my={-7}>
+    <Grid container component="main">
       <Grid
         item
         xs={12}
@@ -151,8 +162,7 @@ const SignUpPage: React.FC = () => {
         }}
       />
       <Grid item xs={2} md={6} component={Paper} elevation={20} borderRadius={3}>
-        <Box sx={{ mt: 1}}>
-
+        <Box sx={{ mt: 1 }}>
           <Grid container spacing={1}>
             <Grid item mx="auto" textAlign="center">
               <Grid item margin={"auto"}>
@@ -180,6 +190,7 @@ const SignUpPage: React.FC = () => {
               <Button
                 style={{
                   padding: "50px",
+                  border: "1px solid black",
                   borderRadius: "100%",
                   backgroundSize: "100%",
                   backgroundImage: `url(${
@@ -218,7 +229,13 @@ const SignUpPage: React.FC = () => {
               >
                 Upload profile image
               </Typography>
-              <GenericForm fields={fields} onSubmit={signUp} submitButtonLabel="Sign Up" schema={schema} isLoading={false}/>
+              <GenericForm
+                fields={fields}
+                onSubmit={signUp}
+                submitButtonLabel="Sign Up"
+                schema={schema}
+                isLoading={isLoading}
+              />
             </Grid>
           </Grid>
           <NavLink

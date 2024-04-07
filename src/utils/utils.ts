@@ -1,5 +1,4 @@
 import { DateTime } from "luxon";
-import CRUDLocalStorage from "../CRUDLocalStorage";
 import { User } from "../models/user";
 
 export const generateUniqueId = () => {
@@ -10,18 +9,16 @@ export function capitalizeFirstLetter(word: string) {
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
 
-export async function updateUser(user: User) {
-  const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-  const updatedUsers = users.filter((userItem) => userItem.id !== user.id);
-  updatedUsers.push(user);
-  await CRUDLocalStorage.setAsyncData("users", updatedUsers);
+export function getUserFullName(user: User) {
+  return `${capitalizeFirstLetter(user.firstName)} ${capitalizeFirstLetter(user.lastName)}`;
 }
 
-export const formatIsoToDate = (date: string,format:string) => {
-  return DateTime.fromISO(date, {
+export function formatIsoStringToDate(iso: string, format: string) {
+  return DateTime.fromISO(iso, {
     zone: "Asia/Jerusalem",
   }).toFormat(`${format}`);
-};
-export function generateUniqueNumber(digit:number) {
-  return Math.random().toFixed(digit).split('.')[1];
+}
+
+export function generateUniqueNumber(digit: number) {
+  return Math.random().toFixed(digit).split(".")[1];
 }

@@ -1,15 +1,15 @@
-import * as React from "react";
-import { useState, useContext, useMemo } from "react";
-import { User } from "../../models/user";
+import React, { useState, useContext, useMemo } from "react";
+import { User } from "../../models/user"; 
 import { successAlert } from "../../utils/swalAlerts";
 import Ajv, { JSONSchemaType } from "ajv";
 import ajvErrors from "ajv-errors";
 import { Button, Grid, Typography, Modal, CircularProgress, Input, Box } from "@mui/material";
 import { UserContext } from "../../UserProvider";
-import { updateUser } from "../../utils/utils";
+import CRUDLocalStorage from "../../CRUDLocalStorage";
 import NavBar from "../../components/NavigationBar/NavBar";
 import * as _ from "lodash";
 import GenericForm from "../../components/GenericForm/GenericForm";
+import { PacmanLoader } from "react-spinners";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -29,7 +29,7 @@ const schema: JSONSchemaType<User> = {
     accountType: { type: "string", enum: ["Business", "Personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
-    cardsAmount: { type: "number" },
+    cardsAmount:{ type: "number" },
   },
   required: [],
   additionalProperties: true,
@@ -50,7 +50,6 @@ const ProfileSettingsPage: React.FC = () => {
   const [isFormLoading, setIsFormLoading] = useState(false);
   const [isProfilePicLoading, setIsProfilePicLoading] = useState(false);
   const [isProfilePictureModalOpen, setIsProfilePictureModalOpen] = useState(false);
-
 
   const fields = useMemo(() => {
     return [
@@ -87,14 +86,14 @@ const ProfileSettingsPage: React.FC = () => {
   }, [currentUser]);
 
   const updateCurrentUser = async (updatedCurrentUser: User) => {
-    await updateUser(updatedCurrentUser);
+    await CRUDLocalStorage.updateItemInList<User>("users", updatedCurrentUser);
     setCurrentUser(updatedCurrentUser);
     successAlert(`Updated User!`);
   };
 
   const handleSubmitProfileInfo = async (data: any) => {
     setIsFormLoading(true);
-    if(validateForm(data)){
+    if (validateForm(data)) {
       const updatedUser: User = {
         ...(currentUser as User),
         ...data,
@@ -129,40 +128,34 @@ const ProfileSettingsPage: React.FC = () => {
     }
   };
 
-  document.title = "Porfile Settings";
+  document.title = "Account Settings";
 
-  return (
-    <Grid>
-      <Grid xs={2} md={2}>
-        <NavBar/>
+  return !currentUser ? (
+    <Grid container direction="column" justifyContent="flex-end" alignItems="center" marginTop={45}>
+      <PacmanLoader color="#ffe500" size={50} />
+    </Grid>
+  ) : (
+    <Box sx={{ display: "flex", backgroundColor: "white"}}>
+      <NavBar />
+      <Grid container direction="column" justifyContent="flex-start" alignItems="center"  marginTop={25}>
+        <Grid item>
+          <GenericForm
+            fields={fields}
+            onSubmit={handleSubmitProfileInfo}
+            submitButtonLabel="Update Profile"
+            schema={schema}
+            isLoading={isFormLoading}
+          />
+          <Button type="submit" onClick={openProfilePicModal}>
+            Change Profile Photo🖼️
+          </Button>
+        </Grid>
       </Grid>
-      {!currentUser ? (
-        <Box sx={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-            <Grid container spacing={4} justifyContent="center">
-              <Grid item>
-                <center>
-                  <GenericForm
-                    fields={fields}
-                    onSubmit={handleSubmitProfileInfo}
-                    submitButtonLabel={ "Update Profile"}
-                    schema={schema}
-                    isLoading={isFormLoading}
-                  ></GenericForm>
-                  <Button type="submit" onClick={openProfilePicModal}>Change Profile Photo🖼️</Button>
-                </center>
-              </Grid>
-            </Grid>
-      )}
 
       <Modal
         id="ProfilePictureChange"
         open={isProfilePictureModalOpen}
         onClose={closeProfilePicModal}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
         sx={{
           display: "flex",
           alignItems: "center",
@@ -177,13 +170,7 @@ const ProfileSettingsPage: React.FC = () => {
             borderRadius: 2,
           }}
         >
-          <Typography
-            id="modal-title"
-            variant="h6"
-            component="h2"
-            gutterBottom
-            sx={{ fontFamily: "Poppins" }}
-          >
+          <Typography id="modal-title" variant="h6" gutterBottom sx={{ fontFamily: "Poppins" }}>
             Change Profile Picture
           </Typography>
           {isProfilePicLoading ? (
@@ -195,7 +182,7 @@ const ProfileSettingsPage: React.FC = () => {
           )}
         </Box>
       </Modal>
-    </Grid>
+    </Box>
   );
 };
 

@@ -1,4 +1,4 @@
-class CRUDLocalStorage {
+export default class CRUDLocalStorage {
   static getAsyncData<T>(key: string): Promise<T> {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -26,13 +26,15 @@ class CRUDLocalStorage {
     });
   }
 
-  static async addItemToList<T>(
-    key: string,
-    newItem: T
-  ): Promise<void> {
-    const items: T[] = (await CRUDLocalStorage.getAsyncData<T[]>(key)) || [];
-    const updatedItems: T[] = [...items, newItem];
+  static async addItemToList<T>(key: string, newItem: T): Promise<void> {
+    const items: T[] = await CRUDLocalStorage.getAsyncData<T[]>(key) || [];
+    const updatedList: T[] = [...items, newItem];
+    await CRUDLocalStorage.setAsyncData(key, updatedList);
+  }
+
+  static async updateItemInList<T extends { id: string }>(key: string, newItem: T): Promise<void> {
+    const items: T[] = await CRUDLocalStorage.getAsyncData<T[]>(key) || [];
+    const updatedItems = items.map((currentItem) => (currentItem.id === newItem.id ? newItem : currentItem));
     await CRUDLocalStorage.setAsyncData(key, updatedItems);
   }
 }
-export default CRUDLocalStorage;
