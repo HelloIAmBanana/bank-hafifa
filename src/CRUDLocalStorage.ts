@@ -4,7 +4,7 @@ export default class CRUDLocalStorage {
       setTimeout(() => {
         const data = localStorage.getItem(key);
         resolve(data ? JSON.parse(data) : ([] as unknown as T));
-      }, 1000);
+      }, 3000);
     });
   }
 
@@ -13,7 +13,7 @@ export default class CRUDLocalStorage {
       setTimeout(() => {
         localStorage.setItem(key, JSON.stringify(value));
         resolve(value);
-      }, 1000);
+      }, 3000);
     });
   }
 
@@ -22,7 +22,7 @@ export default class CRUDLocalStorage {
       setTimeout(() => {
         localStorage.removeItem(key);
         resolve();
-      }, 1000);
+      }, 3000);
     });
   }
 
