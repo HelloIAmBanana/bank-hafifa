@@ -1,6 +1,7 @@
-import { ListItem, ListItemButton, ListItemIcon, Typography } from "@mui/material";
+import { ListItem, ListItemButton, Typography } from "@mui/material";
 import { FunctionComponent } from "react";
 import { useLocation } from "react-router-dom";
+import { IconContext } from "react-icons";
 
 interface NavBarItemProps {
   label: string;
@@ -16,18 +17,20 @@ const NavBarItem: FunctionComponent<NavBarItemProps> = ({ label, icon, onClick }
       key={label}
       disablePadding
       sx={{
-        mb: 6,
-        boxShadow: 5,
-        backgroundColor: location.pathname === "/" + label.toLowerCase() ? "#ca0f50d0" : "",
+        mb: 2,
+        color: location.pathname === "/" + label.toLowerCase() ? "#ca0f50d0" : "#999999",
       }}
     >
       <ListItemButton onClick={onClick}>
-        <ListItemIcon sx={{ color: "#f50057", fontSize: "50px" }}>{icon}</ListItemIcon>
+        <IconContext.Provider
+          value={{ color: location.pathname === "/" + label.toLowerCase() ? "#ca0f50d0" : "#999999", size: "2.5rem" }}>
+            {icon}
+        </IconContext.Provider>
         <Typography
           sx={{
             fontFamily: "Poppins",
-            fontSize: "1.2rem",
-            marginRight: "64px",
+            fontSize: "1.5rem",
+            marginLeft:"64px"
           }}
         >
           {label}

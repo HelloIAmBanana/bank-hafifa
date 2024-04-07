@@ -6,7 +6,7 @@ export const AuthHandlerRoute = () => {
   const isAuthenticated = AuthService.isUserAuthenticated();
   const location = useLocation();
   const currentRoute = location.pathname;
-  const isPublicRoute = ["/signin", "/", "/signup"].some((route) => route === currentRoute);
+  const isPublicRoute =  ["/", "/signup"].some((route) => route === currentRoute);
 
   if (isAuthenticated) {
     return isPublicRoute ? (
@@ -19,6 +19,6 @@ export const AuthHandlerRoute = () => {
       </UserProvider>
     );
   } else {
-    return isPublicRoute ? <Outlet /> : <Navigate to="/signin" />;
+    return isPublicRoute ? <Outlet /> : <Navigate to="/" />;
   }
 };
