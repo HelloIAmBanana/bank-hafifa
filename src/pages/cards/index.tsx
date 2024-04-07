@@ -164,9 +164,9 @@ const CardsPage: React.FC = () => {
               <Button onClick={openCardModal}>CREATE NEW CARD (JUST FOR TESTING)</Button>
             </Grid>
             <Box sx={{ flexGrow: 1 }}>
-              <Grid container direction="row" justifyContent="center" alignItems="baseline" mb={3}>
+              <Grid container direction="row" justifyContent="center" alignItems="center" >
                 <Grid item xs={12} md={12} xl={12} ml={16}>
-                  <Typography variant="h3" fontFamily="Poppins">
+                  <Typography variant="h3" fontFamily="Poppins" mt={5}>
                     Owned
                   </Typography>
                 </Grid>
