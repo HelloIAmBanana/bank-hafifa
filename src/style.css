@@ -49,7 +49,7 @@ button[type="submit"]:hover {
   --ag-foreground-color: #d6044e;
   --ag-border-color:white;
   --ag-background-color: white;
-  --ag-header-background-color: #d6044e;
+  --ag-header-background-color: #ffffff;
   --ag-header-column-resize-handle-color: transparent;
   --ag-font-size: 17px;
   --ag-font-family:Poppins;

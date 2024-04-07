@@ -188,6 +188,7 @@ const SignUpPage: React.FC = () => {
               <Button
                 style={{
                   padding: "50px",
+                  border: "1px solid black",
                   borderRadius: "100%",
                   backgroundSize: "100%",
                   backgroundImage: `url(${
