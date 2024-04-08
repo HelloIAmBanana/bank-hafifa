@@ -6,17 +6,56 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserProvider";
 import NavBarItem from "./NavBarItem";
 import { GiPayMoney, GiSwipeCard, GiHouse, GiPiggyBank, GiGears, GiExitDoor } from "react-icons/gi";
+import { GrUserSettings } from "react-icons/gr";
+
+import AuthService from "../../AuthService";
+
+const getNavBarIcon = (item: string) => {
+  switch (item) {
+    case "Home":
+      return <GiHouse />;
+    case "Loans":
+    case "Loans Managment":
+      return <GiPayMoney />;
+    case "Cards":
+    case "Cards Managment":
+      return <GiSwipeCard />;
+    case "Deposits":
+    case "Deposits Managment":
+      return <GiPiggyBank />;
+    case "User Managment":
+      return <GrUserSettings />;
+    case "Settings":
+      return <GiGears />;
+    default:
+      return <GiExitDoor />;
+  }
+};
+
 export default function NavBar() {
   const navigate = useNavigate();
   const [currentUser] = useContext(UserContext);
-
-  const icons = [<GiHouse />, <GiPayMoney />, <GiSwipeCard />, <GiPiggyBank />, <GiGears />];
 
   function logUserOut() {
     sessionStorage.clear();
     localStorage.removeItem("rememberedAuthToken");
     navigate("/");
   }
+
+  const getRoutePath = (item: string) => {
+    switch (item) {
+      case "Loans Managment":
+        return navigate(`/loansmanagment`);
+      case "Cards Managment":
+        return navigate(`/cardsmanagment`);
+      case "Deposits Managment":
+        return navigate(`/depositsmanagment`);
+      case "User Managment":
+        return navigate(`/usersmanagment`);
+      default:
+        return navigate(`/${item.toLowerCase()} `);
+    }
+  };
 
   const userName = useMemo(() => {
     return getUserFullName(currentUser as User);
@@ -26,10 +65,18 @@ export default function NavBar() {
     return currentUser?.avatarUrl;
   }, [currentUser]);
 
+  const userRoutes = useMemo(() => {
+    if (currentUser) {
+      const isAdmin = AuthService.isUserAdmin(currentUser);
+      if (isAdmin) return ["Loans Managment", "Cards Managment", "Deposits Managment", "User Managment", "Settings"];
+    }
+    return ["Home", "Loans", "Cards", "Deposits", "Settings"];
+  }, [currentUser]);
+
   return (
     <Box sx={{ display: "flex" }}>
       {!userName ? (
-        <Box></Box>
+        <Box />
       ) : (
         <Drawer
           variant="permanent"
@@ -46,10 +93,7 @@ export default function NavBar() {
           }}
         >
           <Box sx={{ marginTop: "15px", marginLeft: 1 }}>
-            <Avatar
-              src={avatarIMG}
-              sx={{backgroundColor: "#f50057", width: 35, height: 35 }}
-            >
+            <Avatar src={avatarIMG} sx={{ backgroundColor: "#f50057", width: 35, height: 35 }}>
               {userName.split(" ")[0][0]}
               {userName.split(" ")[1][0]}
             </Avatar>
@@ -66,8 +110,12 @@ export default function NavBar() {
           <Toolbar />
           <Box sx={{ overflow: "auto" }}>
             <List>
-              {["Home", "Loans", "Cards", "Deposits", "Settings"].map((text, index) => (
-                <NavBarItem label={text} icon={icons[index]} onClick={() => navigate(`/${text.toLowerCase()} `)} />
+              {userRoutes.map((text) => (
+                <NavBarItem
+                  label={text}
+                  icon={getNavBarIcon(text)}
+                  onClick={()=>getRoutePath(text)}
+                />
               ))}
               <NavBarItem label={"Logout"} icon={<GiExitDoor />} onClick={logUserOut} />
             </List>

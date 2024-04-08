@@ -20,7 +20,6 @@ const schema: JSONSchemaType<User> = {
     id: { type: "string" },
     firstName: { type: "string", minLength: 1 },
     lastName: { type: "string", minLength: 1 },
-    hobbies: { type: "array", items: { type: "string" } },
     email: { type: "string", pattern: "[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,}$" },
     password: { type: "string", minLength: 6 },
     birthDate: { type: "string", minLength: 1 },
@@ -29,7 +28,6 @@ const schema: JSONSchemaType<User> = {
     accountType: { type: "string", enum: ["Business", "Personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
-    cardsAmount:{ type: "number" },
   },
   required: [],
   additionalProperties: true,
@@ -131,7 +129,7 @@ const ProfileSettingsPage: React.FC = () => {
   document.title = "Account Settings";
 
   return !currentUser ? (
-    <Grid container direction="column" justifyContent="flex-end" alignItems="center" marginTop={45}>
+    <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
       <PacmanLoader color="#ffe500" size={50} />
     </Grid>
   ) : (

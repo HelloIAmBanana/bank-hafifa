@@ -19,7 +19,6 @@ const schema: JSONSchemaType<User> = {
     id: { type: "string" },
     firstName: { type: "string", minLength: 1 },
     lastName: { type: "string", minLength: 1 },
-    hobbies: { type: "array", items: { type: "string" } },
     email: { type: "string", pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$" },
     password: { type: "string", minLength: 6 },
     birthDate: { type: "string", minLength: 1 },
@@ -28,8 +27,6 @@ const schema: JSONSchemaType<User> = {
     accountType: { type: "string", enum: ["business", "personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
-    cardsAmount:{ type: "number" },
-
   },
   required: ["email", "password"],
   additionalProperties: true,

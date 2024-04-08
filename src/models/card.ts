@@ -4,6 +4,6 @@ export type Card = {
       type: string;
       expireDate: string;
       hiddenPin: number;
-      status: string;
+      status: "approved"|"rejected"|"pending";
       rejectedMessage: string;
     };

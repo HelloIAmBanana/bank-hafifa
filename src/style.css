@@ -50,7 +50,7 @@ button[type="submit"]:hover {
 
 .ag-theme-quartz,
 .ag-theme-quartz-dark {
-  --ag-foreground-color: #d6044e;
+  --ag-foreground-color: #000000;
   --ag-border-color:white;
   --ag-background-color: white;
   --ag-header-background-color: #ffffff;

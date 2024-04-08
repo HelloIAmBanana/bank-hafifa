@@ -16,6 +16,11 @@ class AuthService {
     return localStorage.getItem("rememberedAuthToken");
   }
 
+  static isUserAdmin(user:User){
+    const isAdmin = Boolean(user.role==="admin")
+    return isAdmin;
+  }
+
   static async getCurrentUser(): Promise<User | null> {
     const authToken = AuthService.getAuthToken();
     if (authToken) {

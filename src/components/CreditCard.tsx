@@ -13,34 +13,33 @@ interface Props {
   cardNumber: string;
   cardType: string;
 }
+const getCardProviderImage = (type: string) => {
+  switch (type) {
+    case "Visa":
+      return Visa;
+    case "American Express":
+      return AmericanExpress;
+    case "Mastercard":
+      return Mastercard;
+    default:
+      return null;
+  }
+};
 
-const CardGenerator: React.FC<Props> = ({ cardOwnerName, cardNumber, expireDate, cardType }) => {
-  const getCardProviderImage = (type: string) => {
-    switch (type) {
-      case "Visa":
-        return Visa;
-      case "AmericanExpress":
-        return AmericanExpress;
-      case "Mastercard":
-        return Mastercard;
-      default:
-        return null;
-    }
-  };
-
+const CreditCard: React.FC<Props> = ({ cardOwnerName, cardNumber, expireDate, cardType }) => {
   return (
     <Paper
       sx={{
-        width: 300,
+        width: 350,
         height: "12rem",
-        border: "3px solid black",
+        border: "2px solid black",
         borderRadius: 3,
         backgroundColor: "#DF0351",
         backgroundImage: "linear-gradient(135deg, #DF0351, #525A9A)",
       }}
       elevation={16}
     >
-      <Grid container justifyContent="space-between" spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+      <Grid container justifyContent="space-between" spacing={{ xs: 3, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
         <Grid container direction="row" justifyContent="space-between" alignItems="flex-start" mt={3} ml={2}>
           <Grid item xs={4} sm={4} md={4} key={1} sx={{ ml: 2, mt: 2 }}>
             <img width="30rem" height="30rem" src={`${thunderIcon}`} alt="Thunder" />
@@ -57,7 +56,7 @@ const CardGenerator: React.FC<Props> = ({ cardOwnerName, cardNumber, expireDate,
             </Typography>
           </center>
         </Grid>
-        <Grid item xs={8} sm={8} md={8} key={4} sx={{ ml: 1, mt: 2 }}>
+        <Grid item xs={2} sm={5} md={8} key={4} sx={{ ml: 1, mt: 2 }}>
           <Typography color="white">
             {cardOwnerName}
           </Typography>
@@ -65,7 +64,7 @@ const CardGenerator: React.FC<Props> = ({ cardOwnerName, cardNumber, expireDate,
             {expireDate}
           </Typography>
         </Grid>
-        <Grid item xs={4} sm={4} md={4} key={5} sx={{ mr: -2 }}>
+        <Grid item xs={2} sm={3} md={4} key={5} sx={{ mr: -2 }}>
           <img width="60rem" height="60rem" src={`${getCardProviderImage(cardType)}`} alt="Card Provider" />
         </Grid>
       </Grid>
@@ -73,4 +72,4 @@ const CardGenerator: React.FC<Props> = ({ cardOwnerName, cardNumber, expireDate,
   );
 };
 
-export default CardGenerator;
+export default CreditCard;

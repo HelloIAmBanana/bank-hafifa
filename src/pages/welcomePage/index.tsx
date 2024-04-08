@@ -1,7 +1,7 @@
 import { Box, Typography, Container, Grid, Paper, Modal, Skeleton } from "@mui/material";
 import NavBar from "../../components/NavigationBar/NavBar";
 import AuthService from "../../AuthService";
-import { User } from "../../models/user"; 
+import { User } from "../../models/user";
 import { TransactionRow } from "../../models/transactionRow";
 import { Transaction } from "../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../utils/utils";
@@ -16,6 +16,7 @@ import GenericForm from "../../components/GenericForm/GenericForm";
 import OverviewPanel from "./overviewPanel";
 import TransactionsTable from "../../components/UserTransactionsTable";
 import { PacmanLoader } from "react-spinners";
+import { FirstLoadContext } from "../../FirstLoanProvider";
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
@@ -60,8 +61,9 @@ const schema: JSONSchemaType<Transaction> = {
 };
 const validateForm = ajv.compile(schema);
 
-export default function Welcome() {
+const Welcome: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
+  const [firstLoad, setFirstLoad] = useContext(FirstLoadContext);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
@@ -157,8 +159,12 @@ export default function Welcome() {
         const sortedTransactions = fetchedTransactions.sort((a, b) => {
           return DateTime.fromISO(b.date).toMillis() - DateTime.fromISO(a.date).toMillis();
         });
-        setTransactions(sortedTransactions);
+        const userTransactions = sortedTransactions.filter(
+          (transaction) => (transaction.senderID === currentUser.id)||(transaction.receiverID === currentUser.id)
+        );
+        setTransactions(userTransactions);
         setIsTableLoading(false);
+        setFirstLoad(false)
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -176,6 +182,10 @@ export default function Welcome() {
       <PacmanLoader color="#ffe500" size={50} />
     </Grid>
   ) : (
+    (firstLoad) ? (
+      <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
+        <PacmanLoader color="#ffe500" size={50} />
+      </Grid>):(
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
       <NavBar />
       <Container sx={{ mt: 3 }}>
@@ -229,7 +239,7 @@ export default function Welcome() {
             </Paper>
           </Grid>
           {/* Transactions Table*/}
-          <Grid item xs={12} md={9} lg={12} order={{ xs: 2, md: 2, lg: 3 }}>
+          <Grid item xs={12} md={9} lg={12} order={{ xs: 2, md: 2, lg: 3 }} mt={-20}>
             <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }} elevation={0}>
               <Typography variant="h4" gutterBottom fontWeight={"bold"} fontFamily={"Poppins"}>
                 Transactions
@@ -237,7 +247,7 @@ export default function Welcome() {
               {isTableLoading ? (
                 <Skeleton height={350} />
               ) : (
-                <TransactionsTable transactions={transactions} userID={currentUser.id} />
+                <TransactionsTable transactions={transactions} userID={currentUser.id}/>
               )}
             </Paper>
           </Grid>
@@ -275,6 +285,7 @@ export default function Welcome() {
           </Grid>
         </Box>
       </Modal>
-    </Box>
+    </Box>)
   );
 }
+export default Welcome

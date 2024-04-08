@@ -8,6 +8,7 @@ import LoansPage from "./pages/loans";
 import DepositsPage from "./pages/deposits";
 import Welcome from "./pages/welcomePage";
 import CardsPage from "./pages/cards";
+import AdminPanel from "./pages/adminPanel";
 import "./fonts/Poppins-Regular.ttf";
 import "./style.css";
 import "./App.css";
