@@ -39,3 +39,15 @@ export function warningAlert(message:string){
 });
 }
 
+export function normalAlert(message:string){
+  Swal.fire({
+  toast: true,
+  position: "bottom-right",
+  color: "black",
+  title: message,
+  showConfirmButton: false,
+  timer: 3750,
+  timerProgressBar: true,
+});
+}
+

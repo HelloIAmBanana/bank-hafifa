@@ -4,7 +4,7 @@ export default class CRUDLocalStorage {
       setTimeout(() => {
         const data = localStorage.getItem(key);
         resolve(data ? JSON.parse(data) : ([] as unknown as T));
-      }, 3000);
+      }, 1000);
     });
   }
 
@@ -13,7 +13,7 @@ export default class CRUDLocalStorage {
       setTimeout(() => {
         localStorage.setItem(key, JSON.stringify(value));
         resolve(value);
-      }, 3000);
+      }, 1000);
     });
   }
 
@@ -22,19 +22,25 @@ export default class CRUDLocalStorage {
       setTimeout(() => {
         localStorage.removeItem(key);
         resolve();
-      }, 3000);
+      }, 1000);
     });
   }
 
   static async addItemToList<T>(key: string, newItem: T): Promise<void> {
-    const items: T[] = await CRUDLocalStorage.getAsyncData<T[]>(key) || [];
+    const items: T[] = (await CRUDLocalStorage.getAsyncData<T[]>(key)) || [];
     const updatedList: T[] = [...items, newItem];
     await CRUDLocalStorage.setAsyncData(key, updatedList);
   }
 
   static async updateItemInList<T extends { id: string }>(key: string, newItem: T): Promise<void> {
-    const items: T[] = await CRUDLocalStorage.getAsyncData<T[]>(key) || [];
+    const items: T[] = (await CRUDLocalStorage.getAsyncData<T[]>(key)) || [];
     const updatedItems = items.map((currentItem) => (currentItem.id === newItem.id ? newItem : currentItem));
     await CRUDLocalStorage.setAsyncData(key, updatedItems);
+  }
+
+  static async deleteItemFromList<T extends { id: string }>(key: string, unwantedItem: T): Promise<void> {
+    const items: T[] = (await CRUDLocalStorage.getAsyncData<T[]>(key)) || [];
+    const filteredList: T[] = items.filter((currentItem) => currentItem.id !== unwantedItem.id);
+    await CRUDLocalStorage.setAsyncData(key, filteredList);
   }
 }

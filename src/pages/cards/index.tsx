@@ -1,10 +1,9 @@
 import * as React from "react";
-import AuthService from "../../AuthService";
 import NavBar from "../../components/NavigationBar/NavBar";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect, useContext } from "react";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import { generateUniqueNumber, getUserFullName } from "../../utils/utils";
+import { deleteLegacyCreditCard, generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
 import { Button, Grid, Modal, Box, Container, Typography, Skeleton } from "@mui/material";
 import Ajv, { JSONSchemaType } from "ajv";
 import ajvErrors from "ajv-errors";
@@ -13,28 +12,29 @@ import { UserContext } from "../../UserProvider";
 import { Card } from "../../models/card";
 import { PacmanLoader } from "react-spinners";
 import CreditCard from "../../components/CreditCard";
-import { FirstLoadContext } from "../../FirstLoanProvider";
+import { FirstLoadContext } from "../../FirstLoadProvider";
+import { useIsUserAdmin } from "../../hooks/useIsUserAdmin";
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
 const schema: JSONSchemaType<Card> = {
   type: "object",
   properties: {
+    id: { type: "string" },
     cardNumber: { type: "number" },
     accountID: { type: "string" },
+    ownerName: { type: "string" },
     type: { type: "string", enum: ["Visa", "Mastercard", "American Express"] },
     expireDate: { type: "string", minLength: 1 },
     hiddenPin: { type: "number" },
     status: { type: "string" },
     rejectedMessage: { type: "string" },
   },
-  required: ["accountID", "type", "expireDate"],
+  required: ["type"],
   additionalProperties: true,
   errorMessage: {
     properties: {
-      accountID: "Enter Account ID",
       type: "Enter Card Provider",
-      expireDate: "Please Enter Expiration Date",
     },
   },
 };
@@ -51,49 +51,28 @@ const CardsPage: React.FC = () => {
   const [rejectedCards, setRejectedCards] = useState<Card[]>([]);
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
 
-  const fields = useMemo(() => {
-    return [
-      {
-        id: "accountID",
-        label: "Account ID",
-        type: "text",
-        placeholder: "Enter Account ID",
-        initValue: `${currentUser?.id}`,
-      },
-      {
-        id: "type",
-        label: "Card Type",
-        type: "select",
-        placeholder: "Enter Credit Card Provider",
-        options: [
-          { value: "Visa", label: "Visa" },
-          { value: "Mastercard", label: "Mastercard" },
-          { value: "American Express", label: "American Express" },
-        ],
-      },
-      {
-        id: "expireDate",
-        label: "Date Of Expiry",
-        type: "date",
-        placeholder: "Enter Date Of Expiration",
-      },
-    ];
-  }, [currentUser]);
+  const fields = [
+    {
+      id: "type",
+      label: "Card Provider",
+      type: "select",
+      placeholder: "Enter Credit Card Provider",
+      options: [
+        { value: "Visa", label: "Visa" },
+        { value: "Mastercard", label: "Mastercard" },
+        { value: "American Express", label: "American Express" },
+      ],
+    },
+  ];
 
   const fetchUserCards = async () => {
     setIsCardsLoading(true);
     if (currentUser) {
       try {
         const fetchedCards = await CRUDLocalStorage.getAsyncData<Card[]>("cards");
-        const modifiedCards = fetchedCards
-          .filter((filteredCards) => filteredCards.accountID === currentUser.id)
-          .map((cards) => {
-            return {
-              ...cards,
-              cardOwnerName: getUserFullName(currentUser),
-              expireDate: cards.expireDate.slice(0, 7).replace("-", "/"),
-            };
-          });
+        const modifiedCards: Card[] = fetchedCards.filter(
+          (filteredCards) => filteredCards.accountID === currentUser.id
+        );
         setApprovedCards(modifiedCards.filter((card) => card.status === "approved"));
         setRejectedCards(modifiedCards.filter((card) => card.status === "rejected"));
         setPendingCards(modifiedCards.filter((card) => card.status === "pending"));
@@ -113,19 +92,39 @@ const CardsPage: React.FC = () => {
     setIsNewCardModalOpen(false);
   };
 
+  const cancelCard = async (card: Card) => {
+    if (!card.id) {
+      errorAlert("Card is outdated! Removing from local storage!");
+      await deleteLegacyCreditCard(card);
+      await fetchUserCards();
+      return;
+    }
+    await CRUDLocalStorage.deleteItemFromList<Card>("cards", card);
+    successAlert("Card Canceled!");
+    await fetchUserCards();
+  };
+
+  const calculateExpiredDate = (date: string) => {
+    const year = Number(date.slice(0, 4));
+    const expiredYear = year + 3;
+    const expiredDate = `${expiredYear}${date.slice(4)}`;
+    return expiredDate;
+  };
+
   const handleCardModalSubmit = async (data: any) => {
     setIsCardCreationLoading(true);
-    const cardOwner = await AuthService.getUserFromStorage(data.accountID);
-
-    if (!cardOwner) {
-      errorAlert("USER DOES NOT EXIST!");
-      closeCardModal();
+    if (!data.type) {
       setIsCardCreationLoading(false);
       return;
     }
+    const currentDateTime = new Date().toISOString();
 
     const newCard: Card = {
       ...data,
+      id: generateUniqueId(),
+      accountID: currentUser!.id,
+      ownerName: getUserFullName(currentUser!),
+      expireDate: calculateExpiredDate(currentDateTime),
       cardNumber: +generateUniqueNumber(16),
       hiddenPin: +generateUniqueNumber(16).slice(1, 4),
       status: "pending",
@@ -147,7 +146,7 @@ const CardsPage: React.FC = () => {
   }, [currentUser]);
 
   document.title = "Credit Cards";
-
+  useIsUserAdmin();
   return !currentUser ? (
     <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
       <PacmanLoader color="#ffe500" size={50} />
@@ -179,7 +178,8 @@ const CardsPage: React.FC = () => {
 
                 {isCardsLoading ? (
                   <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
-                  <Skeleton height={"12rem"} width={window.innerWidth / 2} /></Grid>
+                    <Skeleton height={"12rem"} width={window.innerWidth / 2} />
+                  </Grid>
                 ) : (
                   <Box>
                     {approvedCards.length > 0 && (
@@ -188,15 +188,27 @@ const CardsPage: React.FC = () => {
                           Approved
                         </Typography>
                         <Box
-                          sx={{ mt: 2, overflowX: "auto", display: "flex", flexDirection: "row",maxWidth: "100vh", width:"auto" }}
+                          sx={{
+                            mt: 2,
+                            overflowX: "auto",
+                            display: "flex",
+                            flexDirection: "row",
+                            maxWidth: "100vh",
+                            width: "auto",
+                          }}
                         >
                           {approvedCards.map((card, index) => (
                             <Grid item key={index} sx={{ marginRight: 2 }}>
                               <CreditCard
-                                cardOwnerName={getUserFullName(currentUser)}
-                                cardNumber={`${card.cardNumber}`}
-                                expireDate={card.expireDate}
-                                cardType={card.type}
+                                card={card}
+                                approveCard={(card) => {
+                                  return;
+                                }}
+                                rejectCard={(card) => {
+                                  return;
+                                }}
+                                isUserAdmin={false}
+                                cancelCard={cancelCard}
                               />
                             </Grid>
                           ))}
@@ -209,15 +221,29 @@ const CardsPage: React.FC = () => {
                           Pending
                         </Typography>
                         <Grid
-                          sx={{ mt: 2, overflowX: "auto", display: "flex", flexDirection: "row", maxWidth: "100vh", width:"auto" }}
+                          sx={{
+                            mt: 2,
+                            overflowX: "auto",
+                            display: "flex",
+                            flexDirection: "row",
+                            maxWidth: "100vh",
+                            width: "auto",
+                          }}
                         >
                           {pendingCards.map((card, index) => (
                             <Grid item key={index} sx={{ marginRight: 2 }}>
                               <CreditCard
-                                cardOwnerName={getUserFullName(currentUser)}
-                                cardNumber={`${card.cardNumber}`}
-                                expireDate={card.expireDate}
-                                cardType={card.type}
+                                card={card}
+                                approveCard={(card) => {
+                                  return;
+                                }}
+                                rejectCard={(card) => {
+                                  return;
+                                }}
+                                isUserAdmin={false}
+                                cancelCard={(card) => {
+                                  return;
+                                }}
                               />
                             </Grid>
                           ))}
@@ -230,15 +256,29 @@ const CardsPage: React.FC = () => {
                           Rejected
                         </Typography>
                         <Box
-                          sx={{ mt: 2, overflowX: "auto", display: "flex", flexDirection: "row", maxWidth: "100vh", width:"auto" }}
+                          sx={{
+                            mt: 2,
+                            overflowX: "auto",
+                            display: "flex",
+                            flexDirection: "row",
+                            maxWidth: "100vh",
+                            width: "auto",
+                          }}
                         >
                           {rejectedCards.map((card, index) => (
                             <Grid item key={index} sx={{ marginRight: 2 }}>
                               <CreditCard
-                                cardOwnerName={getUserFullName(currentUser)}
-                                cardNumber={`${card.cardNumber}`}
-                                expireDate={card.expireDate}
-                                cardType={card.type}
+                                card={card}
+                                approveCard={(card) => {
+                                  return;
+                                }}
+                                rejectCard={(card) => {
+                                  return;
+                                }}
+                                isUserAdmin={false}
+                                cancelCard={(card) => {
+                                  return;
+                                }}
                               />
                             </Grid>
                           ))}
@@ -276,7 +316,7 @@ const CardsPage: React.FC = () => {
             <GenericForm
               fields={fields}
               onSubmit={handleCardModalSubmit}
-              submitButtonLabel={"Create Card"}
+              submitButtonLabel={"Request New Card"}
               schema={schema}
               isLoading={isCardCreationLoading}
             ></GenericForm>

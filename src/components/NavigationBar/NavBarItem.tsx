@@ -18,19 +18,31 @@ const NavBarItem: FunctionComponent<NavBarItemProps> = ({ label, icon, onClick }
       disablePadding
       sx={{
         mb: 2,
-        color: location.pathname === "/" + label.toLowerCase() ? "#ca0f50d0" : "#999999",
+        color:
+          location.pathname === "/" + label.toLowerCase() ||
+          location.pathname === "/admin/" + label.toLowerCase().split(" ")[0]
+            ? "#ca0f50d0"
+            : "#999999",
       }}
     >
       <ListItemButton onClick={onClick}>
         <IconContext.Provider
-          value={{ color: location.pathname === "/" + label.toLowerCase() ? "#ca0f50d0" : "#999999", size: "2.5rem" }}>
-            {icon}
+          value={{
+            color:
+              location.pathname === "/" + label.toLowerCase() ||
+              location.pathname === "/admin/" + label.toLowerCase().split(" ")[0]
+                ? "#ca0f50d0"
+                : "#999999",
+            size: "2.5rem",
+          }}
+        >
+          {icon}
         </IconContext.Provider>
         <Typography
           sx={{
             fontFamily: "Poppins",
             fontSize: "1.5rem",
-            marginLeft:"64px"
+            marginLeft: "64px",
           }}
         >
           {label}

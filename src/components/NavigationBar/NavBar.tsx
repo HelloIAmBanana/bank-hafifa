@@ -5,8 +5,7 @@ import { getUserFullName } from "../../utils/utils";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserProvider";
 import NavBarItem from "./NavBarItem";
-import { GiPayMoney, GiSwipeCard, GiHouse, GiPiggyBank, GiGears, GiExitDoor } from "react-icons/gi";
-import { GrUserSettings } from "react-icons/gr";
+import { GiPayMoney, GiSwipeCard, GiHouse, GiPiggyBank, GiGears, GiExitDoor, GiSmart } from "react-icons/gi";
 
 import AuthService from "../../AuthService";
 
@@ -15,16 +14,16 @@ const getNavBarIcon = (item: string) => {
     case "Home":
       return <GiHouse />;
     case "Loans":
-    case "Loans Managment":
+    case "Loans Management":
       return <GiPayMoney />;
     case "Cards":
-    case "Cards Managment":
+    case "Cards Management":
       return <GiSwipeCard />;
     case "Deposits":
-    case "Deposits Managment":
+    case "Deposits Management":
       return <GiPiggyBank />;
-    case "User Managment":
-      return <GrUserSettings />;
+    case "Users Management":
+      return <GiSmart />;
     case "Settings":
       return <GiGears />;
     default:
@@ -44,14 +43,14 @@ export default function NavBar() {
 
   const getRoutePath = (item: string) => {
     switch (item) {
-      case "Loans Managment":
-        return navigate(`/loansmanagment`);
-      case "Cards Managment":
-        return navigate(`/cardsmanagment`);
-      case "Deposits Managment":
-        return navigate(`/depositsmanagment`);
-      case "User Managment":
-        return navigate(`/usersmanagment`);
+      case "Loans Management":
+        return navigate(`/admin/loans`);
+      case "Cards Management":
+        return navigate(`/admin/cards`);
+      case "Deposits Management":
+        return navigate(`/admin/deposits`);
+      case "Users Management":
+        return navigate(`/admin/users`);
       default:
         return navigate(`/${item.toLowerCase()} `);
     }
@@ -68,7 +67,8 @@ export default function NavBar() {
   const userRoutes = useMemo(() => {
     if (currentUser) {
       const isAdmin = AuthService.isUserAdmin(currentUser);
-      if (isAdmin) return ["Loans Managment", "Cards Managment", "Deposits Managment", "User Managment", "Settings"];
+      if (isAdmin)
+        return ["Home", "Loans Management", "Cards Management", "Deposits Management", "Users Management", "Settings"];
     }
     return ["Home", "Loans", "Cards", "Deposits", "Settings"];
   }, [currentUser]);
@@ -111,11 +111,7 @@ export default function NavBar() {
           <Box sx={{ overflow: "auto" }}>
             <List>
               {userRoutes.map((text) => (
-                <NavBarItem
-                  label={text}
-                  icon={getNavBarIcon(text)}
-                  onClick={()=>getRoutePath(text)}
-                />
+                <NavBarItem label={text} icon={getNavBarIcon(text)} onClick={() => getRoutePath(text)} />
               ))}
               <NavBarItem label={"Logout"} icon={<GiExitDoor />} onClick={logUserOut} />
             </List>

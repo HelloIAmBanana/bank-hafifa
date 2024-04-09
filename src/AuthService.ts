@@ -16,8 +16,9 @@ class AuthService {
     return localStorage.getItem("rememberedAuthToken");
   }
 
-  static isUserAdmin(user:User){
-    const isAdmin = Boolean(user.role==="admin")
+  static isUserAdmin(user: User | undefined) {
+    if (!user) return;
+    const isAdmin = Boolean(user.role === "admin");
     return isAdmin;
   }
 
