@@ -1,7 +1,6 @@
 import { DateTime } from "luxon";
 import { User } from "../models/user";
 import CRUDLocalStorage from "../CRUDLocalStorage";
-import { Card } from "../models/card";
 
 export const generateUniqueId = () => {
   return "_" + Math.random().toString(36).substring(2, 9);
@@ -29,10 +28,4 @@ export async function getItemInList<T extends { id: string }>(key: string, itemI
 
 export function generateUniqueNumber(digit: number) {
   return Math.random().toFixed(digit).split(".")[1];
-}
-
-export async function deleteLegacyCreditCard(card: Card) {
-  const cards = (await CRUDLocalStorage.getAsyncData<Card[]>("cards")) || [];
-  const filteredList: Card[] = cards.filter((currentCard) => currentCard.cardNumber !== card.cardNumber);
-  await CRUDLocalStorage.setAsyncData("cards", filteredList);
 }

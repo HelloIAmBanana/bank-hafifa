@@ -1,8 +1,8 @@
 import * as React from "react";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useState, useEffect, useContext } from "react";
-import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import { deleteLegacyCreditCard, generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
+import { successAlert } from "../../utils/swalAlerts";
+import {generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
 import {
   Button,
   Grid,
