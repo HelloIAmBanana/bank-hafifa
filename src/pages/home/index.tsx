@@ -1,5 +1,4 @@
 import { Box, Typography, Container, Grid, Paper, Modal, Skeleton, Button } from "@mui/material";
-import NavBar from "../../components/NavigationBar/NavBar";
 import AuthService from "../../AuthService";
 import { User } from "../../models/user";
 import { TransactionRow } from "../../models/transactionRow";
@@ -15,8 +14,6 @@ import { DateTime } from "luxon";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import OverviewPanel from "./overviewPanel";
 import TransactionsTable from "../../components/UserTransactionsTable";
-import { PacmanLoader } from "react-spinners";
-import { FirstLoadContext } from "../../FirstLoadProvider";
 import { useNavigate } from "react-router-dom";
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -64,7 +61,6 @@ const validateForm = ajv.compile(schema);
 
 const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
-  const [firstLoad, setFirstLoad] = useContext(FirstLoadContext);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
@@ -171,7 +167,6 @@ const Home: React.FC = () => {
         );
         setTransactions(userTransactions);
         setIsTableLoading(false);
-        setFirstLoad(false);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -184,22 +179,14 @@ const Home: React.FC = () => {
 
   document.title = "Home";
 
-  return !currentUser ? (
-    <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
-      <PacmanLoader color="#ffe500" size={50} />
-    </Grid>
-  ) : firstLoad ? (
-    <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
-      <PacmanLoader color="#ffe500" size={50} />
-    </Grid>
-  ) : (
+  return (
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
-      <NavBar />
+
       <Container sx={{ mt: 3 }}>
         {isAdmin ? (
           <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
             <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
-              Welcome Back Admin {getUserFullName(currentUser)}
+              Welcome Back Admin {getUserFullName(currentUser!)}
             </Typography>
             <Grid container direction="row" justifyContent="space-evenly" alignItems="center" spacing={1}>
               <Grid item>
@@ -233,7 +220,7 @@ const Home: React.FC = () => {
                   isTableLoading={isTableLoading}
                   userOldBalance={userOldBalance}
                   isButtonLoading={isButtonLoading}
-                  currentUser={currentUser}
+                  currentUser={currentUser!}
                   openPaymentModal={openPaymentModal}
                 />
               </Paper>
@@ -277,7 +264,7 @@ const Home: React.FC = () => {
                 {isTableLoading ? (
                   <Skeleton height={350} />
                 ) : (
-                  <TransactionsTable transactions={transactions} userID={currentUser.id} />
+                  <TransactionsTable transactions={transactions} userID={currentUser!.id} />
                 )}
               </Paper>
             </Grid>

@@ -12,9 +12,9 @@ import { formatIsoStringToDate } from "../utils/utils";
 interface Props {
   card: Card;
   isUserAdmin: Boolean;
-  approveCard: (card: Card) => void;
-  rejectCard: (card: Card, data: any) => void;
-  cancelCard: (card: Card) => void;
+  approveCard?: (card: Card) => void;
+  rejectCard?: (card: Card, data: any) => void;
+  cancelCard?: (card: Card) => void;
 }
 const getCardProviderImage = (type: string) => {
   switch (type) {
@@ -42,12 +42,12 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
 
   const approveCardButtonClicked = () => {
     setIsCardBeingApproved(true);
-    approveCard(card);
+    approveCard?.(card);
   };
 
   const cancelCardButtonClicked = () => {
     setIsCardBeingCanceled(true);
-    cancelCard(card);
+    cancelCard?.(card);
   };
 
   const rejectCardButtonClicked = () => {
@@ -56,7 +56,7 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
 
   const handleCardRejection = async () => {
     setIsCardBeingRejected(true);
-    rejectCard(card, rejectionReason);
+    rejectCard?.(card, rejectionReason);
   };
 
   return (
@@ -85,7 +85,7 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
           <Grid item xs={12} sm={12} md={12} key={3} sx={{ mt: -3 }}>
             <center>
               <Typography color="silver" fontFamily="CreditCard" fontSize={16}>
-                {card.cardNumber
+                {(card.status==="pending")&&(!isUserAdmin)?"???? ???? ???? ????":card.cardNumber
                   .toString()
                   .match(/.{1,4}/g)
                   ?.join(" ") || ""}
@@ -94,16 +94,14 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
           </Grid>
           <Grid item xs={2} sm={5} md={8} key={4} sx={{ ml: 1, mt: 2 }}>
             <Typography color="white">{card.ownerName}</Typography>
-            <Typography color="white">{formatIsoStringToDate(card.expireDate, "MM/yyyy")}</Typography>
+            <Typography color="white">{(card.status==="pending")&&(!isUserAdmin)?"??/??":formatIsoStringToDate(card.expireDate, "MM/yyyy")}</Typography>
           </Grid>
           <Grid item xs={2} sm={3} md={4} key={5} sx={{ mr: -2 }}>
             <img width="60rem" height="60rem" src={`${getCardProviderImage(card.type)}`} alt="Card Provider" />
           </Grid>
         </Grid>
       </Paper>
-      {!isUserAdmin ? (
-        <Box />
-      ) : (
+      {isUserAdmin &&(
         <Grid container direction="row" justifyContent="center" alignItems="center">
           <Grid item>
             <Button
@@ -142,9 +140,7 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
           </Grid>
         </Grid>
       )}
-      {card.status !== "rejected" ? (
-        <Box />
-      ) : (
+      {card.status === "rejected" &&(
         <Grid container direction="row" justifyContent="center" alignItems="center">
           <Grid item>
             <Button
@@ -169,9 +165,7 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
           </Grid>
         </Grid>
       )}
-      {card.status !== "approved" ? (
-        <Box />
-      ) : (
+      {card.status === "approved" && (
         <Grid container direction="row" justifyContent="space-between" alignItems="center">
           <Grid item>
             <Button
@@ -223,11 +217,8 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
         </Grid>
       )}
       <Modal
-        id="CardModal"
         open={isRejectCardModalOpen}
         onClose={() => setIsRejectCardModalOpen(false)}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
         sx={{
           display: "flex",
           alignItems: "center",

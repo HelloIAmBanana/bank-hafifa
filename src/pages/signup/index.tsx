@@ -92,7 +92,7 @@ const schema: JSONSchemaType<User> = {
   errorMessage: {
     properties: {
       email: "Entered Email Is Invalid.",
-      password: "Entered Password Is Invalid.",
+      password: "Entered Password Is Less Than 6 Characters.",
       firstName: "Enter Your First Name",
       lastName: "Enter Your Last Name",
       birthDate: "Enter Your Birthdate",

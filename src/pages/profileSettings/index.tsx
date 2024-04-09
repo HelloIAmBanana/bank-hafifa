@@ -6,10 +6,8 @@ import ajvErrors from "ajv-errors";
 import { Button, Grid, Typography, Modal, CircularProgress, Input, Box } from "@mui/material";
 import { UserContext } from "../../UserProvider";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import NavBar from "../../components/NavigationBar/NavBar";
 import * as _ from "lodash";
 import GenericForm from "../../components/GenericForm/GenericForm";
-import { PacmanLoader } from "react-spinners";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -128,13 +126,8 @@ const ProfileSettingsPage: React.FC = () => {
 
   document.title = "Account Settings";
 
-  return !currentUser ? (
-    <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
-      <PacmanLoader color="#ffe500" size={50} />
-    </Grid>
-  ) : (
+  return(
     <Box sx={{ display: "flex", backgroundColor: "white"}}>
-      <NavBar />
       <Grid container direction="column" justifyContent="flex-start" alignItems="center"  marginTop={25}>
         <Grid item>
           <GenericForm
@@ -144,6 +137,7 @@ const ProfileSettingsPage: React.FC = () => {
             schema={schema}
             isLoading={isFormLoading}
           />
+          </Grid><Grid item>
           <Button type="submit" onClick={openProfilePicModal}>
             Change Profile Photo🖼️
           </Button>
