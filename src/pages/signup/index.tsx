@@ -8,7 +8,7 @@ import ajvErrors from "ajv-errors";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import { User } from "../../models";
+import { User } from "../../models/user"; 
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -73,7 +73,6 @@ const schema: JSONSchemaType<User> = {
     id: { type: "string" },
     firstName: { type: "string", minLength: 1 },
     lastName: { type: "string", minLength: 1 },
-    hobbies: { type: "array", items: { type: "string" } },
     email: { type: "string", pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$" },
     password: { type: "string", minLength: 6 },
     birthDate: { type: "string", minLength: 1 },
@@ -86,13 +85,14 @@ const schema: JSONSchemaType<User> = {
     },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
+
   },
   required: ["id", "birthDate", "email", "firstName", "lastName", "password", "gender", "accountType"],
   additionalProperties: true,
   errorMessage: {
     properties: {
       email: "Entered Email Is Invalid.",
-      password: "Entered Password Is Invalid.",
+      password: "Entered Password Is Less Than 6 Characters.",
       firstName: "Enter Your First Name",
       lastName: "Enter Your Last Name",
       birthDate: "Enter Your Birthdate",

@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
-import { User } from "../models";
+import { User } from "../models/user";
+import CRUDLocalStorage from "../CRUDLocalStorage";
 
 export const generateUniqueId = () => {
   return "_" + Math.random().toString(36).substring(2, 9);
@@ -17,4 +18,14 @@ export function formatIsoStringToDate(iso: string, format: string) {
   return DateTime.fromISO(iso, {
     zone: "Asia/Jerusalem",
   }).toFormat(`${format}`);
+}
+
+export async function getItemInList<T extends { id: string }>(key: string, itemID: string): Promise<T | undefined> {
+  const items: T[] = (await CRUDLocalStorage.getAsyncData<T[]>(key)) || [];
+  const wantedItem = items.find((currentItem) => currentItem.id === itemID);
+  return wantedItem;
+}
+
+export function generateUniqueNumber(digit: number) {
+  return Math.random().toFixed(digit).split(".")[1];
 }

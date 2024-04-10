@@ -1,15 +1,13 @@
 import React, { useState, useContext, useMemo } from "react";
-import { User } from "../../models";
+import { User } from "../../models/user";
 import { successAlert } from "../../utils/swalAlerts";
 import Ajv, { JSONSchemaType } from "ajv";
 import ajvErrors from "ajv-errors";
 import { Button, Grid, Typography, Modal, CircularProgress, Input, Box } from "@mui/material";
 import { UserContext } from "../../UserProvider";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import NavBar from "../../components/NavigationBar/NavBar";
 import * as _ from "lodash";
 import GenericForm from "../../components/GenericForm/GenericForm";
-import { PacmanLoader } from "react-spinners";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -20,7 +18,6 @@ const schema: JSONSchemaType<User> = {
     id: { type: "string" },
     firstName: { type: "string", minLength: 1 },
     lastName: { type: "string", minLength: 1 },
-    hobbies: { type: "array", items: { type: "string" } },
     email: { type: "string", pattern: "[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,}$" },
     password: { type: "string", minLength: 6 },
     birthDate: { type: "string", minLength: 1 },
@@ -129,22 +126,19 @@ const ProfileSettingsPage: React.FC = () => {
 
   document.title = "Account Settings";
 
-  return !currentUser ? (
-    <Grid container direction="column" justifyContent="flex-end" alignItems="center" marginTop={45}>
-      <PacmanLoader color="#ffe500" size={50} />
-    </Grid>
-  ) : (
-    <Box sx={{ display: "flex", backgroundColor: "white"}}>
-      <NavBar />
-      <Grid container direction="column" justifyContent="flex-start" alignItems="center"  marginTop={25}>
+  return (
+    <Box sx={{ display: "flex", backgroundColor: "white" }}>
+      <Grid container direction="column" justifyContent="flex-start" alignItems="center" marginTop={5} mr={15}>
         <Grid item>
           <GenericForm
             fields={fields}
             onSubmit={handleSubmitProfileInfo}
-            submitButtonLabel="Update Profile"
+            submitButtonLabel="Update"
             schema={schema}
             isLoading={isFormLoading}
           />
+        </Grid>
+        <Grid item>
           <Button type="submit" onClick={openProfilePicModal}>
             Change Profile Photo🖼️
           </Button>

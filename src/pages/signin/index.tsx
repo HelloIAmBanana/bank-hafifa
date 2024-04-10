@@ -3,12 +3,11 @@ import Ajv, { JSONSchemaType } from "ajv";
 import loginImage from "../../imgs/loginPage.svg";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import ajvErrors from "ajv-errors";
-import { User } from "../../models";
+import { User } from "../../models/user"; 
 import { useNavigate , NavLink} from "react-router-dom";
 import { validateLogin } from "./login";
 import { Typography, Box, Grid, Paper } from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -19,7 +18,6 @@ const schema: JSONSchemaType<User> = {
     id: { type: "string" },
     firstName: { type: "string", minLength: 1 },
     lastName: { type: "string", minLength: 1 },
-    hobbies: { type: "array", items: { type: "string" } },
     email: { type: "string", pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$" },
     password: { type: "string", minLength: 6 },
     birthDate: { type: "string", minLength: 1 },
@@ -81,7 +79,7 @@ const SignInPage: React.FC = () => {
       if (validUser) {
         storeCurrentAuthToken(validUser.id, isRemembered);
         successAlert("Signing in!");
-        navigate("/home");
+        navigate("/home")
       } else {
         errorAlert("Wrong Credentials!");
       }

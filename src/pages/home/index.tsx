@@ -1,10 +1,11 @@
-import { Box, Typography, Container, Grid, Paper, Modal, Skeleton } from "@mui/material";
-import NavBar from "../../components/NavigationBar/NavBar";
+import { Box, Typography, Container, Grid, Paper, Modal, Skeleton, Button } from "@mui/material";
 import AuthService from "../../AuthService";
-import { User, TransactionRow, Transaction } from "../../models";
+import { User } from "../../models/user";
+import { TransactionRow } from "../../models/transactionRow";
+import { Transaction } from "../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../utils/utils";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { UserContext } from "../../UserProvider";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import Ajv, { JSONSchemaType } from "ajv";
@@ -13,7 +14,7 @@ import { DateTime } from "luxon";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import OverviewPanel from "./overviewPanel";
 import TransactionsTable from "../../components/UserTransactionsTable";
-import { PacmanLoader } from "react-spinners";
+import { useNavigate } from "react-router-dom";
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
@@ -58,13 +59,19 @@ const schema: JSONSchemaType<Transaction> = {
 };
 const validateForm = ajv.compile(schema);
 
-export default function Welcome() {
+const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
   const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
+  const navigate = useNavigate();
+
+  const isAdmin = useMemo(() => {
+    if (!currentUser) return false;
+    return AuthService.isUserAdmin(currentUser);
+  }, [currentUser]);
 
   const updateBalance = async (user: User, amount: number) => {
     const updatedBalance = user.balance + amount;
@@ -155,7 +162,10 @@ export default function Welcome() {
         const sortedTransactions = fetchedTransactions.sort((a, b) => {
           return DateTime.fromISO(b.date).toMillis() - DateTime.fromISO(a.date).toMillis();
         });
-        setTransactions(sortedTransactions);
+        const userTransactions = sortedTransactions.filter(
+          (transaction) => transaction.senderID === currentUser.id || transaction.receiverID === currentUser.id
+        );
+        setTransactions(userTransactions);
         setIsTableLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -169,77 +179,97 @@ export default function Welcome() {
 
   document.title = "Home";
 
-  return !currentUser ? (
-    <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
-      <PacmanLoader color="#ffe500" size={50} />
-    </Grid>
-  ) : (
+  return (
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
-      <NavBar />
+
       <Container sx={{ mt: 3 }}>
-        <Grid container spacing={20}>
-          {/* Overview Panel */}
-          <Grid item xs={12} md={9} lg={8}>
-            <Paper
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-              }}
-              elevation={0}
-            >
-              <OverviewPanel
-                isTableLoading={isTableLoading}
-                userOldBalance={userOldBalance}
-                isButtonLoading={isButtonLoading}
-                currentUser={currentUser}
-                openPaymentModal={openPaymentModal}
-              />
-            </Paper>
-          </Grid>
-          {/* Quick Transaction */}
-          <Grid item xs={4} md={4} lg={4} order={{ xs: 3, md: 3, lg: 2 }}>
+        {isAdmin ? (
+          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
             <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
-              Quick Transaction
+              Welcome Back Admin {getUserFullName(currentUser!)}
             </Typography>
-            <Paper
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                borderRadius: 5,
-              }}
-            >
-              <Box
+            <Grid container direction="row" justifyContent="space-evenly" alignItems="center" spacing={1}>
+              <Grid item>
+                <Button type="submit">Loans Management</Button>
+              </Grid>
+              <Grid item>
+                <Button type="submit" onClick={() => navigate("/admin/cards")}>
+                  Cards Management
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button type="submit">Users Management</Button>
+              </Grid>
+              <Grid item>
+                <Button type="submit">Deposits Management</Button>
+              </Grid>
+            </Grid>
+          </Grid>
+        ) : (
+          <Grid container spacing={20}>
+            {/* Overview Panel */}
+            <Grid item xs={12} md={9} lg={8}>
+              <Paper
                 sx={{
-                  backgroundColor: "#D3E1F5",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+                elevation={0}
+              >
+                <OverviewPanel
+                  isTableLoading={isTableLoading}
+                  userOldBalance={userOldBalance}
+                  isButtonLoading={isButtonLoading}
+                  currentUser={currentUser!}
+                  openPaymentModal={openPaymentModal}
+                />
+              </Paper>
+            </Grid>
+            {/* Quick Transaction */}
+            <Grid item xs={4} md={4} lg={4} order={{ xs: 3, md: 3, lg: 2 }}>
+              <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+                Quick Transaction
+              </Typography>
+              <Paper
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
                   borderRadius: 5,
-                  height: "150",
-                  borderColor: "#808080",
                 }}
               >
-                <GenericForm
-                  fields={fields}
-                  onSubmit={handleSubmitTransaction}
-                  schema={schema}
-                  isLoading={isButtonLoading && !isPaymentModalOpen}
-                  submitButtonLabel="Send Money"
-                />
-              </Box>
-            </Paper>
+                <Box
+                  sx={{
+                    backgroundColor: "#D3E1F5",
+                    borderRadius: 5,
+                    height: "150",
+                    borderColor: "#808080",
+                  }}
+                >
+                  <GenericForm
+                    fields={fields}
+                    onSubmit={handleSubmitTransaction}
+                    schema={schema}
+                    isLoading={isButtonLoading && !isPaymentModalOpen}
+                    submitButtonLabel="Send Money"
+                  />
+                </Box>
+              </Paper>
+            </Grid>
+            {/* Transactions Table*/}
+            <Grid item xs={12} md={9} lg={12} order={{ xs: 2, md: 2, lg: 3 }} mt={-20}>
+              <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }} elevation={0}>
+                <Typography variant="h4" gutterBottom fontWeight={"bold"} fontFamily={"Poppins"}>
+                  Transactions
+                </Typography>
+                {isTableLoading ? (
+                  <Skeleton height={350} />
+                ) : (
+                  <TransactionsTable transactions={transactions} userID={currentUser!.id} />
+                )}
+              </Paper>
+            </Grid>
           </Grid>
-          {/* Transactions Table*/}
-          <Grid item xs={12} md={9} lg={12} order={{ xs: 2, md: 2, lg: 3 }}>
-            <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }} elevation={0}>
-              <Typography variant="h4" gutterBottom fontWeight={"bold"} fontFamily={"Poppins"}>
-                Transactions
-              </Typography>
-              {isTableLoading ? (
-                <Skeleton height={350} />
-              ) : (
-                <TransactionsTable transactions={transactions} userID={currentUser.id} />
-              )}
-            </Paper>
-          </Grid>
-        </Grid>
+        )}
       </Container>
 
       <Modal
@@ -275,4 +305,5 @@ export default function Welcome() {
       </Modal>
     </Box>
   );
-}
+};
+export default Home;

@@ -5,10 +5,10 @@ import "@ag-grid-community/styles/ag-theme-quartz.css";
 import { ColDef, ModuleRegistry } from "@ag-grid-community/core";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 import { Box, Typography } from "@mui/material";
-import transferIcon from "../imgs/transaction.png";
+import transactionIcon from "../imgs/icons/Transaction.png";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
 import { formatIsoStringToDate } from "../utils/utils";
-import { TransactionRow } from "../models";
+import { TransactionRow } from "../models/transactionRow";
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
@@ -23,7 +23,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, use
       {
         field: "",
         cellRenderer: () => (
-          <img src={transferIcon} alt="Transfer Icon" color="red" style={{ width: 40, height: 50, color: "red" }} />
+          <img src={transactionIcon} alt="Transfer Icon" color="red" style={{ width: 40, height: 50, color: "red" }} />
         ),
         suppressHeaderMenuButton: true,
         initialWidth: 50,

@@ -1,6 +1,6 @@
 import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
 import { Fragment } from "react/jsx-runtime";
-import { User } from "../../models";
+import { User } from "../../models/user";
 
 interface OverviewGridPanel {
   isTableLoading: boolean;

@@ -4,7 +4,7 @@ import { Box, CircularProgress, MenuItem, FormControl, FormHelperText, Button, T
 import Ajv, { Schema } from "ajv";
 import ajvErrors from "ajv-errors";
 import fieldsRegistry from "./fieldsRegistry";
-import { Field } from "../../models";
+import { Field } from "../../models/field";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -103,7 +103,7 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
       })}
 
       <center>
-        <Button onClick={onClick} type="submit" disabled={isLoading} sx={{ width: "75%" , marginBottom:"10px"}}>
+        <Button onClick={onClick} type="submit" disabled={isLoading} sx={{ width: "75%", marginBottom: "10px" }}>
           {isLoading ? (
             <CircularProgress size={17} thickness={20} sx={{ fontSize: 30, color: "white" }} />
           ) : (

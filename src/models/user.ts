@@ -3,7 +3,6 @@ export type User = {
   firstName: string;
   lastName: string;
   birthDate: string;
-  hobbies: string[];
   email: string;
   password: string;
   avatarUrl: string;

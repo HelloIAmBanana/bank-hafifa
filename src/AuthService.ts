@@ -1,5 +1,5 @@
 import CRUDLocalStorage from "./CRUDLocalStorage";
-import { User } from "./models";
+import { User } from "./models/user";
 
 class AuthService {
   static async getUserFromStorage(id: string) {
@@ -14,6 +14,12 @@ class AuthService {
 
   static getRememberedToken() {
     return localStorage.getItem("rememberedAuthToken");
+  }
+
+  static isUserAdmin(user: User | undefined) {
+    if (!user) return;
+    const isAdmin = Boolean(user.role === "admin");
+    return isAdmin;
   }
 
   static async getCurrentUser(): Promise<User | null> {
