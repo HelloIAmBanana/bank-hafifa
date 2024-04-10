@@ -1,8 +1,8 @@
 import * as React from "react";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 import { successAlert } from "../../utils/swalAlerts";
-import {generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
+import { generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
 import {
   Button,
   Grid,
@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { UserContext } from "../../UserProvider";
 import { Card } from "../../models/card";
-import CreditCardDisplay from "../../components/CreditCardDisplay";
+import CreditCardsRow from "../../components/CreditCardsRow";
 
 const calculateExpiredDate = (date: string) => {
   const year = Number(date.slice(0, 4));
@@ -53,6 +53,18 @@ const CardsPage: React.FC = () => {
     }
     setIsCardsLoading(false);
   };
+
+  const pendingCards = useMemo(() => {
+    return cards.filter((card) => card.status === "pending");
+  }, [cards]);
+
+  const approvedCards = useMemo(() => {
+    return cards.filter((card) => card.status === "approved");
+  }, [cards]);
+
+  const rejectedCards = useMemo(() => {
+    return cards.filter((card) => card.status === "rejected");
+  }, [cards]);
 
   const openCardModal = () => {
     setIsNewCardModalOpen(true);
@@ -100,7 +112,7 @@ const CardsPage: React.FC = () => {
   document.title = "Credit Cards";
 
   return (
-    <Box>
+    <Grid container justifyContent="flex-start">
       <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>
         <Container sx={{ mt: 2 }}>
           <Grid container spacing={5}>
@@ -125,9 +137,9 @@ const CardsPage: React.FC = () => {
                   </Grid>
                 ) : (
                   <Box>
-                    <CreditCardDisplay cards={cards} title="Approved" cancelAction={cancelCard} />
-                    <CreditCardDisplay cards={cards} title="Pending" />
-                    <CreditCardDisplay cards={cards} title="Rejected" />
+                    <CreditCardsRow cards={approvedCards} title="Approved" cancelAction={cancelCard} />
+                    <CreditCardsRow cards={pendingCards} title="Pending" />
+                    <CreditCardsRow cards={rejectedCards} title="Rejected" />
                   </Box>
                 )}
               </Grid>
@@ -176,7 +188,7 @@ const CardsPage: React.FC = () => {
           </center>
         </Box>
       </Modal>
-    </Box>
+    </Grid>
   );
 };
 

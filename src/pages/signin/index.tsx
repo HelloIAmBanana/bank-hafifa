@@ -9,7 +9,6 @@ import { validateLogin } from "./login";
 import { Typography, Box, Grid, Paper } from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 
-
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
@@ -80,7 +79,7 @@ const SignInPage: React.FC = () => {
       if (validUser) {
         storeCurrentAuthToken(validUser.id, isRemembered);
         successAlert("Signing in!");
-        navigate("/home");
+        navigate("/home")
       } else {
         errorAlert("Wrong Credentials!");
       }

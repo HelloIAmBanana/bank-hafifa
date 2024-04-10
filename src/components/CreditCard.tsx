@@ -85,7 +85,7 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
           <Grid item xs={12} sm={12} md={12} key={3} sx={{ mt: -3 }}>
             <center>
               <Typography color="silver" fontFamily="CreditCard" fontSize={16}>
-                {(card.status==="pending")&&(!isUserAdmin)?"???? ???? ???? ????":card.cardNumber
+                {(card.status!=="approved")&&(!isUserAdmin)?"???? ???? ???? ????":card.cardNumber
                   .toString()
                   .match(/.{1,4}/g)
                   ?.join(" ") || ""}
@@ -94,7 +94,7 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
           </Grid>
           <Grid item xs={2} sm={5} md={8} key={4} sx={{ ml: 1, mt: 2 }}>
             <Typography color="white">{card.ownerName}</Typography>
-            <Typography color="white">{(card.status==="pending")&&(!isUserAdmin)?"??/??":formatIsoStringToDate(card.expireDate, "MM/yyyy")}</Typography>
+            <Typography color="white">{(card.status!=="approved")&&(!isUserAdmin)?"??/??":formatIsoStringToDate(card.expireDate, "MM/yyyy")}</Typography>
           </Grid>
           <Grid item xs={2} sm={3} md={4} key={5} sx={{ mr: -2 }}>
             <img width="60rem" height="60rem" src={`${getCardProviderImage(card.type)}`} alt="Card Provider" />
@@ -243,8 +243,10 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
               sx={{ mt: 2, fontFamily: "Poppins" }}
             />
 
-            <Button type="submit" onClick={handleCardRejection} disabled={isCardBeingRejected}>
-              Reject Card
+            <Button type="submit" onClick={handleCardRejection} disabled={isCardBeingRejected} sx={{width:"227.5px"}}>
+            {isCardBeingRejected ? (
+                <CircularProgress size={18} thickness={20} sx={{ fontSize: 30, color: "white" }} />
+              ) :"Reject Request"}
             </Button>
           </center>
         </Box>

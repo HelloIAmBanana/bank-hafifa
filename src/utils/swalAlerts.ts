@@ -42,7 +42,6 @@ export function warningAlert(message:string){
 export function normalAlert(message:string){
   Swal.fire({
   toast: true,
-  color: "black",
   title: message,
   showConfirmButton: false,
   timer: 3750,

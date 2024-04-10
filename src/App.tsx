@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ReactDOM from "react-dom";
 import SignUpPage from "./pages/signup";
 import SignInPage from "./pages/signin";
 import { AuthHandlerRoute } from "./ProtectedRoutes";
@@ -34,4 +33,3 @@ function App() {
 }
 
 export default App;
-ReactDOM.render(<App />, document.getElementById("root"));

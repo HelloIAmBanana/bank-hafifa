@@ -1,5 +1,5 @@
 import React, { useState, useContext, useMemo } from "react";
-import { User } from "../../models/user"; 
+import { User } from "../../models/user";
 import { successAlert } from "../../utils/swalAlerts";
 import Ajv, { JSONSchemaType } from "ajv";
 import ajvErrors from "ajv-errors";
@@ -126,18 +126,19 @@ const ProfileSettingsPage: React.FC = () => {
 
   document.title = "Account Settings";
 
-  return(
-    <Box sx={{ display: "flex", backgroundColor: "white"}}>
-      <Grid container direction="column" justifyContent="flex-start" alignItems="center"  marginTop={25}>
+  return (
+    <Box sx={{ display: "flex", backgroundColor: "white" }}>
+      <Grid container direction="column" justifyContent="flex-start" alignItems="center" marginTop={5} mr={15}>
         <Grid item>
           <GenericForm
             fields={fields}
             onSubmit={handleSubmitProfileInfo}
-            submitButtonLabel="Update Profile"
+            submitButtonLabel="Update"
             schema={schema}
             isLoading={isFormLoading}
           />
-          </Grid><Grid item>
+        </Grid>
+        <Grid item>
           <Button type="submit" onClick={openProfilePicModal}>
             Change Profile Photo🖼️
           </Button>

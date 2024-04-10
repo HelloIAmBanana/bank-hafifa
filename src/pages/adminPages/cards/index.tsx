@@ -4,7 +4,7 @@ import { Grid, Box, Container, Typography, Skeleton } from "@mui/material";
 import { Card } from "../../../models/card";
 import { UserContext } from "../../../UserProvider";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import {  successAlert } from "../../../utils/swalAlerts";
+import { successAlert } from "../../../utils/swalAlerts";
 import CreditCard from "../../../components/CreditCard";
 
 const AdminCardsPage: React.FC = () => {
@@ -52,33 +52,37 @@ const AdminCardsPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
-  document.title = "Credit Cards";
+  document.title = "Cards Management";
 
   return (
-    <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>
-      <Container sx={{ mt: 2 }}>
-        <Grid container spacing={5}>
-          <Box sx={{ flexGrow: 1 }}>
-            <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start">
-              <Grid container direction="row" justifyContent="space-between" alignItems="center" mt={5}>
-                <Grid item xs={6}>
-                  <Typography variant="h3" fontFamily="Poppins">
-                    Credit Cards
-                  </Typography>
+    <Grid container justifyContent="flex-start">
+      <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>
+        <Container sx={{ mt: 2 }}>
+          <Grid container spacing={5}>
+            <Box sx={{ flexGrow: 1 }}>
+              <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start">
+                <Grid container direction="row" justifyContent="space-between" alignItems="center" mt={5}>
+                  <Grid item xs={12}>
+                    <Typography variant="h3" fontFamily="Poppins">
+                      Credit Cards
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} container justifyContent="flex-start">
+                  <Typography variant="h5" fontFamily="Poppins">
+                      Pending Card Requests
+                    </Typography>
+                  </Grid>
                 </Grid>
-              </Grid>
 
               {isCardsLoading ? (
                 <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
                   <Skeleton height={"12rem"} width={window.innerWidth / 2} />
                 </Grid>
               ) : (
-                <Box>
+                <Box  ml={12}>
                   {pendingCards.length > 0 && (
                     <Grid item mt={2}>
-                      <Typography variant="h5" fontFamily="Poppins">
-                        Card Requests
-                      </Typography>
+
                       <Grid container direction="row">
                         {pendingCards.map((card, index) => (
                           <Grid
@@ -86,7 +90,6 @@ const AdminCardsPage: React.FC = () => {
                             direction="row"
                             justifyContent="center"
                             alignItems="center"
-                            xl={4}
                             lg={6}
                             md={8}
                             sm={12}
@@ -97,9 +100,6 @@ const AdminCardsPage: React.FC = () => {
                                 approveCard={approveCard}
                                 rejectCard={rejectCard}
                                 isUserAdmin={true}
-                                cancelCard={(card) => {
-                                  return;
-                                }}
                               />
                             </Grid>
                           </Grid>
@@ -113,7 +113,7 @@ const AdminCardsPage: React.FC = () => {
           </Box>
         </Grid>
       </Container>
-    </Box>
+    </Box></Grid>
   );
 };
 
