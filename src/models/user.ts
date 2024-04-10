@@ -3,7 +3,6 @@ export type User = {
   firstName: string;
   lastName: string;
   birthDate: string;
-  hobbies: string[];
   email: string;
   password: string;
   avatarUrl: string;
@@ -11,5 +10,4 @@ export type User = {
   accountType: string;
   role: string;
   balance: number;
-  cardsAmount:number;
 };

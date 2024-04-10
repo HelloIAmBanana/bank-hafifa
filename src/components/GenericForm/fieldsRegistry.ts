@@ -12,6 +12,7 @@ const fieldsRegistry: FieldsRegistry = {
   password: Input,
   number: Input,
   date: Input,
+  time: Input,
   select: Select,
   checkbox: Checkbox,
 };

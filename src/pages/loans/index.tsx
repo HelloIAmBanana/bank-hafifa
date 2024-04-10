@@ -1,17 +1,14 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { UserContext } from "../../UserProvider";
-import NavBar from "../../components/NavigationBar/NavBar";
-import { Box, Button, Grid, Modal, Skeleton, Typography } from "@mui/material";
-import { generateUniqueId } from "../../utils/utils";
-import { PacmanLoader } from "react-spinners";
-import LoansDisplay from "../../components/LoanDisplay";
+import { Box, Button, Container, Grid, Modal, Skeleton, Typography } from "@mui/material";
+import { generateUniqueId, getUserFullName } from "../../utils/utils";
 import GenericForm from "../../components/GenericForm/GenericForm";
-import AuthService from "../../AuthService";
 import { Loan } from "../../models/loan";
-import { errorAlert, successAlert } from "../../utils/swalAlerts";
+import { successAlert } from "../../utils/swalAlerts";
 import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
+import LoanRow from "../../components/Loan/LoanRows";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -20,13 +17,14 @@ const schema: JSONSchemaType<Loan> = {
   type: "object",
   properties: {
     id: { type: "string" },
+    loanOwner: { type: "string" },
     loanAmount: { type: "string" },
     accountID: { type: "string" },
     interest: { type: "string" },
     paidBack: { type: "number" },
     status: { type: "string" },
     expireDate: { type: "string" },
-    rejectedMessage: { type: "string" },
+    message: { type: "string" },
   },
   required: ["accountID", "loanAmount", "interest"],
   additionalProperties: true,
@@ -43,7 +41,7 @@ const LoansPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
   const [isNewLoanModalOpen, setIsNewLoanModalOpen] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const [loans, setLoans] = useState<Loan[]>();
+  const [loans, setLoans] = useState<Loan[]>([]);
   const [isLoansLoading, setIsLoanLoading] = useState(true);
 
   const fetchUserLoans = async () => {
@@ -55,7 +53,6 @@ const LoansPage: React.FC = () => {
         const modifiedLoans = userLoans.map((userLoan) => {
           return {
             ...userLoan,
-            expireDate: userLoan.expireDate.replaceAll("-", "/"),
           };
         });
         setLoans(modifiedLoans);
@@ -65,58 +62,48 @@ const LoansPage: React.FC = () => {
       setIsLoanLoading(false);
     }
   };
+  const pendingLoans = useMemo(() => {
+    return loans.filter((loan) => loan.status === "pending");
+  }, [loans]);
 
-  const fields = useMemo(() => {
-    return [
-      {
-        id: "accountID",
-        label: "Account ID",
-        type: "text",
-        placeholder: "Enter Account ID",
-        initValue: `${currentUser?.id}`,
-      },
-      {
-        id: "loanAmount",
-        label: "Loan Amount",
-        type: "number",
-        placeholder: "Enter Loan Amount",
-      },
-      {
-        id: "interest",
-        label: "interest Amount",
-        type: "number",
-        placeholder: "Enter interest Amount",
-      },
-      {
-        id: "expireDate",
-        label: "Enter Expire Date",
-        type: "date",
-      },
-    ];
-  }, [currentUser]);
+  const approvedLoans = useMemo(() => {
+    return loans.filter((loan) => loan.status === "approved");
+  }, [loans]);
+
+  const offeredLoans = useMemo(() => {
+    return loans.filter((loan) => loan.status === "offered");
+  }, [loans]);
+
+  const fields = [
+    {
+      id: "loanAmount",
+      label: "Loan Amount",
+      type: "number",
+      placeholder: "Enter Loan Amount",
+    },
+  ];
 
   const handleLoanModalSubmit = async (data: any) => {
     setIsButtonLoading(true);
 
-    const loanRequester = await AuthService.getUserFromStorage(data.accountID);
-    if (loanRequester) {
-      const newLoan: Loan = {
-        ...data,
-        id: generateUniqueId(),
-        status: "Appending",
-        paidBack: 0,
-        rejectedMessage: "",
-      };
-      if (validateForm(newLoan)) {
-        await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);
-        successAlert("Loan was created!");
-        closeLoanModal();
-        fetchUserLoans();
-      }
-    } else {
-      errorAlert("USER DOES NOT EXIST!");
+    const newLoan: Loan = {
+      ...data,
+      interest: "0",
+      expireDate: "",
+      accountID: currentUser!.id,
+      id: generateUniqueId(),
+      status: "pending",
+      loanOwner:getUserFullName(currentUser!),
+      paidBack: 0,
+      message: "",
+    };
+    if (validateForm(newLoan)) {
+      await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);
+      successAlert("Loan was created!");
       closeLoanModal();
+      fetchUserLoans();
     }
+
     setIsButtonLoading(false);
   };
 
@@ -135,35 +122,43 @@ const LoansPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
-  return !currentUser ? (
-    <Grid container direction="column" justifyContent="flex-end" alignItems="center" marginTop={45}>
-      <PacmanLoader color="#ffe500" size={50} />
-    </Grid>
-  ) : (
-    <Box sx={{ display: "flex", backgroundColor: "white", boxShadow: 16 }}>
-      <NavBar />
-      <Box sx={{ flexGrow: 1 }}>
-        <Grid container direction="row" justifyContent="center" alignItems="center">
-          <Button onClick={openLoanModal}>New Loan</Button>
+  return (
+    <Grid container justifyContent="flex-start">
+      <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>
+        <Container sx={{ mt: 2 }}>
+          <Grid container spacing={5}>
+            <Box sx={{ flexGrow: 1 }}>
+              <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start">
+                <Grid container direction="row" justifyContent="space-between" alignItems="center" mt={5}>
+                  <Grid item xs={12} justifyContent="flex-start">
+                    <Typography variant="h3" fontFamily="Poppins">
+                      Loans
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={5} container justifyContent="flex-start">
+                    <Button onClick={openLoanModal} type="submit" sx={{ width: "100%", borderRadius: 2, mb: 5 }}>
+                      Request New Loan
+                    </Button>
+                  </Grid>
+                </Grid>
 
-          <Grid item xs={12} md={12} xl={12} ml={16}>
-            <Typography variant="h3" fontFamily="Poppins" mt={5}>
-              Loans
-            </Typography>
-          </Grid>
-          {isLoansLoading ? (
-            <Skeleton height={700} width={1400} />
-          ) : (
-            loans!.map((loan, index) => (
-              <Grid item xs={12} sm={6} md={6} lg={4} xl={2} key={index} ml={5} mt={5}>
-                <LoansDisplay loan={loan} />
+                {isLoansLoading ? (
+                  <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
+                    <Skeleton height={"12rem"} width={window.innerWidth / 2} />
+                  </Grid>
+                ) : (
+                  <Box>
+                    <LoanRow loans={approvedLoans} title="Approved" />
+                    <LoanRow loans={offeredLoans} title="Offered" fetchAction={fetchUserLoans} />
+                    <LoanRow loans={pendingLoans} title="Pending" />
+                  </Box>
+                )}
               </Grid>
-            ))
-          )}
-        </Grid>
+            </Box>
+          </Grid>
+        </Container>
       </Box>
       <Modal
-        id="LoanModal"
         open={isNewLoanModalOpen}
         onClose={closeLoanModal}
         sx={{
@@ -184,14 +179,14 @@ const LoansPage: React.FC = () => {
             <GenericForm
               fields={fields}
               onSubmit={handleLoanModalSubmit}
-              submitButtonLabel={"Create Card"}
+              submitButtonLabel={"Request Loan"}
               schema={schema}
               isLoading={isButtonLoading}
             ></GenericForm>
           </center>
         </Box>
       </Modal>
-    </Box>
+    </Grid>
   );
 };
 
