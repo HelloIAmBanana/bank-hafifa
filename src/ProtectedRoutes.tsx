@@ -9,21 +9,24 @@ import LoadingScreen from "./components/Loader";
 import CRUDLocalStorage from "./CRUDLocalStorage";
 import blocked from "./imgs/blocked.png";
 import { Loan } from "./models/loan";
+
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
   const normalPath = path.slice(6);
   return normalPath;
 }
+
 function getTimeFromISO(isoString: string) {
-  //2024-04-11T11:02:09.048Z
   const time = isoString.slice(11, 16);
   const timeNumber = +time.replace(":","");
   return timeNumber;
 }
+
 function isUserBlocked(blockedList: string[], userID: string) {
   const isBlocked = blockedList.includes(userID);
   return isBlocked;
 }
+
 export const AuthHandlerRoute = () => {
   const isAuthenticated = AuthService.isUserAuthenticated();
   const location = useLocation();
@@ -34,9 +37,10 @@ export const AuthHandlerRoute = () => {
     const user = (await AuthService.getCurrentUser()) as User;
     setCurrentUser(user);
   };
-  const time = new Date().toISOString();
+ 
 
   const blockUnpayingUsers = async () => {
+    const time = new Date().toISOString();
     const loans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
     const unpaidLoans = loans.filter((loan) => (getTimeFromISO(loan.expireDate) <= getTimeFromISO(time))&&((loan.status!=="rejected" ) && (loan.status!=="offered")));
     for (let i = 0; i < unpaidLoans.length; i++) {
@@ -45,6 +49,7 @@ export const AuthHandlerRoute = () => {
     }
     await storeBlockedUsers()
   };
+ 
   const storeBlockedUsers = async () => {
     const hatedUsers = await CRUDLocalStorage.getAsyncData<string[]>("blocked");
     setBlockedUsers(hatedUsers);
