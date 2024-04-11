@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { Grid, Box, Container, Typography, Skeleton } from "@mui/material";
 import { UserContext } from "../../../UserProvider";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import LoansDisplay from "../../../components/Loan/LoanDisplay";
+import LoansDisplay from "../../../components/Loan/Loan";
 import { Loan } from "../../../models/loan";
 
 const AdminLoansPage: React.FC = () => {

@@ -35,6 +35,12 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
   };
 
   const validateForm = (data: Record<string, any>) => {
+    for (const key in data) {
+      console.log(key)
+      if (typeof data[key] === "string" && !isNaN(parseFloat(data[key])) && !/:/.test(data[key])) {
+        data[key] = parseFloat(data[key]);
+      }
+    }
     validate(data);
     const formErrors = validate.errors;
     formErrors?.forEach((currentError) => {

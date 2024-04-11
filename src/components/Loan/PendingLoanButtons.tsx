@@ -19,9 +19,9 @@ const schema: JSONSchemaType<Loan> = {
   properties: {
     id: { type: "string" },
     loanOwner:{type:"string"},
-    loanAmount: { type: "string" },
+    loanAmount: { type: "number" },
     accountID: { type: "string" },
-    interest: { type: "string" },
+    interest: { type: "number" },
     paidBack: { type: "number" },
     status: { type: "string" },
     expireDate: { type: "string", minLength: 1 },

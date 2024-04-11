@@ -15,6 +15,7 @@ function exctractPathFromAdminRoute(path: string) {
   return normalPath;
 }
 function getTimeFromISO(isoString: string) {
+  //2024-04-11T11:02:09.048Z
   const time = isoString.slice(11, 16);
   const timeNumber = +time.replace(":","");
   return timeNumber;
@@ -37,7 +38,7 @@ export const AuthHandlerRoute = () => {
 
   const blockUnpayingUsers = async () => {
     const loans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
-    const unpaidLoans = loans.filter((loan) => (getTimeFromISO(loan.expireDate) !>= getTimeFromISO(time))&&(loan.status==="approved"));
+    const unpaidLoans = loans.filter((loan) => (getTimeFromISO(loan.expireDate) <= getTimeFromISO(time))&&((loan.status!=="rejected" ) && (loan.status!=="offered")));
     for (let i = 0; i < unpaidLoans.length; i++) {
       await CRUDLocalStorage.addItemToList("blocked", unpaidLoans[i].accountID);
       await CRUDLocalStorage.deleteItemFromList("loans", unpaidLoans[i])

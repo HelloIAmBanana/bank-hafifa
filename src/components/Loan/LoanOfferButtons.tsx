@@ -25,7 +25,7 @@ const [isAcceptLoading,setIsAcceptLoading]=useState(false);
 
   const acceptLoanOffer = async () => {
     setIsAcceptLoading(true);
-    const updatedBalance = currentUser!.balance + +loan.loanAmount;
+    const updatedBalance = currentUser!.balance + loan.loanAmount;
     const updatedUser: User = {
       ...currentUser!,
       balance: updatedBalance,

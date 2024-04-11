@@ -27,7 +27,7 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan, fetch
   const handlePayBackLoan = async () => {
     if (currentUser!.balance < depositAmount) return;
 
-    const neededAmount = Math.ceil(+loan.loanAmount + +loan.loanAmount * (+loan.interest / 100) - +loan.paidBack);
+    const neededAmount = Math.ceil(loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack);
     setIsDepositing(true)
     if (depositAmount >= neededAmount) {
       const updatedUser: User = {

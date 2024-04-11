@@ -33,7 +33,7 @@ const LoansDisplay: React.FC<LoansDisplayProps> = ({ loan, fetchLoans, isUserAdm
                 {loan.status === "approved" && (
                   <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>
                     Left to pay: $
-                    {Math.ceil(+loan.loanAmount + +loan.loanAmount * (+loan.interest / 100) - +loan.paidBack)}
+                    {Math.ceil(loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack)}
                   </Typography>
                 )}
               </Grid>
