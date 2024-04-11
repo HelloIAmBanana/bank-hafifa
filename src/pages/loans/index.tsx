@@ -73,6 +73,10 @@ const LoansPage: React.FC = () => {
   const offeredLoans = useMemo(() => {
     return loans.filter((loan) => loan.status === "offered");
   }, [loans]);
+  
+  const rejectedLoans = useMemo(() => {
+    return loans.filter((loan) => loan.status === "rejected");
+  }, [loans]);
 
   const fields = [
     {
@@ -148,9 +152,11 @@ const LoansPage: React.FC = () => {
                   </Grid>
                 ) : (
                   <Box>
-                    <LoanRow loans={approvedLoans} title="Approved" />
+                    <LoanRow loans={approvedLoans} title="Approved" fetchAction={fetchUserLoans}/>
                     <LoanRow loans={offeredLoans} title="Offered" fetchAction={fetchUserLoans} />
-                    <LoanRow loans={pendingLoans} title="Pending" />
+                    <LoanRow loans={pendingLoans} title="Pending" fetchAction={fetchUserLoans}/>
+                    <LoanRow loans={rejectedLoans} title="Rejected" fetchAction={fetchUserLoans}/>
+
                   </Box>
                 )}
               </Grid>

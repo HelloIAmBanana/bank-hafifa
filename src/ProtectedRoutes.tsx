@@ -2,13 +2,12 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import AuthService from "./AuthService";
 import UserProvider from "./UserProvider";
 import NavBar from "./components/NavigationBar/NavBar";
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Grid, Modal, Typography } from "@mui/material";
 import { User } from "./models/user";
 import { useEffect, useState } from "react";
 import LoadingScreen from "./components/Loader";
 import CRUDLocalStorage from "./CRUDLocalStorage";
 import blocked from "./imgs/blocked.png";
-import { getUserFullName } from "./utils/utils";
 import { Loan } from "./models/loan";
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
@@ -75,15 +74,16 @@ export const AuthHandlerRoute = () => {
       {!currentUser ? (
         <LoadingScreen />
       ) : isUserBlocked(blockedUsers, currentUser.id) ? (
-        <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" mr={5}>
-          <Typography fontFamily="Poppins" variant="h2">
-            UMMM ACTUALLY... U R BLOCKED☝️🤓{" "}
-          </Typography>
-          <img src={`${blocked}`} alt="nerd" />
-          <Typography fontFamily="Poppins" variant="h4">
-            L {getUserFullName(currentUser).toUpperCase()} FUCKING BOZO
-          </Typography>
-        </Grid>
+        <Modal open={true}><Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" mr={5}>
+        <Typography fontFamily="Poppins" variant="h2">
+          UMMM ACTUALLY... U R BLOCKED
+        </Typography>
+        <img src={`${blocked}`} alt="nerd" />
+
+        <Typography fontFamily="Poppins" variant="h4">
+          DONT FUCK WITH THE BANK AND PAY YOUR LOAN NEXT TIME🥶
+        </Typography>
+      </Grid></Modal>
       ) : (
         <Box sx={{ display: "flex", backgroundColor: "white" }}>
           {isPublicRoute ? (
