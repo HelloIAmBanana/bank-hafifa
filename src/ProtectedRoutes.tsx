@@ -18,7 +18,7 @@ function exctractPathFromAdminRoute(path: string) {
 
 function getTimeFromISO(isoString: string) {
   const time = isoString.slice(11, 16);
-  const timeNumber = +time.replace(":","");
+  const timeNumber = +time.replace(":", "");
   return timeNumber;
 }
 
@@ -37,29 +37,35 @@ export const AuthHandlerRoute = () => {
     const user = (await AuthService.getCurrentUser()) as User;
     setCurrentUser(user);
   };
- 
 
   const blockUnpayingUsers = async () => {
     const time = new Date().toISOString();
     const loans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
-    const unpaidLoans = loans.filter((loan) => (getTimeFromISO(loan.expireDate) <= getTimeFromISO(time))&&((loan.status!=="rejected" ) && (loan.status!=="offered")));
+    const unpaidLoans = loans.filter(
+      (loan) =>
+        getTimeFromISO(loan.expireDate) <= getTimeFromISO(time) &&
+        loan.status !== "rejected" &&
+        loan.status !== "offered"
+    );
     for (let i = 0; i < unpaidLoans.length; i++) {
       await CRUDLocalStorage.addItemToList("blocked", unpaidLoans[i].accountID);
-      await CRUDLocalStorage.deleteItemFromList("loans", unpaidLoans[i])
+      await CRUDLocalStorage.deleteItemFromList("loans", unpaidLoans[i]);
     }
-    await storeBlockedUsers()
+    await storeBlockedUsers();
   };
- 
+
   const storeBlockedUsers = async () => {
     const hatedUsers = await CRUDLocalStorage.getAsyncData<string[]>("blocked");
     setBlockedUsers(hatedUsers);
   };
+
   useEffect(() => {
     storeCurrentUser();
-    blockUnpayingUsers()
+    blockUnpayingUsers();
     storeBlockedUsers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
+
   const currentRoute = location.pathname;
   const isPublicRoute = ["/", "/signup"].includes(currentRoute);
   const isAdminRoute = [
@@ -70,26 +76,30 @@ export const AuthHandlerRoute = () => {
     "/settings",
     "/home",
   ].includes(currentRoute);
+
   const isUserRoute = ["/cards", "/loans", "/deposits", "/users", "/settings", "/home"].includes(currentRoute);
 
   if (!isAuthenticated) {
     return isPublicRoute ? <Outlet /> : <Navigate to="/" />;
   }
+
   return (
     <UserProvider>
       {!currentUser ? (
         <LoadingScreen />
       ) : isUserBlocked(blockedUsers, currentUser.id) ? (
-        <Modal open={true}><Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" mr={5}>
-        <Typography fontFamily="Poppins" variant="h2">
-          UMMM ACTUALLY... U R BLOCKED
-        </Typography>
-        <img src={`${blocked}`} alt="nerd" />
+        <Modal open={true}>
+          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" mr={5}>
+            <Typography fontFamily="Poppins" variant="h2">
+              UMMM ACTUALLY... U R BLOCKED
+            </Typography>
+            <img src={`${blocked}`} alt="nerd" />
 
-        <Typography fontFamily="Poppins" variant="h4">
-          DONT FUCK WITH THE BANK AND PAY YOUR LOAN NEXT TIME🥶
-        </Typography>
-      </Grid></Modal>
+            <Typography fontFamily="Poppins" variant="h4">
+              DONT FUCK WITH THE BANK AND PAY YOUR LOAN NEXT TIME🥶
+            </Typography>
+          </Grid>
+        </Modal>
       ) : (
         <Box sx={{ display: "flex", backgroundColor: "white" }}>
           {isPublicRoute ? (
