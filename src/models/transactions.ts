@@ -3,7 +3,7 @@ export type Transaction = {
   senderID: string;
   receiverID: string;
   reason: string;
-  amount: string;
+  amount: number;
   senderName: string;
   receiverName: string;
   date: string;

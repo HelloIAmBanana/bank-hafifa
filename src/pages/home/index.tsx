@@ -43,7 +43,7 @@ const schema: JSONSchemaType<Transaction> = {
     senderID: { type: "string" },
     receiverID: { type: "string", minLength: 1 },
     reason: { type: "string" },
-    amount: { type: "string", minLength: 1 },
+    amount: { type: "number", minLength: 1 },
     senderName: { type: "string" },
     receiverName: { type: "string" },
     date: { type: "string" },

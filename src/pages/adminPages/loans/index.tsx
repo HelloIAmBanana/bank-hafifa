@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { Grid, Box, Container, Typography, Skeleton } from "@mui/material";
 import { UserContext } from "../../../UserProvider";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import LoansDisplay from "../../../components/Loan/Loan";
+import Loans from "../../../components/Loan/Loan";
 import { Loan } from "../../../models/loan";
 
 const AdminLoansPage: React.FC = () => {
@@ -72,7 +72,7 @@ const AdminLoansPage: React.FC = () => {
                               sm={12}
                             >
                               <Grid item key={index} sx={{ marginRight: 2 }}>
-                                <LoansDisplay loan={loan} fetchLoans={fetchLoans} isUserAdmin={true} />
+                                <Loans loan={loan} fetchLoans={fetchLoans} isUserAdmin={true} />
                               </Grid>
                             </Grid>
                           ))}

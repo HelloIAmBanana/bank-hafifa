@@ -18,7 +18,7 @@ const schema: JSONSchemaType<Loan> = {
   type: "object",
   properties: {
     id: { type: "string" },
-    loanOwner:{type:"string"},
+    loanOwner: { type: "string" },
     loanAmount: { type: "number" },
     accountID: { type: "string" },
     interest: { type: "number" },
@@ -53,13 +53,6 @@ const fields = [
 
 const validateForm = ajv.compile(schema);
 
-const getExpiredDate = (date: string,chosenTime:string) => {
-  const currentTime = date.slice(11, 16);
-  const DateWithoutTime = date.split(currentTime);
-  const expiredDate = `${DateWithoutTime[0]}${chosenTime}${DateWithoutTime[1]}`
-  return expiredDate;
-};
-
 const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan, fetchLoans }) => {
   const [isRejectLoading, setIsRejectLoading] = useState(false);
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
@@ -80,14 +73,11 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan, fetchLoan
   };
 
   const acceptLoanRequest = async (data: any) => {
-    const currentDate = new Date().toISOString();
-
     const newLoan: Loan = {
       ...loan,
+      ...data,
       message: "offered",
       status: "offered",
-      expireDate: getExpiredDate(currentDate,data.expireDate),
-      interest: data.interest,
     };
     if (!validateForm(newLoan)) return;
 
@@ -102,7 +92,7 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan, fetchLoan
     setIsLoanApprovalModalOpen(true);
   };
   const closeLoanApprovalModal = () => {
-    if(isAcceptLoading) return ;
+    if (isAcceptLoading) return;
     setIsLoanApprovalModalOpen(false);
   };
   return (

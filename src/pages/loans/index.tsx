@@ -32,6 +32,7 @@ const schema: JSONSchemaType<Loan> = {
     properties: {
       accountID: "Enter Account ID",
       loanAmount: "blabla",
+      expireDate:"safd",
     },
   },
 };

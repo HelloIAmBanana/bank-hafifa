@@ -7,24 +7,12 @@ import { User } from "./models/user";
 import { useEffect, useState } from "react";
 import LoadingScreen from "./components/Loader";
 import CRUDLocalStorage from "./CRUDLocalStorage";
-import blocked from "./imgs/blocked.png";
 import { Loan } from "./models/loan";
 
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
   const normalPath = path.slice(6);
   return normalPath;
-}
-
-function getTimeFromISO(isoString: string) {
-  const time = isoString.slice(11, 16);
-  const timeNumber = +time.replace(":", "");
-  return timeNumber;
-}
-
-function isUserBlocked(blockedList: string[], userID: string) {
-  const isBlocked = blockedList.includes(userID);
-  return isBlocked;
 }
 
 export const AuthHandlerRoute = () => {
@@ -39,30 +27,34 @@ export const AuthHandlerRoute = () => {
   };
 
   const blockUnpayingUsers = async () => {
-    const time = new Date().toISOString();
-    const loans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
-    const unpaidLoans = loans.filter(
-      (loan) =>
-        getTimeFromISO(loan.expireDate) <= getTimeFromISO(time) &&
-        loan.status !== "rejected" &&
-        loan.status !== "offered"
-    );
-    for (let i = 0; i < unpaidLoans.length; i++) {
-      await CRUDLocalStorage.addItemToList("blocked", unpaidLoans[i].accountID);
-      await CRUDLocalStorage.deleteItemFromList("loans", unpaidLoans[i]);
-    }
-    await storeBlockedUsers();
-  };
+    const currentDate = new Date();
 
-  const storeBlockedUsers = async () => {
-    const hatedUsers = await CRUDLocalStorage.getAsyncData<string[]>("blocked");
-    setBlockedUsers(hatedUsers);
+    const loans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
+
+    const expiredLoans = loans.filter((loan) => {
+      const [hours, minutes] = loan.expireDate.split(":").map(Number);
+
+      const expirationDateTime = new Date();
+      expirationDateTime.setHours(hours);
+      expirationDateTime.setMinutes(minutes);
+      expirationDateTime.setSeconds(0);
+
+      return expirationDateTime < currentDate && loan.status === "approved";
+    });
+
+    for (const loan of expiredLoans) {
+      await CRUDLocalStorage.addItemToList("blocked", loan.accountID);
+      await CRUDLocalStorage.deleteItemFromList("loans", loan);
+    }
+    const blockedList = await CRUDLocalStorage.getAsyncData<string[]>("blocked");
+    const uniqueBlockedUsers = [...new Set(blockedList)];
+    await CRUDLocalStorage.setAsyncData("blocked", uniqueBlockedUsers);
+    setBlockedUsers(uniqueBlockedUsers);
   };
 
   useEffect(() => {
     storeCurrentUser();
     blockUnpayingUsers();
-    storeBlockedUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
 
@@ -87,19 +79,6 @@ export const AuthHandlerRoute = () => {
     <UserProvider>
       {!currentUser ? (
         <LoadingScreen />
-      ) : isUserBlocked(blockedUsers, currentUser.id) ? (
-        <Modal open={true}>
-          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" mr={5}>
-            <Typography fontFamily="Poppins" variant="h2">
-              UMMM ACTUALLY... U R BLOCKED
-            </Typography>
-            <img src={`${blocked}`} alt="nerd" />
-
-            <Typography fontFamily="Poppins" variant="h4">
-              DONT FUCK WITH THE BANK AND PAY YOUR LOAN NEXT TIME🥶
-            </Typography>
-          </Grid>
-        </Modal>
       ) : (
         <Box sx={{ display: "flex", backgroundColor: "white" }}>
           {isPublicRoute ? (
@@ -108,6 +87,25 @@ export const AuthHandlerRoute = () => {
             <>
               <NavBar />
               <Grid container direction="column" justifyContent="flex-start" alignItems="center">
+                {blockedUsers.includes(currentUser.id) && (
+                  <Modal open={true} sx={{backgroundColor:"white"}}>
+                    <Grid
+                      container
+                      direction="column"
+                      justifyContent="center"
+                      alignItems="center"
+                      minHeight="100vh"
+                      mr={5}
+                    >
+                      <Typography fontFamily="Poppins" variant="h2">
+                        Your account was blocked!
+                      </Typography>
+                      <Typography fontFamily="Poppins" variant="h4">
+                        Please don't contact us.
+                      </Typography>
+                    </Grid>
+                  </Modal>
+                )}
                 {currentUser.role === "admin" ? (
                   isAdminRoute ? (
                     <Outlet />

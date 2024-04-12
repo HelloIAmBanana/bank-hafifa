@@ -36,8 +36,8 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
 
   const validateForm = (data: Record<string, any>) => {
     for (const key in data) {
-      console.log(key)
-      if (typeof data[key] === "string" && !isNaN(parseFloat(data[key])) && !/:/.test(data[key])) {
+      const fieldType= fields.find(field => field.id === key)!.type
+      if (fieldType==="number") {
         data[key] = parseFloat(data[key]);
       }
     }

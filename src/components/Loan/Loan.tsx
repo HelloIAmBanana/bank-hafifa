@@ -1,17 +1,17 @@
 import { Grid, Paper, Typography } from "@mui/material";
 import { Loan } from "../../models/loan";
-import thunderIcon from "../../imgs/icons/Thunder.svg";
+import thunderIcon from "../../imgs/Icons/Thunder.svg";
 import LoanOfferButtons from "./LoanOfferButtons";
 import PendingLoanButtons from "./PendingLoanButtons";
 import ApprovedLoansButtons from "./ApprovedLoanButtons";
 
-interface LoansDisplayProps {
+interface LoansProps {
   loan: Loan;
   isUserAdmin?: boolean;
-  fetchLoans?: () => Promise<void>;
+  fetchLoans: () => Promise<void>;
 }
 
-const LoansDisplay: React.FC<LoansDisplayProps> = ({ loan, fetchLoans, isUserAdmin }) => {
+const Loans: React.FC<LoansProps> = ({ loan, fetchLoans, isUserAdmin }) => {
   return (
     <Grid container direction="column" justifyContent="center" alignItems="center">
       <Grid item>
@@ -65,7 +65,7 @@ const LoansDisplay: React.FC<LoansDisplayProps> = ({ loan, fetchLoans, isUserAdm
                 </Grid>
                 <Grid item xs={4} sm={4} md={8} key={5} sx={{ ml: 1, mt: -1 }}>
                   <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>
-                    Exp: {loan.expireDate.slice(11, 16)}
+                    Exp: {loan.expireDate}
                   </Typography>
                 </Grid>
               </>
@@ -81,4 +81,4 @@ const LoansDisplay: React.FC<LoansDisplayProps> = ({ loan, fetchLoans, isUserAdm
   );
 };
 
-export default LoansDisplay;
+export default Loans;

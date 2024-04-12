@@ -6,7 +6,7 @@ import { User } from "../../models/user";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 
 interface ApprovedLoansButtonsProps {
-  fetchLoans?: () => Promise<void>;
+  fetchLoans: () => Promise<void>;
   loan: Loan;
 }
 
@@ -25,31 +25,26 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan, fetch
   };
 
   const handlePayBackLoan = async () => {
-    if (currentUser!.balance < depositAmount) return;
+    if (!currentUser || currentUser.balance < depositAmount) return;
 
-    const neededAmount = Math.ceil(loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack);
-    setIsDepositing(true)
+    const totalLoanAmount = loan.loanAmount + loan.loanAmount * (loan.interest / 100);
+    const neededAmount = Math.ceil(totalLoanAmount - loan.paidBack);
+    setIsDepositing(true);
+
+    const amountToDeduct = depositAmount >= neededAmount ? neededAmount : depositAmount;
+    const updatedUser: User = {
+      ...currentUser,
+      balance: currentUser.balance - amountToDeduct,
+    };
+
+    await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
+    setCurrentUser(updatedUser);
+
     if (depositAmount >= neededAmount) {
-      const updatedUser: User = {
-        ...currentUser!,
-        balance: currentUser!.balance - neededAmount,
-      };
-      await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-      await CRUDLocalStorage.deleteItemFromList<Loan>("loans", loan)
-      setCurrentUser(updatedUser);
-      await fetchLoans?.();
-      return;
+      await CRUDLocalStorage.deleteItemFromList<Loan>("loans", loan);
     }
-    if (depositAmount < neededAmount) {
-        const updatedUser: User = {
-          ...currentUser!,
-          balance: currentUser!.balance - depositAmount,
-        };
-        await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-        setCurrentUser(updatedUser);
-        await fetchLoans?.();
-        return;
-      }
+    
+    await fetchLoans();
   };
   return (
     <Grid container direction="row" justifyContent="space-between" alignItems="center">
@@ -96,7 +91,7 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan, fetch
               placeholder="Enter Amount"
               value={depositAmount}
               onChange={(e) => setDepositAmount(+e.target.value.replace(/[^0-9]/g, ""))}
-              sx={{ mt: 2,width:"100%", fontFamily: "Poppins" }}
+              sx={{ mt: 2, width: "100%", fontFamily: "Poppins" }}
             />
 
             <Button type="submit" onClick={handlePayBackLoan} disabled={isDepositing} sx={{ width: "227.5px" }}>
