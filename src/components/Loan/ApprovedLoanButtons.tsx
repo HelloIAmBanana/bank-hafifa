@@ -36,14 +36,19 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan, fetch
       ...currentUser,
       balance: currentUser.balance - amountToDeduct,
     };
-
-    await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-    setCurrentUser(updatedUser);
+    const updatedLoan: Loan = {
+      ...loan,
+      paidBack: loan.paidBack + depositAmount,
+    };
 
     if (depositAmount >= neededAmount) {
       await CRUDLocalStorage.deleteItemFromList<Loan>("loans", loan);
     }
-    
+
+    await CRUDLocalStorage.updateItemInList<Loan>("loans", updatedLoan);
+    await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
+    setCurrentUser(updatedUser);
+
     await fetchLoans();
   };
   return (

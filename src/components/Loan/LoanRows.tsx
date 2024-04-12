@@ -27,7 +27,7 @@ const LoanRow: React.FC<LoanRowsProps> = ({ loans, title, fetchAction }) => {
         }}
       >
         {loans.map((loan, index) => (
-          <Grid item key={index} ml={5}>
+          <Grid item key={index} mr={2}>
             <Loans loan={loan} fetchLoans={fetchAction} />
           </Grid>
         ))}

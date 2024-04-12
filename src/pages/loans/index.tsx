@@ -18,7 +18,7 @@ const schema: JSONSchemaType<Loan> = {
   properties: {
     id: { type: "string" },
     loanOwner: { type: "string" },
-    loanAmount: { type: "number" },
+    loanAmount: { type: "number", minimum: 0 },
     accountID: { type: "string" },
     interest: { type: "number" },
     paidBack: { type: "number" },
@@ -30,9 +30,7 @@ const schema: JSONSchemaType<Loan> = {
   additionalProperties: true,
   errorMessage: {
     properties: {
-      accountID: "Enter Account ID",
-      loanAmount: "blabla",
-      expireDate:"safd",
+      loanAmount: "Entered amount is less than 0",
     },
   },
 };
@@ -47,15 +45,15 @@ const LoansPage: React.FC = () => {
   const [isLoansLoading, setIsLoanLoading] = useState(true);
 
   const fetchUserLoans = async () => {
-      setIsLoanLoading(true);
-      try {
-        const fetchedLoans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
-        const userLoans = fetchedLoans.filter((currentLoan) => currentLoan.accountID === currentUser!.id);
-        setLoans(userLoans);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-      setIsLoanLoading(false);
+    setIsLoanLoading(true);
+    try {
+      const fetchedLoans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
+      const userLoans = fetchedLoans.filter((currentLoan) => currentLoan.accountID === currentUser!.id);
+      setLoans(userLoans);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    setIsLoanLoading(false);
   };
   const pendingLoans = useMemo(() => {
     return loans.filter((loan) => loan.status === "pending");
@@ -84,7 +82,7 @@ const LoansPage: React.FC = () => {
 
   const handleLoanModalSubmit = async (data: any) => {
     setIsButtonLoading(true);
-    
+
     const newLoan: Loan = {
       ...data,
       interest: 0,
@@ -96,7 +94,7 @@ const LoansPage: React.FC = () => {
       paidBack: 0,
       message: "",
     };
-    
+
     if (!validateForm(newLoan)) {
       setIsButtonLoading(false);
       return;
