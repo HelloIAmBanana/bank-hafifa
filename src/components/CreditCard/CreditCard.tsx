@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import Visa from "../imgs/Icons/Visa.svg";
-import AmericanExpress from "../imgs/Icons/AmericanExpress.svg";
-
-import Mastercard from "../imgs/Icons/Mastercard.svg";
-import ContactlessIcon from "../imgs/Icons/Contactless.svg";
-import thunderIcon from "../imgs/Icons/Thunder.svg";
+import Visa from "../../imgs/Icons/Visa.svg";
+import AmericanExpress from "../../imgs/Icons/AmericanExpress.svg";
+import Mastercard from "../../imgs/Icons/Mastercard.svg";
+import ContactlessIcon from "../../imgs/Icons/Contactless.svg";
+import thunderIcon from "../../imgs/Icons/Thunder.svg";
 import { Box, Button, CircularProgress, Grid, Modal, Paper, TextField, Typography } from "@mui/material";
-import { Card } from "../models/card";
-import { normalAlert } from "../utils/swalAlerts";
-import { formatIsoStringToDate } from "../utils/utils";
+import { Card } from "../../models/card";
+import { normalAlert } from "../../utils/swalAlerts";
+import { formatIsoStringToDate } from "../../utils/utils";
 
 interface Props {
   card: Card;
@@ -25,8 +24,6 @@ const getCardProviderImage = (type: string) => {
       return AmericanExpress;
     case "Mastercard":
       return Mastercard;
-    default:
-      return null;
   }
 };
 

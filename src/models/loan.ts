@@ -7,5 +7,4 @@ export type Loan = {
   loanOwner:string;
   status: "approved" | "offered" | "pending"|"rejected";
   expireDate: string;
-  message: string;
 };

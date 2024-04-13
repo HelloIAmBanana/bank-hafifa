@@ -13,7 +13,6 @@ const AdminLoansPage: React.FC = () => {
 
   const fetchLoans = async () => {
     setIsLoansLoading(true);
-    if (currentUser) {
       try {
         const fetchedLoans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
         const filteredLoaned: Loan[] = fetchedLoans.filter((filteredCards) => filteredCards.status === "pending");
@@ -21,7 +20,6 @@ const AdminLoansPage: React.FC = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-    }
     setIsLoansLoading(false);
   };
 
@@ -34,7 +32,7 @@ const AdminLoansPage: React.FC = () => {
 
   return (
     <Grid container justifyContent="flex-start">
-      <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>
+      <Box component="main" sx={{ ml: 15 }}>
         <Container sx={{ mt: 2 }}>
           <Grid container spacing={5}>
             <Box sx={{ flexGrow: 1 }}>
@@ -57,29 +55,26 @@ const AdminLoansPage: React.FC = () => {
                     <Skeleton height={"12rem"} width={window.innerWidth / 2} />
                   </Grid>
                 ) : (
-                  <Box ml={12}>
-                    {pendingLoans.length > 0 && (
-                      <Grid item mt={2}>
-                        <Grid container direction="row">
-                          {pendingLoans.map((loan, index) => (
-                            <Grid
-                              container
-                              direction="row"
-                              justifyContent="center"
-                              alignItems="center"
-                              lg={6}
-                              md={8}
-                              sm={12}
-                            >
-                              <Grid item key={index} sx={{ marginRight: 2 }}>
-                                <Loans loan={loan} fetchLoans={fetchLoans} isUserAdmin={true} />
-                              </Grid>
-                            </Grid>
-                          ))}
+                  <Grid item mt={2}>
+                    <Grid container>
+                      {pendingLoans.map((loan, index) => (
+                        <Grid
+                          container
+                          direction="row"
+                          justifyContent="center"
+                          alignItems="center"
+                          xl={3}
+                          lg={4}
+                          md={6}
+                          sm={12}
+                        >
+                          <Grid item key={index} mr={2}>
+                            <Loans loan={loan} fetchLoans={fetchLoans} isUserAdmin={true} />
+                          </Grid>
                         </Grid>
-                      </Grid>
-                    )}
-                  </Box>
+                      ))}
+                    </Grid>
+                  </Grid>
                 )}
               </Grid>
             </Box>

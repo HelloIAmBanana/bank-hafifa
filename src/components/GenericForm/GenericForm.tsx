@@ -36,9 +36,18 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
 
   const validateForm = (data: Record<string, any>) => {
     for (const key in data) {
-      const fieldType= fields.find(field => field.id === key)!.type
-      if (fieldType==="number") {
+      const fieldType = fields.find((field) => field.id === key)!.type;
+      console.log(fieldType);
+      if (fieldType === "number") {
         data[key] = parseFloat(data[key]);
+      }
+      if (fieldType === "file") {
+        if (data[key][0] instanceof File) {
+          data[key] = URL.createObjectURL(data[key][0]);
+        }
+        else{
+          data[key]="";
+        }
       }
     }
     validate(data);

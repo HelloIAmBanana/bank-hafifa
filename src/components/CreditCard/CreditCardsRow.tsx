@@ -1,5 +1,5 @@
 import { Grid, Typography } from "@mui/material";
-import { Card } from "../models/card";
+import { Card } from "../../models/card";
 import CreditCard from "./CreditCard";
 
 interface CreditCardsRowsProps {

@@ -15,7 +15,6 @@ import "./App.css";
 function App() {
   return (
     <Router>
-      <div>
         <Routes>
           <Route element={<AuthHandlerRoute />}>
             <Route path="/" element={<SignInPage />} />
@@ -25,12 +24,10 @@ function App() {
             <Route path="/cards" element={<CardsPage />} />
             <Route path="/admin/cards" element={<AdminCardsPage />} />
             <Route path="/admin/loans" element={<AdminLoansPage />} />
-
             <Route path="/deposits" element={<DepositsPage />} />
             <Route path="/settings" element={<ProfileSettingsPage />} />
           </Route>
         </Routes>
-      </div>
     </Router>
   );
 }

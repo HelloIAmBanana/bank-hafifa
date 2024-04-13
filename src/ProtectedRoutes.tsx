@@ -8,12 +8,29 @@ import { useEffect, useState } from "react";
 import LoadingScreen from "./components/Loader";
 import CRUDLocalStorage from "./CRUDLocalStorage";
 import { Loan } from "./models/loan";
+import { errorAlert, successAlert } from "./utils/swalAlerts";
+import { Notification } from "./models/notification";
 
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
   const normalPath = path.slice(6);
   return normalPath;
 }
+
+const getNotification = (notification: string) => {
+  switch (notification) {
+    case "cardApproved":
+      return successAlert("Your card request was approved by an admin!");
+    case "cardDeclined":
+      return errorAlert("Your card request was declined by an admin!");
+    case "loanApproved":
+      return successAlert("Your loan request was approved by an admin!");
+    case "loanDeclined":
+      return errorAlert("Your loan request was declined by an admin!");
+    case "newTransaction":
+      return successAlert("You have received a new transaction while you were offline!");
+  }
+};
 
 export const AuthHandlerRoute = () => {
   const isAuthenticated = AuthService.isUserAuthenticated();
@@ -24,6 +41,19 @@ export const AuthHandlerRoute = () => {
   const storeCurrentUser = async () => {
     const user = (await AuthService.getCurrentUser()) as User;
     setCurrentUser(user);
+  };
+
+  const fetchUserNotifications = async () => {
+    if (currentUser) {
+      const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
+      const userNotifications = notifications.filter((notification) => notification.accountID === currentUser.id);
+
+      userNotifications.forEach(async (notification) => {
+        getNotification(notification.type);
+
+        await CRUDLocalStorage.deleteItemFromList("notifications", notification);
+      });
+    }
   };
 
   const blockUnpayingUsers = async () => {
@@ -46,6 +76,7 @@ export const AuthHandlerRoute = () => {
       await CRUDLocalStorage.addItemToList("blocked", loan.accountID);
       await CRUDLocalStorage.deleteItemFromList("loans", loan);
     }
+    
     const blockedList = await CRUDLocalStorage.getAsyncData<string[]>("blocked");
     const uniqueBlockedUsers = [...new Set(blockedList)];
     await CRUDLocalStorage.setAsyncData("blocked", uniqueBlockedUsers);
@@ -55,6 +86,7 @@ export const AuthHandlerRoute = () => {
   useEffect(() => {
     storeCurrentUser();
     blockUnpayingUsers();
+    fetchUserNotifications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
 
@@ -88,7 +120,7 @@ export const AuthHandlerRoute = () => {
               <NavBar />
               <Grid container direction="column" justifyContent="flex-start" alignItems="center">
                 {blockedUsers.includes(currentUser.id) && (
-                  <Modal open={true} sx={{backgroundColor:"white"}}>
+                  <Modal open={true} sx={{ backgroundColor: "white" }}>
                     <Grid
                       container
                       direction="column"

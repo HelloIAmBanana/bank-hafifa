@@ -75,15 +75,18 @@ const SignInPage: React.FC = () => {
     if (validateForm(data)) {
       const isRemembered = (data as User & { rememberMe: boolean }).rememberMe;
       setIsLoading(true);
+
       const validUser = await validateLogin(data);
-      if (validUser) {
-        storeCurrentAuthToken(validUser.id, isRemembered);
-        successAlert("Signing in!");
-        navigate("/home");
-      } else {
+
+      if (!validUser) {
         errorAlert("Wrong Credentials!");
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+      
+      storeCurrentAuthToken(validUser.id, isRemembered);
+      successAlert("Signing in!");
+      navigate("/home");
     }
   };
 

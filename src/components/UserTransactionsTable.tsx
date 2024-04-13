@@ -8,12 +8,12 @@ import { Box, Typography } from "@mui/material";
 import transactionIcon from "../imgs/Icons/Transaction.png";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
 import { formatIsoStringToDate } from "../utils/utils";
-import { TransactionRow } from "../models/transactionRow";
+import { Transaction } from "../models/transactions";
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
 interface TransactionsTableProps {
-  transactions: TransactionRow[];
+  transactions: Transaction[];
   userID: string;
 }
 

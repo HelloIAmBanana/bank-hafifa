@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 import { User } from "../models/user";
 import CRUDLocalStorage from "../CRUDLocalStorage";
+import { Notification } from "../models/notification";
 
 export const generateUniqueId = () => {
   return "_" + Math.random().toString(36).substring(2, 9);
@@ -26,6 +27,19 @@ export async function getItemInList<T extends { id: string }>(key: string, itemI
   return wantedItem;
 }
 
-export function generateUniqueNumber(digit: number) {
-  return Math.random().toFixed(digit).split(".")[1];
+export function generateUniqueNumber(digitAmount: number) {
+  return parseFloat((Math.random().toString().slice(2) + Math.random().toString().slice(15)).slice(0, digitAmount));
+}
+
+export async function createNewNotification(
+  accountID: string,
+  type: "loanDeclined" | "cardDeclined" | "cardApproved" | "loanApproved" | "newTransaction"
+) {
+  const newNotification: Notification = {
+    accountID: accountID,
+    type: type,
+    id: generateUniqueId(),
+  };
+
+  await CRUDLocalStorage.addItemToList<Notification>("notifications", newNotification);
 }
