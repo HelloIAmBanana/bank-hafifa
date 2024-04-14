@@ -130,7 +130,7 @@ export const AuthHandlerRoute = () => {
                       mr={5}
                     >
                       <Typography fontFamily="Poppins" variant="h2">
-                        Your account was blocked!
+                        Your account was blocky blocky!
                       </Typography>
                       <Typography fontFamily="Poppins" variant="h4">
                         Please don't contact us.

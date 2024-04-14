@@ -32,7 +32,7 @@ const AdminLoansPage: React.FC = () => {
 
   return (
     <Grid container justifyContent="flex-start">
-      <Box component="main" sx={{ ml: 15 }}>
+      <Box component="main" sx={{ ml: 20 }}>
         <Container sx={{ mt: 2 }}>
           <Grid container spacing={5}>
             <Box sx={{ flexGrow: 1 }}>
@@ -55,7 +55,7 @@ const AdminLoansPage: React.FC = () => {
                     <Skeleton height={"12rem"} width={window.innerWidth / 2} />
                   </Grid>
                 ) : (
-                  <Grid item mt={2}>
+                  <Grid item mt={2} ml={11}>
                     <Grid container>
                       {pendingLoans.map((loan, index) => (
                         <Grid

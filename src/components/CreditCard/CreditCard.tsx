@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import Visa from "../../imgs/Icons/Visa.svg";
-import AmericanExpress from "../../imgs/Icons/AmericanExpress.svg";
-import Mastercard from "../../imgs/Icons/Mastercard.svg";
-import ContactlessIcon from "../../imgs/Icons/Contactless.svg";
-import thunderIcon from "../../imgs/Icons/Thunder.svg";
+import Visa from "../../imgs/icons/Visa.svg";
+import AmericanExpress from "../../imgs/icons/AmericanExpress.svg";
+import Mastercard from "../../imgs/icons/Mastercard.svg";
+import ContactlessIcon from "../../imgs/icons/Contactless.svg";
+import thunderIcon from "../../imgs/icons/Thunder.svg";
 import { Box, Button, CircularProgress, Grid, Modal, Paper, TextField, Typography } from "@mui/material";
 import { Card } from "../../models/card";
 import { normalAlert } from "../../utils/swalAlerts";
