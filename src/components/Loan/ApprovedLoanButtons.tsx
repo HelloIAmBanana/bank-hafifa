@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { ChangeEvent, useContext, useState } from "react";
 import { Loan } from "../../models/loan";
 import { Box, Button, CircularProgress, Grid, Modal, TextField, Typography } from "@mui/material";
 import { UserContext } from "../../UserProvider";
@@ -10,7 +10,7 @@ interface ApprovedLoansButtonsProps {
   loan: Loan;
 }
 
-const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan}) => {
+const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => {
   const [isDepositing, setIsDepositing] = useState(false);
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
@@ -26,7 +26,7 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan}) => {
   };
 
   const handlePayBackLoan = async () => {
-    if (!currentUser || currentUser.balance < depositAmount) return;
+    if (currentUser!.balance < depositAmount) return;
 
     const totalLoanAmount = loan.loanAmount + loan.loanAmount * (loan.interest / 100);
     const neededAmount = Math.ceil(totalLoanAmount - loan.paidBack);
@@ -34,8 +34,8 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan}) => {
 
     const amountToDeduct = depositAmount >= neededAmount ? neededAmount : depositAmount;
     const updatedUser: User = {
-      ...currentUser,
-      balance: currentUser.balance - amountToDeduct,
+      ...currentUser!,
+      balance: currentUser!.balance - amountToDeduct,
     };
     const updatedLoan: Loan = {
       ...loan,
@@ -52,8 +52,18 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan}) => {
 
     await fetchUserLoans();
   };
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const neededAmount = Math.ceil(
+      loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack
+    );
+    const value = +e.target.value;
+    if (value > neededAmount) return;
+    setDepositAmount(value);
+  };
+
   return (
-    <Grid container direction="row" justifyContent="space-between" alignItems="center">
+    <Grid container direction="row" justifyContent="center" alignItems="center">
       <Grid item>
         <Button
           sx={{
@@ -96,13 +106,9 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan}) => {
               type="number"
               placeholder="Enter Amount"
               value={depositAmount}
-              InputProps={{
-                inputProps: { 
-                    max: Math.ceil((loan.loanAmount + loan.loanAmount * (loan.interest / 100))-loan.paidBack), min: 1 
-                }
-            }}
-              onChange={(e) => setDepositAmount(+e.target.value)}
-              sx={{ mt: 2, width: "100%", fontFamily: "Poppins" }}
+              inputProps={{ min: 1 }}
+              onChange={handleChange}
+              sx={{ mt: 2, width: "50%", fontFamily: "Poppins" }}
             />
 
             <Button type="submit" onClick={handlePayBackLoan} disabled={isDepositing} sx={{ width: "227.5px" }}>

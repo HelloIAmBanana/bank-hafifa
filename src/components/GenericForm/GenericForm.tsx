@@ -1,13 +1,10 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Box, CircularProgress, MenuItem, FormControl, FormHelperText, Button, Typography } from "@mui/material";
-import Ajv, { Schema } from "ajv";
-import ajvErrors from "ajv-errors";
 import fieldsRegistry from "./fieldsRegistry";
 import { Field } from "../../models/field";
-
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
+import ajv from "../../ajvSettings";
+import { Schema } from "ajv";
 
 interface GenericFormProps {
   fields: Field[];

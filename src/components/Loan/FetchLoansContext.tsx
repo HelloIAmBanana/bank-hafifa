@@ -20,6 +20,7 @@ export function FetchLoansContextProvider({ children }: React.PropsWithChildren)
   const [currentUser] = useContext(UserContext);
   const [isLoansLoading, setIsLoanLoading] = useState(true);
   const [loans, setLoans] = useState<Loan[]>([]);
+
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);
   }, [currentUser]);
@@ -28,15 +29,11 @@ export function FetchLoansContextProvider({ children }: React.PropsWithChildren)
     setIsLoanLoading(true);
     try {
       const fetchedLoans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
+      const currentLoans = isAdmin
+        ? fetchedLoans
+        : fetchedLoans.filter((currentLoan) => currentLoan.accountID === currentUser!.id);
 
-      if (isAdmin) {
-        setLoans(fetchedLoans);
-        setIsLoanLoading(false);
-        return;
-      }
-
-      const userLoans = fetchedLoans.filter((currentLoan) => currentLoan.accountID === currentUser!.id);
-      setLoans(userLoans);
+      setLoans(currentLoans);
     } catch (error) {
       console.error("Error fetching data:", error);
     }

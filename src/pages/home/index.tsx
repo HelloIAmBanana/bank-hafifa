@@ -7,16 +7,13 @@ import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { UserContext } from "../../UserProvider";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import Ajv, { JSONSchemaType } from "ajv";
-import ajvErrors from "ajv-errors";
+import ajv from "../../ajvSettings";
+import { JSONSchemaType } from "ajv";
 import { DateTime } from "luxon";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import OverviewPanel from "./overviewPanel";
 import TransactionsTable from "../../components/UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
-
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
 
 const fields = [
   {
@@ -214,7 +211,6 @@ const Home: React.FC = () => {
                   isTableLoading={isTableLoading}
                   userOldBalance={userOldBalance}
                   isButtonLoading={isButtonLoading}
-                  currentUser={currentUser!}
                   openPaymentModal={openPaymentModal}
                 />
               </Paper>

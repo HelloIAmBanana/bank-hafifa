@@ -1,12 +1,12 @@
 import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
 import { Fragment } from "react/jsx-runtime";
-import { User } from "../../models/user";
+import { useContext } from "react";
+import { UserContext } from "../../UserProvider";
 
 interface OverviewGridPanel {
   isTableLoading: boolean;
   userOldBalance: number | undefined;
   isButtonLoading: boolean;
-  currentUser: User;
   openPaymentModal: () => void;
 }
 
@@ -14,9 +14,10 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
   isTableLoading,
   userOldBalance,
   isButtonLoading,
-  currentUser,
   openPaymentModal,
 }) => {
+  const [currentUser] = useContext(UserContext);
+
   return (
     <Fragment>
       <Typography variant="h4" fontFamily={"Poppins"} fontWeight={"bold"}>
@@ -52,7 +53,7 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
                   fontSize: 36,
                 }}
               >
-                {!isButtonLoading ? `$${currentUser.balance}` : `$${userOldBalance}`}
+                {`$${currentUser!.balance}`}
               </Typography>
             )}
           </Paper>

@@ -63,7 +63,7 @@ const LoanBox: React.FC<LoansProps> = ({ loan }) => {
                 <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>{loan.loanOwner}</Typography>
               </Grid>
             )}
-            {loan.status !== "pending" && (
+            {(loan.status === "approved"||loan.status==="offered") && (
               <>
                 <Grid item xs={8} sm={8} md={8} key={4} sx={{ ml: 1, mt: 1 }}>
                   <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>Interest Rate</Typography>

@@ -5,14 +5,11 @@ import { generateUniqueId, getUserFullName } from "../../utils/utils";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { Loan } from "../../models/loan";
 import { successAlert } from "../../utils/swalAlerts";
-import ajvErrors from "ajv-errors";
-import Ajv, { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import LoansRow from "../../components/Loan/LoansRow";
 import { useFetchLoansContext } from "../../components/Loan/FetchLoansContext";
-
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
+import ajv from "../../ajvSettings";
+import { JSONSchemaType } from "ajv";
 
 const schema: JSONSchemaType<Loan> = {
   type: "object",
@@ -107,11 +104,10 @@ const LoansPage: React.FC = () => {
   }, [currentUser]);
 
   return (
-    <Grid container justifyContent="flex-start">
-      <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>
+    <Grid container justifyContent="flex-start"  sx={{overflowX:"hidden"}}>
+      <Box sx={{ ml: 15 }}>
         <Container sx={{ mt: 2 }}>
           <Grid container spacing={5}>
-            <Box sx={{ flexGrow: 1 }}>
               <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start">
                 <Grid container direction="row" justifyContent="space-between" alignItems="center" mt={5}>
                   <Grid item xs={12} justifyContent="flex-start">
@@ -139,7 +135,6 @@ const LoansPage: React.FC = () => {
                   </Box>
                 )}
               </Grid>
-            </Box>
           </Grid>
         </Container>
       </Box>

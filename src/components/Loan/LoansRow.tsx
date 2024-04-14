@@ -9,13 +9,20 @@ interface LoanRowsProps {
 
 const LoansRow: React.FC<LoanRowsProps> = ({ loans, title }) => {
   if (loans.length <= 0) return null;
-  
+
   return (
-    <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
-      <Typography variant="h5" fontFamily="Poppins">
-        {title}
-      </Typography>
-      <Grid
+    <Grid container>
+      <Grid item xs={12} sm={12} md={12} lg={7} xl={10} mt={2}>
+        <Typography variant="h5" fontFamily="Poppins">
+          {title}
+        </Typography>
+      </Grid>
+      <Grid item
+        xl={10}
+        lg={7}
+        md={5}
+        sm={3}
+        xs={2}
         sx={{
           mt: 2,
           overflowX: loans.length > 2 ? "auto" : "visible",
@@ -27,7 +34,7 @@ const LoansRow: React.FC<LoanRowsProps> = ({ loans, title }) => {
       >
         {loans.map((loan, index) => (
           <Grid item key={index} mr={2}>
-            <LoanBox loan={loan}/>
+            <LoanBox loan={loan} />
           </Grid>
         ))}
       </Grid>
