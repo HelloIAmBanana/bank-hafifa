@@ -14,6 +14,7 @@ const fieldsRegistry: FieldsRegistry = {
   file: Input,
   date: Input,
   time: Input,
+  "datetime-local":Input,
   select: Select,
   checkbox: Checkbox,
 };

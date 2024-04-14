@@ -9,7 +9,8 @@ import LoadingScreen from "./components/Loader";
 import CRUDLocalStorage from "./CRUDLocalStorage";
 import { Loan } from "./models/loan";
 import { errorAlert, successAlert } from "./utils/swalAlerts";
-import { Notification } from "./models/notification";
+import { Notification, NotificationType } from "./models/notification";
+import { FetchLoansContextProvider } from "./components/Loan/FetchLoansContext";
 
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
@@ -17,7 +18,7 @@ function exctractPathFromAdminRoute(path: string) {
   return normalPath;
 }
 
-const getNotification = (notification: string) => {
+const getNotification = (notification: NotificationType) => {
   switch (notification) {
     case "cardApproved":
       return successAlert("Your card request was approved by an admin!");
@@ -38,55 +39,45 @@ export const AuthHandlerRoute = () => {
   const [currentUser, setCurrentUser] = useState<User>();
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
 
-  const storeCurrentUser = async () => {
+  const storeCurrentUserAndNotifications = async () => {
     const user = (await AuthService.getCurrentUser()) as User;
+    const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
+
     setCurrentUser(user);
-  };
 
-  const fetchUserNotifications = async () => {
-    if (currentUser) {
-      const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
-      const userNotifications = notifications.filter((notification) => notification.accountID === currentUser.id);
+    const userNotifications = notifications.filter((notification) => notification.accountID === user.id);
 
-      userNotifications.forEach(async (notification) => {
-        getNotification(notification.type);
+    userNotifications.forEach(async (notification) => {
+      getNotification(notification.type);
 
-        await CRUDLocalStorage.deleteItemFromList("notifications", notification);
-      });
-    }
+      await CRUDLocalStorage.deleteItemFromList("notifications", notification);
+    });
   };
 
   const blockUnpayingUsers = async () => {
-    const currentDate = new Date();
+    const currentDate = new Date().toISOString();
 
     const loans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
 
-    const expiredLoans = loans.filter((loan) => {
-      const [hours, minutes] = loan.expireDate.split(":").map(Number);
+    const expiredLoans = loans.filter((loan) => loan.expireDate < currentDate);
 
-      const expirationDateTime = new Date();
-      expirationDateTime.setHours(hours);
-      expirationDateTime.setMinutes(minutes);
-      expirationDateTime.setSeconds(0);
-
-      return expirationDateTime < currentDate && loan.status === "approved";
-    });
-
+    const blocked = await CRUDLocalStorage.getAsyncData<string[]>("blocked");
     for (const loan of expiredLoans) {
-      await CRUDLocalStorage.addItemToList("blocked", loan.accountID);
-      await CRUDLocalStorage.deleteItemFromList("loans", loan);
+      if (!blocked.includes(loan.accountID) && loan.status === "approved") {
+        await CRUDLocalStorage.addItemToList("blocked", loan.accountID);
+      }
+      if (loan.status === "approved" || loan.status === "offered") {
+        await CRUDLocalStorage.deleteItemFromList("loans", loan);
+      }
     }
-    
+
     const blockedList = await CRUDLocalStorage.getAsyncData<string[]>("blocked");
-    const uniqueBlockedUsers = [...new Set(blockedList)];
-    await CRUDLocalStorage.setAsyncData("blocked", uniqueBlockedUsers);
-    setBlockedUsers(uniqueBlockedUsers);
+    setBlockedUsers(blockedList);
   };
 
   useEffect(() => {
-    storeCurrentUser();
+    storeCurrentUserAndNotifications();
     blockUnpayingUsers();
-    fetchUserNotifications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
 
@@ -112,12 +103,14 @@ export const AuthHandlerRoute = () => {
       {!currentUser ? (
         <LoadingScreen />
       ) : (
+        
         <Box sx={{ display: "flex", backgroundColor: "white" }}>
           {isPublicRoute ? (
             <Navigate to="/home" />
           ) : (
             <>
-              <NavBar />
+          <NavBar />
+              
               <Grid container direction="column" justifyContent="flex-start" alignItems="center">
                 {blockedUsers.includes(currentUser.id) && (
                   <Modal open={true} sx={{ backgroundColor: "white" }}>
@@ -138,6 +131,7 @@ export const AuthHandlerRoute = () => {
                     </Grid>
                   </Modal>
                 )}
+                <FetchLoansContextProvider>
                 {currentUser.role === "admin" ? (
                   isAdminRoute ? (
                     <Outlet />
@@ -149,6 +143,7 @@ export const AuthHandlerRoute = () => {
                 ) : (
                   <Navigate to={exctractPathFromAdminRoute(location.pathname)} />
                 )}
+                </FetchLoansContextProvider>
               </Grid>
             </>
           )}

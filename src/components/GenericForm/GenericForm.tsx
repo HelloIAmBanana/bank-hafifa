@@ -34,22 +34,25 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
     clearErrors();
   };
 
-  const validateForm = (data: Record<string, any>) => {
-    for (const key in data) {
+  const formatFormData = (data: Record<string, any>) => {
+    const formattedData = data;
+    for (const key in formattedData) {
       const fieldType = fields.find((field) => field.id === key)!.type;
-      console.log(fieldType);
       if (fieldType === "number") {
-        data[key] = parseFloat(data[key]);
+        formattedData[key] = parseFloat(formattedData[key]);
       }
       if (fieldType === "file") {
-        if (data[key][0] instanceof File) {
-          data[key] = URL.createObjectURL(data[key][0]);
-        }
-        else{
-          data[key]="";
+        if (formattedData[key][0] instanceof File) {
+          formattedData[key] = URL.createObjectURL(formattedData[key][0]);
+        } else {
+          formattedData[key] = "";
         }
       }
     }
+    return formattedData;
+  };
+
+  const validateForm = (data: Record<string, any>) => {
     validate(data);
     const formErrors = validate.errors;
     formErrors?.forEach((currentError) => {
@@ -60,8 +63,9 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
   };
 
   const internalHandleSubmit = async (data: Record<string, any>) => {
-    validateForm(data);
-    onSubmit(data);
+    const formattedData = formatFormData(data);
+    validateForm(formattedData);
+    onSubmit(formattedData);
   };
 
   return (

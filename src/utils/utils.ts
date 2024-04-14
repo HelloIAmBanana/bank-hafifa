@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { User } from "../models/user";
 import CRUDLocalStorage from "../CRUDLocalStorage";
-import { Notification } from "../models/notification";
+import { Notification, NotificationType } from "../models/notification";
 
 export const generateUniqueId = () => {
   return "_" + Math.random().toString(36).substring(2, 9);
@@ -33,7 +33,7 @@ export function generateUniqueNumber(digitAmount: number) {
 
 export async function createNewNotification(
   accountID: string,
-  type: "loanDeclined" | "cardDeclined" | "cardApproved" | "loanApproved" | "newTransaction"
+  type: NotificationType,
 ) {
   const newNotification: Notification = {
     accountID: accountID,

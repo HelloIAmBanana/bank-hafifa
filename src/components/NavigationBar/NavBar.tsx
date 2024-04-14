@@ -87,6 +87,7 @@ export default function NavBar() {
               borderTopLeftRadius: 16,
               borderLeftRadius: 16,
               position: "relative",
+              borderRight: "2px solid #ca0f50d0",
             },
           }}
         >

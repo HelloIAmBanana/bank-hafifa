@@ -1,20 +1,21 @@
 import React, { useContext, useState } from "react";
 import { Loan } from "../../models/loan";
-import { Box, Button, CircularProgress, Grid, Input, Modal, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Grid, Modal, TextField, Typography } from "@mui/material";
 import { UserContext } from "../../UserProvider";
+import { useFetchLoansContext } from "./FetchLoansContext";
 import { User } from "../../models/user";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 
 interface ApprovedLoansButtonsProps {
-  fetchLoans: () => Promise<void>;
   loan: Loan;
 }
 
-const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan, fetchLoans }) => {
+const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan}) => {
   const [isDepositing, setIsDepositing] = useState(false);
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState(0);
+  const { fetchUserLoans } = useFetchLoansContext();
 
   const openLoanApprovalModal = () => {
     setIsLoanApprovalModalOpen(true);
@@ -49,7 +50,7 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan, fetch
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
     setCurrentUser(updatedUser);
 
-    await fetchLoans();
+    await fetchUserLoans();
   };
   return (
     <Grid container direction="row" justifyContent="space-between" alignItems="center">
@@ -91,11 +92,16 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan, fetch
             <Typography variant="h5" sx={{ fontFamily: "Poppins" }}>
               Enter amount
             </Typography>
-            <Input
+            <TextField
               type="number"
               placeholder="Enter Amount"
               value={depositAmount}
-              onChange={(e) => setDepositAmount(+e.target.value.replace(/[^0-9]/g, ""))}
+              InputProps={{
+                inputProps: { 
+                    max: Math.ceil((loan.loanAmount + loan.loanAmount * (loan.interest / 100))-loan.paidBack), min: 1 
+                }
+            }}
+              onChange={(e) => setDepositAmount(+e.target.value)}
               sx={{ mt: 2, width: "100%", fontFamily: "Poppins" }}
             />
 
