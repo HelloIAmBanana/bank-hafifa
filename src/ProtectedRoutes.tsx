@@ -44,9 +44,10 @@ export const AuthHandlerRoute = () => {
     const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
 
     setCurrentUser(user);
+    
     if(!currentUser) return;
     
-    const userNotifications = notifications.filter((notification) => notification.accountID === user.id);
+    const userNotifications = notifications.filter((notification) => notification.accountID === currentUser.id);
 
     userNotifications.forEach(async (notification) => {
       getNotification(notification.type);

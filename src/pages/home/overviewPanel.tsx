@@ -42,7 +42,7 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
             </Typography>
             {isTableLoading ? (
               <center>
-                <Skeleton/>
+                <Skeleton height={"44.4531px"}/>
               </center>
             ) : (
               <Typography
@@ -53,7 +53,7 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
                   fontSize: 36,
                 }}
               >
-                {`$${currentUser!.balance}`}
+                {`$${currentUser!.balance.toLocaleString()}`}
               </Typography>
             )}
           </Paper>
