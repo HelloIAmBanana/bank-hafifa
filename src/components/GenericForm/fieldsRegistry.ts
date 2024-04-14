@@ -11,6 +11,7 @@ const fieldsRegistry: FieldsRegistry = {
   email: Input,
   password: Input,
   number: Input,
+  file: Input,
   date: Input,
   time: Input,
   select: Select,

@@ -1,15 +1,15 @@
 import { Grid, Typography } from "@mui/material";
-import { Loan } from "../../models/loan";
-import Loans from "./Loan";
+import { Deposit } from "../../models/deposit";
+import DepositBox from "./Deposit";
 
-interface LoanRowsProps {
-  loans: Loan[];
+interface DepositRowsProps {
+  deposits: Deposit[];
   title: string;
   fetchAction: () => Promise<void>;
 }
 
-const LoanRow: React.FC<LoanRowsProps> = ({ loans, title, fetchAction }) => {
-  if (loans.length <= 0) return null;
+const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title, fetchAction }) => {
+  if (deposits.length <= 0) return null;
   
   return (
     <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
@@ -19,16 +19,16 @@ const LoanRow: React.FC<LoanRowsProps> = ({ loans, title, fetchAction }) => {
       <Grid
         sx={{
           mt: 2,
-          overflowX: loans.length > 2 ? "auto" : "visible",
+          overflowX: deposits.length > 2 ? "auto" : "visible",
           display: "flex",
           flexDirection: "row",
           maxWidth: "100vh",
           width: "auto",
         }}
       >
-        {loans.map((loan, index) => (
+        {deposits.map((deposit, index) => (
           <Grid item key={index} mr={2}>
-            <Loans loan={loan} fetchLoans={fetchAction} />
+            <DepositBox deposit={deposit} fetchAction={fetchAction} isUserAdmin={false}/>
           </Grid>
         ))}
       </Grid>
@@ -36,4 +36,4 @@ const LoanRow: React.FC<LoanRowsProps> = ({ loans, title, fetchAction }) => {
   );
 };
 
-export default LoanRow;
+export default DepositRows;

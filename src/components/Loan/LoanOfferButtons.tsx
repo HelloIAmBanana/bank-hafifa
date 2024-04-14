@@ -7,25 +7,25 @@ import { User } from "../../models/user";
 import { UserContext } from "../../UserProvider";
 
 interface LoanOfferButtonsProps {
-  fetchLoans?: () => Promise<void>;
+  fetchLoans: () => Promise<void>;
   loan: Loan;
 }
 
 const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = ({ fetchLoans, loan }) => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
-const [isRejectLoading,setIsRejectLoading]=useState(false);
-const [isAcceptLoading,setIsAcceptLoading]=useState(false);
+  const [isRejectLoading, setIsRejectLoading] = useState(false);
+  const [isAcceptLoading, setIsAcceptLoading] = useState(false);
 
   const rejectLoanOffer = async () => {
-    setIsRejectLoading(true)
+    setIsRejectLoading(true);
     await CRUDLocalStorage.deleteItemFromList<Loan>("loans", loan);
     successAlert("Loan Offer Rejected!");
-    await fetchLoans?.();
+    await fetchLoans();
   };
 
   const acceptLoanOffer = async () => {
     setIsAcceptLoading(true);
-    const updatedBalance = currentUser!.balance + +loan.loanAmount;
+    const updatedBalance = currentUser!.balance + loan.loanAmount;
     const updatedUser: User = {
       ...currentUser!,
       balance: updatedBalance,
@@ -33,11 +33,12 @@ const [isAcceptLoading,setIsAcceptLoading]=useState(false);
     const updatedLoan: Loan = {
       ...loan,
       status: "approved",
-      message: "approved",
     };
+
     await CRUDLocalStorage.updateItemInList<Loan>("loans", updatedLoan);
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
     setCurrentUser(updatedUser);
+    await fetchLoans();
     setIsAcceptLoading(false);
   };
   return (
@@ -50,6 +51,8 @@ const [isAcceptLoading,setIsAcceptLoading]=useState(false);
             fontSize: 18,
             mb: 3,
             color: "white",
+            height: "43.5px",
+            width: "83.75px",
             "&:hover": {
               backgroundColor: "darkgreen",
             },
@@ -67,6 +70,8 @@ const [isAcceptLoading,setIsAcceptLoading]=useState(false);
             fontFamily: "Poppins",
             color: "white",
             fontSize: 18,
+            height: "43.5px",
+            width: "83.75px",
             mb: 3,
             "&:hover": {
               backgroundColor: "darkred",
@@ -75,7 +80,7 @@ const [isAcceptLoading,setIsAcceptLoading]=useState(false);
           disabled={isRejectLoading}
           onClick={rejectLoanOffer}
         >
-          Reject
+          {isRejectLoading ? <CircularProgress /> : "Reject"}
         </Button>
       </Grid>
     </Grid>

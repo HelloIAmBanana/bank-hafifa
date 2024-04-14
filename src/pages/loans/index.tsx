@@ -18,50 +18,52 @@ const schema: JSONSchemaType<Loan> = {
   properties: {
     id: { type: "string" },
     loanOwner: { type: "string" },
-    loanAmount: { type: "string" },
+    loanAmount: { type: "number", minimum: 1 },
     accountID: { type: "string" },
-    interest: { type: "string" },
+    interest: { type: "number" },
     paidBack: { type: "number" },
     status: { type: "string" },
     expireDate: { type: "string" },
-    message: { type: "string" },
   },
-  required: ["accountID", "loanAmount", "interest"],
+  required: ["loanAmount"],
   additionalProperties: true,
   errorMessage: {
     properties: {
-      accountID: "Enter Account ID",
+      loanAmount: "Entered amount is less than 1",
     },
   },
 };
 
 const validateForm = ajv.compile(schema);
 
+const fields = [
+  {
+    id: "loanAmount",
+    label: "Loan Amount",
+    type: "number",
+    placeholder: "Enter Loan Amount",
+  },
+];
+
 const LoansPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
   const [isNewLoanModalOpen, setIsNewLoanModalOpen] = useState(false);
-  const [isButtonLoading, setIsButtonLoading] = useState(false);
+  const [isCreatingNewLoan, setIsCreatingNewLoan] = useState(false);
   const [loans, setLoans] = useState<Loan[]>([]);
   const [isLoansLoading, setIsLoanLoading] = useState(true);
 
   const fetchUserLoans = async () => {
-    if (currentUser) {
-      setIsLoanLoading(true);
-      try {
-        const fetchedLoans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
-        const userLoans = fetchedLoans.filter((currentLoan) => currentLoan.accountID === currentUser.id);
-        const modifiedLoans = userLoans.map((userLoan) => {
-          return {
-            ...userLoan,
-          };
-        });
-        setLoans(modifiedLoans);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-      setIsLoanLoading(false);
+    setIsLoanLoading(true);
+    try {
+      const fetchedLoans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
+      const userLoans = fetchedLoans.filter((currentLoan) => currentLoan.accountID === currentUser!.id);
+      setLoans(userLoans);
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
+    setIsLoanLoading(false);
   };
+
   const pendingLoans = useMemo(() => {
     return loans.filter((loan) => loan.status === "pending");
   }, [loans]);
@@ -73,42 +75,31 @@ const LoansPage: React.FC = () => {
   const offeredLoans = useMemo(() => {
     return loans.filter((loan) => loan.status === "offered");
   }, [loans]);
-  
+
   const rejectedLoans = useMemo(() => {
     return loans.filter((loan) => loan.status === "rejected");
   }, [loans]);
 
-  const fields = [
-    {
-      id: "loanAmount",
-      label: "Loan Amount",
-      type: "number",
-      placeholder: "Enter Loan Amount",
-    },
-  ];
-
   const handleLoanModalSubmit = async (data: any) => {
-    setIsButtonLoading(true);
-
     const newLoan: Loan = {
-      ...data,
-      interest: "0",
+      loanAmount: data.loanAmount,
+      interest: 0,
       expireDate: "",
       accountID: currentUser!.id,
       id: generateUniqueId(),
       status: "pending",
-      loanOwner:getUserFullName(currentUser!),
+      loanOwner: getUserFullName(currentUser!),
       paidBack: 0,
-      message: "",
     };
-    if (validateForm(newLoan)) {
-      await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);
-      successAlert("Loan was created!");
-      closeLoanModal();
-      fetchUserLoans();
-    }
 
-    setIsButtonLoading(false);
+    if (!validateForm(newLoan)) return;
+    
+    setIsCreatingNewLoan(true);
+    await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);
+    successAlert("Loan was created!");
+    closeLoanModal();
+    await fetchUserLoans();
+    setIsCreatingNewLoan(false);
   };
 
   const openLoanModal = () => {
@@ -116,6 +107,7 @@ const LoansPage: React.FC = () => {
   };
 
   const closeLoanModal = () => {
+    if(isCreatingNewLoan) return;
     setIsNewLoanModalOpen(false);
   };
 
@@ -152,11 +144,10 @@ const LoansPage: React.FC = () => {
                   </Grid>
                 ) : (
                   <Box>
-                    <LoanRow loans={approvedLoans} title="Approved" fetchAction={fetchUserLoans}/>
+                    <LoanRow loans={approvedLoans} title="Approved" fetchAction={fetchUserLoans} />
                     <LoanRow loans={offeredLoans} title="Offered" fetchAction={fetchUserLoans} />
-                    <LoanRow loans={pendingLoans} title="Pending" fetchAction={fetchUserLoans}/>
-                    <LoanRow loans={rejectedLoans} title="Rejected" fetchAction={fetchUserLoans}/>
-
+                    <LoanRow loans={pendingLoans} title="Pending" fetchAction={fetchUserLoans} />
+                    <LoanRow loans={rejectedLoans} title="Rejected" fetchAction={fetchUserLoans} />
                   </Box>
                 )}
               </Grid>
@@ -187,8 +178,8 @@ const LoansPage: React.FC = () => {
               onSubmit={handleLoanModalSubmit}
               submitButtonLabel={"Request Loan"}
               schema={schema}
-              isLoading={isButtonLoading}
-            ></GenericForm>
+              isLoading={isCreatingNewLoan}
+            />
           </center>
         </Box>
       </Modal>

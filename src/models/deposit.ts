@@ -1,9 +1,9 @@
 export type Deposit = {
-    id: string;
-    depositAmount: string;
-    interest: string;
-    accountID: string;
-    status: "accepted" | "offered";
-    expireTime: string;
-  };
-  
+  id: string;
+  expireTime: string;
+  depositOwner: string;
+  accountID: string;
+  status: "Active" | "Offered" | "Withdrawn";
+  depositAmount: number;
+  interest: number;
+};

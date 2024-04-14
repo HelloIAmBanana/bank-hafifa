@@ -1,6 +1,5 @@
 import { Box, Drawer, Toolbar, List, Typography, Avatar } from "@mui/material";
 import { useContext, useMemo } from "react";
-import { User } from "../../models/user";
 import { getUserFullName } from "../../utils/utils";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserProvider";
@@ -57,18 +56,17 @@ export default function NavBar() {
   };
 
   const userName = useMemo(() => {
-    return getUserFullName(currentUser as User);
+    return getUserFullName(currentUser!);
   }, [currentUser]);
 
   const avatarIMG = useMemo(() => {
-    return currentUser?.avatarUrl;
+    return currentUser!.avatarUrl;
   }, [currentUser]);
 
   const userRoutes = useMemo(() => {
-    if (currentUser) {
-      const isAdmin = AuthService.isUserAdmin(currentUser);
-      if (isAdmin)
-        return ["Home", "Loans Management", "Cards Management", "Deposits Management", "Users Management", "Settings"];
+    const isAdmin = AuthService.isUserAdmin(currentUser);
+    if (isAdmin) {
+      return ["Home", "Loans Management", "Cards Management", "Deposits Management", "Users Management", "Settings"];
     }
     return ["Home", "Loans", "Cards", "Deposits", "Settings"];
   }, [currentUser]);

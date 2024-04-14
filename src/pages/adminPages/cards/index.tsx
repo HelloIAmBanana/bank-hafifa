@@ -5,7 +5,8 @@ import { Card } from "../../../models/card";
 import { UserContext } from "../../../UserProvider";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { successAlert } from "../../../utils/swalAlerts";
-import CreditCard from "../../../components/CreditCard";
+import CreditCard from "../../../components/CreditCard/CreditCard";
+import { createNewNotification } from "../../../utils/utils";
 
 const AdminCardsPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
@@ -17,6 +18,8 @@ const AdminCardsPage: React.FC = () => {
       ...card,
       status: "approved",
     };
+
+    await createNewNotification(card.accountID, "cardApproved");
     await CRUDLocalStorage.updateItemInList<Card>("cards", newCard);
     successAlert("Card approved!");
     await fetchCards();
@@ -28,6 +31,9 @@ const AdminCardsPage: React.FC = () => {
       status: "rejected",
       rejectedMessage: rejectionReason,
     };
+
+    await createNewNotification(card.accountID, "cardDeclined");
+
     await CRUDLocalStorage.updateItemInList<Card>("cards", newCard);
     successAlert("Card rejected!");
     await fetchCards();
@@ -35,7 +41,6 @@ const AdminCardsPage: React.FC = () => {
 
   const fetchCards = async () => {
     setIsCardsLoading(true);
-    if (currentUser) {
       try {
         const fetchedCards = await CRUDLocalStorage.getAsyncData<Card[]>("cards");
         const modifiedCards: Card[] = fetchedCards.filter((filteredCards) => filteredCards.status === "pending");
@@ -43,7 +48,6 @@ const AdminCardsPage: React.FC = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-    }
     setIsCardsLoading(false);
   };
 
@@ -56,7 +60,7 @@ const AdminCardsPage: React.FC = () => {
 
   return (
     <Grid container justifyContent="flex-start">
-      <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>
+      <Box component="main" sx={{ ml: 15 }}>
         <Container sx={{ mt: 2 }}>
           <Grid container spacing={5}>
             <Box sx={{ flexGrow: 1 }}>
@@ -68,52 +72,52 @@ const AdminCardsPage: React.FC = () => {
                     </Typography>
                   </Grid>
                   <Grid item xs={12} container justifyContent="flex-start">
-                  <Typography variant="h5" fontFamily="Poppins">
+                    <Typography variant="h5" fontFamily="Poppins">
                       Pending Card Requests
                     </Typography>
                   </Grid>
                 </Grid>
 
-              {isCardsLoading ? (
-                <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
-                  <Skeleton height={"12rem"} width={window.innerWidth / 2} />
-                </Grid>
-              ) : (
-                <Box  ml={12}>
-                  {pendingCards.length > 0 && (
-                    <Grid item mt={2}>
-
-                      <Grid container direction="row">
-                        {pendingCards.map((card, index) => (
-                          <Grid
-                            container
-                            direction="row"
-                            justifyContent="center"
-                            alignItems="center"
-                            lg={6}
-                            md={8}
-                            sm={12}
-                          >
-                            <Grid item key={index} sx={{ marginRight: 2 }}>
-                              <CreditCard
-                                card={card}
-                                approveCard={approveCard}
-                                rejectCard={rejectCard}
-                                isUserAdmin={true}
-                              />
+                {isCardsLoading ? (
+                  <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
+                    <Skeleton height={"12rem"} width={window.innerWidth / 2} />
+                  </Grid>
+                ) : (
+                  <Box ml={12}>
+                    {pendingCards.length > 0 && (
+                      <Grid item mt={2}>
+                        <Grid container direction="row">
+                          {pendingCards.map((card, index) => (
+                            <Grid
+                              container
+                              direction="row"
+                              justifyContent="center"
+                              alignItems="center"
+                              lg={6}
+                              md={8}
+                              sm={12}
+                            >
+                              <Grid item key={index} sx={{ marginRight: 2 }}>
+                                <CreditCard
+                                  card={card}
+                                  approveCard={approveCard}
+                                  rejectCard={rejectCard}
+                                  isUserAdmin={true}
+                                />
+                              </Grid>
                             </Grid>
-                          </Grid>
-                        ))}
+                          ))}
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  )}
-                </Box>
-              )}
-            </Grid>
-          </Box>
-        </Grid>
-      </Container>
-    </Box></Grid>
+                    )}
+                  </Box>
+                )}
+              </Grid>
+            </Box>
+          </Grid>
+        </Container>
+      </Box>
+    </Grid>
   );
 };
 
