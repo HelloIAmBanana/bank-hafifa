@@ -85,7 +85,7 @@ export const AuthHandlerRoute = () => {
     const currentDate = new Date().toISOString();
     const deposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("loans");
 
-    const expiredDeposits = deposits.filter((deposit) => deposit.expireTime < currentDate);
+    const expiredDeposits = deposits.filter((deposit) => deposit.expireDate < currentDate);
 
     for (const deposit of expiredDeposits) {
       const totalDepositAmount = deposit.depositAmount + deposit.depositAmount * deposit.interest;

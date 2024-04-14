@@ -166,7 +166,7 @@ const Home: React.FC = () => {
             alignItems="center"
             minHeight="100vh"
             ml={10}
-            mt={-3}
+            mt={-10}
           >
             <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
               Welcome Back Admin {getUserFullName(currentUser!)}
@@ -174,19 +174,19 @@ const Home: React.FC = () => {
             <Grid container direction="row" justifyContent="space-evenly" alignItems="center" spacing={1}>
               <Grid item>
                 <Button type="submit" onClick={() => navigate("/admin/loans")}>
-                  Loans Management
+                  Loan Control
                 </Button>
               </Grid>
               <Grid item>
                 <Button type="submit" onClick={() => navigate("/admin/cards")}>
-                  Cards Management
+                  Card Control
                 </Button>
               </Grid>
               <Grid item>
-                <Button type="submit">Users Management</Button>
+                <Button type="submit">User Control</Button>
               </Grid>
               <Grid item>
-                <Button type="submit">Deposits Management</Button>
+                <Button type="submit" onClick={() => navigate("/admin/deposits")}>Deposit Control</Button>
               </Grid>
             </Grid>
           </Grid>

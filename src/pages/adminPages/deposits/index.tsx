@@ -20,7 +20,7 @@ const schema: JSONSchemaType<Deposit> = {
   type: "object",
   properties: {
     id: { type: "string" },
-    expireTime: { type: "string" },
+    expireDate: { type: "string" },
     depositOwner: { type: "string" },
     accountID: { type: "string" },
     status: { type: "string" },

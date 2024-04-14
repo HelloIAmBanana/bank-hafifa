@@ -13,15 +13,15 @@ const getNavBarIcon = (item: string) => {
     case "Home":
       return <GiHouse />;
     case "Loans":
-    case "Loans Management":
+    case "Loans Control":
       return <GiPayMoney />;
     case "Cards":
-    case "Cards Management":
+    case "Cards Control":
       return <GiSwipeCard />;
     case "Deposits":
-    case "Deposits Management":
+    case "Deposits Control":
       return <GiPiggyBank />;
-    case "Users Management":
+    case "Users Control":
       return <GiSmart />;
     case "Settings":
       return <GiGears />;
@@ -42,13 +42,13 @@ export default function NavBar() {
 
   const getRoutePath = (item: string) => {
     switch (item) {
-      case "Loans Management":
+      case "Loans Control":
         return navigate(`/admin/loans`);
-      case "Cards Management":
+      case "Cards Control":
         return navigate(`/admin/cards`);
-      case "Deposits Management":
+      case "Deposits Control":
         return navigate(`/admin/deposits`);
-      case "Users Management":
+      case "Users Control":
         return navigate(`/admin/users`);
       default:
         return navigate(`/${item.toLowerCase()} `);
@@ -66,7 +66,7 @@ export default function NavBar() {
   const userRoutes = useMemo(() => {
     const isAdmin = AuthService.isUserAdmin(currentUser);
     if (isAdmin) {
-      return ["Home", "Loans Management", "Cards Management", "Deposits Management", "Users Management", "Settings"];
+      return ["Home", "Loans Control", "Cards Control", "Deposits Control", "Users Control", "Settings"];
     }
     return ["Home", "Loans", "Cards", "Deposits", "Settings"];
   }, [currentUser]);
