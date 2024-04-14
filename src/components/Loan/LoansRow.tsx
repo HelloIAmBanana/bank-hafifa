@@ -1,14 +1,13 @@
 import { Grid, Typography } from "@mui/material";
 import { Loan } from "../../models/loan";
-import Loans from "./Loan";
+import LoanBox from "./LoanBox";
 
 interface LoanRowsProps {
   loans: Loan[];
   title: string;
-  fetchAction: () => Promise<void>;
 }
 
-const LoanRow: React.FC<LoanRowsProps> = ({ loans, title, fetchAction }) => {
+const LoansRow: React.FC<LoanRowsProps> = ({ loans, title }) => {
   if (loans.length <= 0) return null;
   
   return (
@@ -28,7 +27,7 @@ const LoanRow: React.FC<LoanRowsProps> = ({ loans, title, fetchAction }) => {
       >
         {loans.map((loan, index) => (
           <Grid item key={index} mr={2}>
-            <Loans loan={loan} fetchLoans={fetchAction} />
+            <LoanBox loan={loan}/>
           </Grid>
         ))}
       </Grid>
@@ -36,4 +35,4 @@ const LoanRow: React.FC<LoanRowsProps> = ({ loans, title, fetchAction }) => {
   );
 };
 
-export default LoanRow;
+export default LoansRow;

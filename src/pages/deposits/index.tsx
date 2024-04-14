@@ -1,26 +1,12 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { UserContext } from "../../UserProvider";
 import { Box, Container, Grid, Skeleton, Typography } from "@mui/material";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { Deposit } from "../../models/deposit";
 import DepositRows from "../../components/Deposit/DepositRows";
+import { useFetchContext } from "../../FetchContext";
 
 const DepositsPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
-  const [isDepositsLoading,setIsDepositsLoading]=useState(false)
-  const [deposits,setDeposits]=useState<Deposit[]>([])
-
-  const fetchUserDeposits = async () => {
-    setIsDepositsLoading(true);
-    try {
-      const fetchedDeposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("deposits");
-      const userDeposits = fetchedDeposits.filter((deposit) => deposit.accountID === currentUser!.id);
-      setDeposits(userDeposits);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-    setIsDepositsLoading(false);
-  };
+  const { fetchUserDeposits, isLoading, deposits } = useFetchContext();
 
   const activeDeposits = useMemo(() => {
     return deposits.filter((deposit) => deposit.status === "Active");
@@ -40,6 +26,7 @@ const DepositsPage: React.FC = () => {
     fetchUserDeposits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
+
   return (
     <Grid container justifyContent="flex-start">
       <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>
@@ -55,22 +42,23 @@ const DepositsPage: React.FC = () => {
                   </Grid>
                 </Grid>
 
-                {isDepositsLoading ? (
+                {isLoading ? (
                   <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
                     <Skeleton height={"12rem"} width={window.innerWidth / 2} />
                   </Grid>
                 ) : (
                   <Box>
-                    <DepositRows deposits={activeDeposits} title="Active" fetchAction={fetchUserDeposits} />
-                    <DepositRows deposits={offeredDeposits} title="Offered" fetchAction={fetchUserDeposits} />
-                    <DepositRows deposits={withdrawnDeposits} title="Withdrawn" fetchAction={fetchUserDeposits} />
+                    <DepositRows deposits={activeDeposits} title="Active" />
+                    <DepositRows deposits={offeredDeposits} title="Offered" />
+                    <DepositRows deposits={withdrawnDeposits} title="Withdrawn" />
                   </Box>
                 )}
               </Grid>
             </Box>
           </Grid>
         </Container>
-      </Box></Grid>
+      </Box>
+    </Grid>
   );
 };
 

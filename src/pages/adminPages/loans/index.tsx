@@ -1,30 +1,20 @@
 import * as React from "react";
-import { useState, useEffect, useContext } from "react";
+import { useEffect, useContext } from "react";
 import { Grid, Box, Container, Typography, Skeleton } from "@mui/material";
 import { UserContext } from "../../../UserProvider";
-import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import Loans from "../../../components/Loan/Loan";
-import { Loan } from "../../../models/loan";
+import LoanBox from "../../../components/Loan/LoanBox";
+import { useFetchContext } from "../../../FetchContext";
 
 const AdminLoansPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
-  const [isLoansLoading, setIsLoansLoading] = useState(false);
-  const [pendingLoans, setPendingLoans] = useState<Loan[]>([]);
+  const { fetchUserLoans, isLoading: isLoansLoading, loans } = useFetchContext();
 
-  const fetchLoans = async () => {
-    setIsLoansLoading(true);
-      try {
-        const fetchedLoans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
-        const filteredLoaned: Loan[] = fetchedLoans.filter((filteredCards) => filteredCards.status === "pending");
-        setPendingLoans(filteredLoaned);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    setIsLoansLoading(false);
-  };
+  const pendingLoans = React.useMemo(() => {
+    return loans.filter((loan) => loan.status === "pending");
+  }, [loans]);
 
   useEffect(() => {
-    fetchLoans();
+    fetchUserLoans();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
@@ -55,26 +45,23 @@ const AdminLoansPage: React.FC = () => {
                     <Skeleton height={"12rem"} width={window.innerWidth / 2} />
                   </Grid>
                 ) : (
-                  <Grid item mt={2} ml={11}>
-                    <Grid container>
+                    <Grid container mt={2}>
                       {pendingLoans.map((loan, index) => (
                         <Grid
                           container
                           direction="row"
-                          justifyContent="center"
+                          justifyContent="flex-start"
                           alignItems="center"
-                          xl={3}
-                          lg={4}
+                          xl={4}
                           md={6}
                           sm={12}
                         >
-                          <Grid item key={index} mr={2}>
-                            <Loans loan={loan} fetchLoans={fetchLoans} isUserAdmin={true} />
+                          <Grid item key={index}>
+                            <LoanBox loan={loan}/>
                           </Grid>
                         </Grid>
                       ))}
                     </Grid>
-                  </Grid>
                 )}
               </Grid>
             </Box>

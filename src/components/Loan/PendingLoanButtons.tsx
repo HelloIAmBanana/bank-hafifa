@@ -7,12 +7,12 @@ import GenericForm from "../GenericForm/GenericForm";
 import Ajv, { JSONSchemaType } from "ajv";
 import ajvErrors from "ajv-errors";
 import { createNewNotification } from "../../utils/utils";
+import { useFetchContext } from "../../FetchContext";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
 interface PendingLoanButtonsProps {
-  fetchLoans: () => Promise<void>;
   loan: Loan;
 }
 const schema: JSONSchemaType<Loan> = {
@@ -41,7 +41,7 @@ const fields = [
   {
     id: "expireDate",
     label: "Exp Time",
-    type: "time",
+    type: "datetime-local",
     placeholder: "Enter Loan Expire Time",
   },
   {
@@ -54,10 +54,11 @@ const fields = [
 
 const validateForm = ajv.compile(schema);
 
-const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan, fetchLoans }) => {
+const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
   const [isRejectLoading, setIsRejectLoading] = useState(false);
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
+  const { fetchUserLoans } = useFetchContext();
 
   const rejectLoan = async () => {
     setIsRejectLoading(true);
@@ -71,14 +72,17 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan, fetchLoan
 
     await CRUDLocalStorage.updateItemInList<Loan>("loans", newLoan);
     successAlert("Loan Rejected!");
-    await fetchLoans();
+    await fetchUserLoans();
   };
 
   const acceptLoanRequest = async (data: any) => {
+    const expiryDate = new Date(`${data.expireDate}`).toISOString();
+
     const newLoan: Loan = {
       ...loan,
       ...data,
       status: "offered",
+      expireDate: expiryDate
     };
 
     if (!validateForm(newLoan)) return;
@@ -89,7 +93,7 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan, fetchLoan
 
     await CRUDLocalStorage.updateItemInList<Loan>("loans", newLoan);
     successAlert("Loan Offered!");
-    await fetchLoans();
+    await fetchUserLoans();
   };
 
   const openLoanApprovalModal = () => {

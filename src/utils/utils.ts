@@ -1,9 +1,7 @@
 import { DateTime } from "luxon";
 import { User } from "../models/user";
 import CRUDLocalStorage from "../CRUDLocalStorage";
-import { Notification } from "../models/notification";
-import { Loan } from "../models/loan";
-import { Deposit } from "../models/deposit";
+import { Notification, NotificationType } from "../models/notification";
 
 export const generateUniqueId = () => {
   return "_" + Math.random().toString(36).substring(2, 9);
@@ -35,7 +33,7 @@ export function generateUniqueNumber(digitAmount: number) {
 
 export async function createNewNotification(
   accountID: string,
-  type: "loanDeclined" | "cardDeclined" | "cardApproved" | "loanApproved" | "newTransaction" | "newDepositOffer" |"DepositWithdrawn"
+  type: NotificationType,
 ) {
   const newNotification: Notification = {
     accountID: accountID,
@@ -44,43 +42,4 @@ export async function createNewNotification(
   };
 
   await CRUDLocalStorage.addItemToList<Notification>("notifications", newNotification);
-}
-
-export async function fetchExpiredLoans() {
-  const currentDate = new Date();
-
-  const loans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
-
-  const expiredLoans = loans.filter((loan) => {
-    const [hours, minutes] = loan.expireDate.split(":").map(Number);
-
-    const expirationDateTime = new Date();
-    expirationDateTime.setHours(hours);
-    expirationDateTime.setMinutes(minutes);
-    expirationDateTime.setSeconds(0);
-
-    return expirationDateTime < currentDate && loan.status === "approved";
-  });
-
-  return expiredLoans;
-}
-
-export async function fetchExpiredDeposits() {
-
-  const currentDate = new Date();
-
-  const deposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("deposits");
-
-  const expiredDeposits = deposits.filter((deposit) => {
-    const [hours, minutes] = deposit.expireTime.split(":").map(Number);
-
-    const expirationDateTime = new Date();
-    expirationDateTime.setHours(hours);
-    expirationDateTime.setMinutes(minutes);
-    expirationDateTime.setSeconds(0);
-
-    return expirationDateTime < currentDate && deposit.status === "Active";
-  });
-
-  return expiredDeposits;
 }

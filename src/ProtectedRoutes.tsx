@@ -7,16 +7,20 @@ import { User } from "./models/user";
 import { useEffect, useState } from "react";
 import LoadingScreen from "./components/Loader";
 import CRUDLocalStorage from "./CRUDLocalStorage";
+import { Loan } from "./models/loan";
 import { errorAlert, successAlert } from "./utils/swalAlerts";
-import { Notification } from "./models/notification";
-import { createNewNotification, fetchExpiredDeposits, fetchExpiredLoans, getItemInList } from "./utils/utils";
+import { Notification, NotificationType } from "./models/notification";
+import { FetchContextProvider } from "./FetchContext";
+import { Deposit } from "./models/deposit";
+import { createNewNotification, getItemInList } from "./utils/utils";
+
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
   const normalPath = path.slice(6);
   return normalPath;
 }
 
-const getNotification = (notification: string) => {
+const getNotification = (notification: NotificationType) => {
   switch (notification) {
     case "cardApproved":
       return successAlert("Your card request was approved by an admin!");
@@ -30,6 +34,8 @@ const getNotification = (notification: string) => {
       return successAlert("You have received a new transaction while you were offline!");
     case "newDepositOffer":
       return successAlert("You have a new deposit offer!");
+    case "DepositWithdrawn":
+      return successAlert("One or more deposits have been withdrawn!");
   }
 };
 
@@ -39,59 +45,67 @@ export const AuthHandlerRoute = () => {
   const [currentUser, setCurrentUser] = useState<User>();
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
 
-  const storeCurrentUser = async () => {
+  const storeCurrentUserAndNotifications = async () => {
     const user = (await AuthService.getCurrentUser()) as User;
+    const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
+
     setCurrentUser(user);
-  };
 
-  const fetchUserNotifications = async () => {
-    if (currentUser) {
-      const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
-      const userNotifications = notifications.filter((notification) => notification.accountID === currentUser.id);
+    const userNotifications = notifications.filter((notification) => notification.accountID === user.id);
 
-      userNotifications.forEach(async (notification) => {
-        getNotification(notification.type);
-        await CRUDLocalStorage.deleteItemFromList("notifications", notification);
-      });
-    }
+    userNotifications.forEach(async (notification) => {
+      getNotification(notification.type);
+
+      await CRUDLocalStorage.deleteItemFromList("notifications", notification);
+    });
   };
 
   const blockUnpayingUsers = async () => {
-    const expiredLoans = await fetchExpiredLoans();
+    const currentDate = new Date().toISOString();
 
+    const loans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
+
+    const expiredLoans = loans.filter((loan) => loan.expireDate < currentDate);
+
+    const blocked = await CRUDLocalStorage.getAsyncData<string[]>("blocked");
     for (const loan of expiredLoans) {
-      await CRUDLocalStorage.addItemToList("blocked", loan.accountID);
-      await CRUDLocalStorage.deleteItemFromList("loans", loan);
+      if (!blocked.includes(loan.accountID) && loan.status === "approved") {
+        await CRUDLocalStorage.addItemToList("blocked", loan.accountID);
+      }
+      if (loan.status === "approved" || loan.status === "offered") {
+        await CRUDLocalStorage.deleteItemFromList("loans", loan);
+      }
     }
 
     const blockedList = await CRUDLocalStorage.getAsyncData<string[]>("blocked");
-    const uniqueBlockedUsers = [...new Set(blockedList)];
-    await CRUDLocalStorage.setAsyncData("blocked", uniqueBlockedUsers);
-    setBlockedUsers(uniqueBlockedUsers);
+    setBlockedUsers(blockedList);
   };
 
   const withdrawDeposits = async () => {
-    const expiredDeposits = await fetchExpiredDeposits();
+    const currentDate = new Date().toISOString();
+    const deposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("loans");
+
+    const expiredDeposits = deposits.filter((deposit) => deposit.expireTime < currentDate);
 
     for (const deposit of expiredDeposits) {
       const totalDepositAmount = deposit.depositAmount + deposit.depositAmount * deposit.interest;
       const depositOwner = (await getItemInList<User>("users", deposit.accountID))!;
+
       const updatedUser: User = {
         ...depositOwner,
         balance: depositOwner!.balance + totalDepositAmount,
       };
 
-      await CRUDLocalStorage.updateItemInList<User>("users",updatedUser)
+      await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
       await CRUDLocalStorage.deleteItemFromList("deposits", deposit);
-      createNewNotification(deposit.accountID,"DepositWithdrawn")
+      createNewNotification(deposit.accountID, "DepositWithdrawn");
     }
   };
 
   useEffect(() => {
-    storeCurrentUser();
-    withdrawDeposits();
+    storeCurrentUserAndNotifications();
     blockUnpayingUsers();
-    fetchUserNotifications();
+    withdrawDeposits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
 
@@ -123,6 +137,7 @@ export const AuthHandlerRoute = () => {
           ) : (
             <>
               <NavBar />
+
               <Grid container direction="column" justifyContent="flex-start" alignItems="center">
                 {blockedUsers.includes(currentUser.id) && (
                   <Modal open={true} sx={{ backgroundColor: "white" }}>
@@ -143,17 +158,19 @@ export const AuthHandlerRoute = () => {
                     </Grid>
                   </Modal>
                 )}
-                {currentUser.role === "admin" ? (
-                  isAdminRoute ? (
+                <FetchContextProvider>
+                  {currentUser.role === "admin" ? (
+                    isAdminRoute ? (
+                      <Outlet />
+                    ) : (
+                      <Navigate to={`/admin${location.pathname}`} />
+                    )
+                  ) : isUserRoute ? (
                     <Outlet />
                   ) : (
-                    <Navigate to={`/admin${location.pathname}`} />
-                  )
-                ) : isUserRoute ? (
-                  <Outlet />
-                ) : (
-                  <Navigate to={exctractPathFromAdminRoute(location.pathname)} />
-                )}
+                    <Navigate to={exctractPathFromAdminRoute(location.pathname)} />
+                  )}
+                </FetchContextProvider>
               </Grid>
             </>
           )}

@@ -3,21 +3,22 @@ import { Deposit } from "../../models/deposit";
 import { Button, CircularProgress, Grid } from "@mui/material";
 import { successAlert } from "../../utils/swalAlerts";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
+import { useFetchContext } from "../../FetchContext";
 
 interface UserDepositButtonsProps {
   deposit: Deposit;
-  fetchDeposits: () => Promise<void>;
 }
 
-const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit, fetchDeposits }) => {
+const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit}) => {
   const [isRejectingDeposit, setIsRejectingDeposit] = useState(false);
   const [isAcceptingDeposit, setIsAcceptingDeposit] = useState(false);
+  const { fetchUserDeposits } = useFetchContext();
 
   const rejectDeposit = async () => {
     setIsRejectingDeposit(true);
     await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     successAlert("Deposit was rejected!");
-    await fetchDeposits();
+    await fetchUserDeposits();
   };
   
   const acceptDeposit = async () => {
@@ -30,7 +31,7 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit, fetchD
 
     await CRUDLocalStorage.updateItemInList<Deposit>("deposits",acceptedDeposit)
     successAlert("Deposit was accepted!");
-    await fetchDeposits();
+    await fetchUserDeposits();
   };
 
   return (

@@ -9,11 +9,11 @@ import { UserContext } from "../../UserProvider";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import Ajv, { JSONSchemaType } from "ajv";
 import ajvErrors from "ajv-errors";
-import { DateTime } from "luxon";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import OverviewPanel from "./overviewPanel";
 import TransactionsTable from "../../components/UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
+import { useFetchContext } from "../../FetchContext";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -57,14 +57,14 @@ const schema: JSONSchemaType<Transaction> = {
     },
   },
 };
+
 const validateForm = ajv.compile(schema);
 
 const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const [isTableLoading, setIsTableLoading] = useState(false);
+  const { fetchUserTransactions, isLoading, transactions } = useFetchContext();
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
   const navigate = useNavigate();
 
@@ -96,7 +96,7 @@ const Home: React.FC = () => {
   };
 
   const createNewTransaction = async (data: any) => {
-    const designatedUser = await getItemInList<User>("users", data.receiverID)
+    const designatedUser = await getItemInList<User>("users", data.receiverID);
     const designatedUserName = getUserFullName(designatedUser!);
 
     const currentDateTime = new Date().toISOString();
@@ -148,22 +148,6 @@ const Home: React.FC = () => {
     closePaymentModal();
   };
 
-  const fetchUserTransactions = async () => {
-    setIsTableLoading(true);
-    try {
-      const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
-      const sortedTransactions = fetchedTransactions.sort((a, b) => {
-        return DateTime.fromISO(b.date).toMillis() - DateTime.fromISO(a.date).toMillis();
-      });
-      const userTransactions = sortedTransactions.filter(
-        (transaction) => transaction.senderID === currentUser!.id || transaction.receiverID === currentUser!.id
-      );
-      setTransactions(userTransactions);
-      setIsTableLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
   useEffect(() => {
     fetchUserTransactions();
     // eslint-disable-next-line
@@ -175,7 +159,15 @@ const Home: React.FC = () => {
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
       <Container sx={{ mt: 3 }}>
         {isAdmin ? (
-          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
+          <Grid
+            container
+            direction="column"
+            justifyContent="center"
+            alignItems="center"
+            minHeight="100vh"
+            ml={10}
+            mt={-3}
+          >
             <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
               Welcome Back Admin {getUserFullName(currentUser!)}
             </Typography>
@@ -194,7 +186,7 @@ const Home: React.FC = () => {
                 <Button type="submit">Users Management</Button>
               </Grid>
               <Grid item>
-                <Button type="submit" onClick={() => navigate("/admin/deposits")}>Deposits Management</Button>
+                <Button type="submit">Deposits Management</Button>
               </Grid>
             </Grid>
           </Grid>
@@ -210,7 +202,7 @@ const Home: React.FC = () => {
                 elevation={0}
               >
                 <OverviewPanel
-                  isTableLoading={isTableLoading}
+                  isTableLoading={isLoading}
                   userOldBalance={userOldBalance}
                   isButtonLoading={isButtonLoading}
                   currentUser={currentUser!}
@@ -254,7 +246,7 @@ const Home: React.FC = () => {
                 <Typography variant="h4" gutterBottom fontWeight={"bold"} fontFamily={"Poppins"}>
                   Transactions
                 </Typography>
-                {isTableLoading ? (
+                {isLoading ? (
                   <Skeleton height={350} />
                 ) : (
                   <TransactionsTable transactions={transactions} userID={currentUser!.id} />

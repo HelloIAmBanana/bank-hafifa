@@ -10,7 +10,8 @@ import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import GenericForm from "../../../components/GenericForm/GenericForm";
 import { User } from "../../../models/user";
-import DepositBox from "../../../components/Deposit/Deposit";
+import DepositBox from "../../../components/Deposit/DepositBox";
+import { useFetchContext } from "../../../FetchContext";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -63,21 +64,9 @@ const validateForm = ajv.compile(schema);
 
 const AdminDepositsPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
-  const [isDepositsLoading, setIsDepositsLoading] = useState(false);
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [isCreatingNewDeposit, setIsCreatingNewDeposit] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-
-  const fetchDeposits = async () => {
-    setIsDepositsLoading(true);
-    try {
-      const fetchedDeposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("deposits");
-      setDeposits(fetchedDeposits);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-    setIsDepositsLoading(false);
-  };
+  const { fetchUserDeposits, isLoading, deposits } = useFetchContext();
 
   const closeDepositModal = () => {
     if (isCreatingNewDeposit) return;
@@ -115,11 +104,11 @@ const AdminDepositsPage: React.FC = () => {
     createNewNotification(data.accountID, "newDepositOffer");
     successAlert("Deposit was offered!");
     closeDepositModal();
-    await fetchDeposits();
+    await fetchUserDeposits();
   };
 
   useEffect(() => {
-    fetchDeposits();
+    fetchUserDeposits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
@@ -145,7 +134,7 @@ const AdminDepositsPage: React.FC = () => {
                   </Grid>
                 </Grid>
 
-                {isDepositsLoading ? (
+                {isLoading ? (
                   <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
                     <Skeleton height={"12rem"} width={window.innerWidth / 2} />
                   </Grid>
@@ -165,7 +154,7 @@ const AdminDepositsPage: React.FC = () => {
                               sm={12}
                             >
                               <Grid item key={index} sx={{ marginRight: 2 }}>
-                                <DepositBox deposit={deposit} isUserAdmin={true} fetchAction={fetchDeposits} />
+                                <DepositBox deposit={deposit}/>
                               </Grid>
                             </Grid>
                           ))}

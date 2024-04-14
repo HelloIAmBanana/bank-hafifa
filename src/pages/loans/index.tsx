@@ -8,7 +8,8 @@ import { successAlert } from "../../utils/swalAlerts";
 import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import LoanRow from "../../components/Loan/LoanRows";
+import LoansRow from "../../components/Loan/LoansRow";
+import { useFetchContext } from "../../FetchContext";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -49,20 +50,7 @@ const LoansPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
   const [isNewLoanModalOpen, setIsNewLoanModalOpen] = useState(false);
   const [isCreatingNewLoan, setIsCreatingNewLoan] = useState(false);
-  const [loans, setLoans] = useState<Loan[]>([]);
-  const [isLoansLoading, setIsLoanLoading] = useState(true);
-
-  const fetchUserLoans = async () => {
-    setIsLoanLoading(true);
-    try {
-      const fetchedLoans = await CRUDLocalStorage.getAsyncData<Loan[]>("loans");
-      const userLoans = fetchedLoans.filter((currentLoan) => currentLoan.accountID === currentUser!.id);
-      setLoans(userLoans);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-    setIsLoanLoading(false);
-  };
+  const { fetchUserLoans, isLoading: isLoansLoading, loans } = useFetchContext();
 
   const pendingLoans = useMemo(() => {
     return loans.filter((loan) => loan.status === "pending");
@@ -93,7 +81,7 @@ const LoansPage: React.FC = () => {
     };
 
     if (!validateForm(newLoan)) return;
-    
+
     setIsCreatingNewLoan(true);
     await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);
     successAlert("Loan was created!");
@@ -107,7 +95,7 @@ const LoansPage: React.FC = () => {
   };
 
   const closeLoanModal = () => {
-    if(isCreatingNewLoan) return;
+    if (isCreatingNewLoan) return;
     setIsNewLoanModalOpen(false);
   };
 
@@ -144,10 +132,10 @@ const LoansPage: React.FC = () => {
                   </Grid>
                 ) : (
                   <Box>
-                    <LoanRow loans={approvedLoans} title="Approved" fetchAction={fetchUserLoans} />
-                    <LoanRow loans={offeredLoans} title="Offered" fetchAction={fetchUserLoans} />
-                    <LoanRow loans={pendingLoans} title="Pending" fetchAction={fetchUserLoans} />
-                    <LoanRow loans={rejectedLoans} title="Rejected" fetchAction={fetchUserLoans} />
+                    <LoansRow loans={approvedLoans} title="Approved"/>
+                    <LoansRow loans={offeredLoans} title="Offered"/>
+                    <LoansRow loans={pendingLoans} title="Pending"/>
+                    <LoansRow loans={rejectedLoans} title="Rejected"/>
                   </Box>
                 )}
               </Grid>

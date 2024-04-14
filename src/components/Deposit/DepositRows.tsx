@@ -1,14 +1,13 @@
 import { Grid, Typography } from "@mui/material";
 import { Deposit } from "../../models/deposit";
-import DepositBox from "./Deposit";
+import DepositBox from "./DepositBox";
 
 interface DepositRowsProps {
   deposits: Deposit[];
   title: string;
-  fetchAction: () => Promise<void>;
 }
 
-const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title, fetchAction }) => {
+const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title}) => {
   if (deposits.length <= 0) return null;
   
   return (
@@ -28,7 +27,7 @@ const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title, fetchAction 
       >
         {deposits.map((deposit, index) => (
           <Grid item key={index} mr={2}>
-            <DepositBox deposit={deposit} fetchAction={fetchAction} isUserAdmin={false}/>
+            <DepositBox deposit={deposit}/>
           </Grid>
         ))}
       </Grid>

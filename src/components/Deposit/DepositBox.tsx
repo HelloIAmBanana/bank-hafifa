@@ -1,18 +1,23 @@
 import { Grid, Paper, Typography } from "@mui/material";
 import thunderIcon from "../../imgs/icons/Thunder.svg";
-import React from "react";
+import React, { useContext, useMemo } from "react";
 import { Deposit } from "../../models/deposit";
 import AdminDepositButtons from "./AdminButtons";
 import UserDepositButtons from "./UserDepositButtons";
+import AuthService from "../../AuthService";
+import { UserContext } from "../../UserProvider";
 
 interface DepositBoxProps {
   deposit: Deposit;
-  isUserAdmin: Boolean;
-  fetchAction: () => Promise<void>;
 }
 
-const DepositBox: React.FC<DepositBoxProps> = ({ deposit, isUserAdmin, fetchAction }) => {
+const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
+  const [currentUser] = useContext(UserContext);
 
+  const isAdmin = useMemo(() => {
+    return AuthService.isUserAdmin(currentUser);
+  }, [currentUser]);
+  
   return (
     <Grid container direction="column" justifyContent="center" alignItems="center">
       <Paper
@@ -54,8 +59,8 @@ const DepositBox: React.FC<DepositBoxProps> = ({ deposit, isUserAdmin, fetchActi
           </Grid>
         </Grid>
       </Paper>
-      {isUserAdmin && <AdminDepositButtons deposit={deposit} fetchDeposits={fetchAction} />}
-      {!isUserAdmin && deposit.status==="Offered" && <UserDepositButtons deposit={deposit} fetchDeposits={fetchAction} />}
+      {isAdmin && <AdminDepositButtons deposit={deposit} />}
+      {!isAdmin && deposit.status === "Offered" && <UserDepositButtons deposit={deposit} />}
     </Grid>
   );
 };

@@ -4,14 +4,22 @@ import thunderIcon from "../../imgs/icons/Thunder.svg";
 import LoanOfferButtons from "./LoanOfferButtons";
 import PendingLoanButtons from "./PendingLoanButtons";
 import ApprovedLoansButtons from "./ApprovedLoanButtons";
+import { formatIsoStringToDate } from "../../utils/utils";
+import { useContext, useMemo } from "react";
+import AuthService from "../../AuthService";
+import { UserContext } from "../../UserProvider";
 
 interface LoansProps {
   loan: Loan;
-  isUserAdmin?: boolean;
-  fetchLoans: () => Promise<void>;
 }
 
-const Loans: React.FC<LoansProps> = ({ loan, fetchLoans, isUserAdmin }) => {
+const LoanBox: React.FC<LoansProps> = ({ loan }) => {
+  const [currentUser] = useContext(UserContext);
+
+  const isAdmin = useMemo(() => {
+    return AuthService.isUserAdmin(currentUser);
+  }, [currentUser]);
+
   return (
     <Grid container direction="column" justifyContent="center" alignItems="center">
       <Grid item>
@@ -50,7 +58,7 @@ const Loans: React.FC<LoansProps> = ({ loan, fetchLoans, isUserAdmin }) => {
                 </Typography>
               </center>
             </Grid>
-            {isUserAdmin && loan.status === "pending" && (
+            {isAdmin && loan.status === "pending" && (
               <Grid item xs={8} sm={8} md={8} key={4} sx={{ ml: 1, mt: 8 }}>
                 <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>{loan.loanOwner}</Typography>
               </Grid>
@@ -65,7 +73,7 @@ const Loans: React.FC<LoansProps> = ({ loan, fetchLoans, isUserAdmin }) => {
                 </Grid>
                 <Grid item xs={4} sm={4} md={8} key={5} sx={{ ml: 1, mt: -1 }}>
                   <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>
-                    Exp: {loan.expireDate}
+                    {formatIsoStringToDate(loan.expireDate, "dd/MM/yyyy HH:mm")}
                   </Typography>
                 </Grid>
               </>
@@ -73,12 +81,12 @@ const Loans: React.FC<LoansProps> = ({ loan, fetchLoans, isUserAdmin }) => {
           </Grid>
         </Paper>
         {/* Loan Buttons */}
-        {loan.status === "approved" && <ApprovedLoansButtons loan={loan} fetchLoans={fetchLoans} />}
-        {loan.status === "offered" && !isUserAdmin && <LoanOfferButtons loan={loan} fetchLoans={fetchLoans} />}
-        {loan.status === "pending" && isUserAdmin && <PendingLoanButtons loan={loan} fetchLoans={fetchLoans} />}
+        {loan.status === "approved" && <ApprovedLoansButtons loan={loan}/>}
+        {loan.status === "offered" && !isAdmin && <LoanOfferButtons loan={loan}/>}
+        {loan.status === "pending" && isAdmin && <PendingLoanButtons loan={loan}/>}
       </Grid>
     </Grid>
   );
 };
 
-export default Loans;
+export default LoanBox;
