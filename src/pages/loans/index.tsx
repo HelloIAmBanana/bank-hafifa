@@ -8,7 +8,7 @@ import { successAlert } from "../../utils/swalAlerts";
 import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import LoansRow from "../../components/Loan/LoanRows";
+import LoansRow from "../../components/Loan/LoansRow";
 import { useFetchLoansContext } from "../../components/Loan/FetchLoansContext";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
