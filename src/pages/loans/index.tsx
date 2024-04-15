@@ -9,7 +9,7 @@ import ajvErrors from "ajv-errors";
 import Ajv, { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import LoansRow from "../../components/Loan/LoansRow";
-import { useFetchContext } from "../../FetchContext";
+import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -50,7 +50,7 @@ const LoansPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
   const [isNewLoanModalOpen, setIsNewLoanModalOpen] = useState(false);
   const [isCreatingNewLoan, setIsCreatingNewLoan] = useState(false);
-  const { fetchUserLoans, isLoading: isLoansLoading, loans } = useFetchContext();
+  const { fetchLoans, isLoading: isLoansLoading, loans } = useFetchLoanContext();
 
   const pendingLoans = useMemo(() => {
     return loans.filter((loan) => loan.status === "pending");
@@ -86,7 +86,7 @@ const LoansPage: React.FC = () => {
     await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);
     successAlert("Loan was created!");
     closeLoanModal();
-    await fetchUserLoans();
+    await fetchLoans();
     setIsCreatingNewLoan(false);
   };
 
@@ -102,7 +102,7 @@ const LoansPage: React.FC = () => {
   document.title = "Loans";
 
   useEffect(() => {
-    fetchUserLoans();
+    fetchLoans();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 

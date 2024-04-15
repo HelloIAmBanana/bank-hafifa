@@ -13,7 +13,7 @@ import GenericForm from "../../components/GenericForm/GenericForm";
 import OverviewPanel from "./overviewPanel";
 import TransactionsTable from "../../components/UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
-import { useFetchContext } from "../../FetchContext";
+import { useFetchTransactionsContext } from "../../contexts/fetchTransactionsContext";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -63,7 +63,7 @@ const validateForm = ajv.compile(schema);
 const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const { fetchUserTransactions, isLoading, transactions } = useFetchContext();
+  const { fetchTransactions, isLoading, transactions } = useFetchTransactionsContext();
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
   const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
   const navigate = useNavigate();
@@ -149,29 +149,23 @@ const Home: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchUserTransactions();
+    fetchTransactions();
     // eslint-disable-next-line
   }, [currentUser]);
 
   document.title = "Home";
 
   return (
-    <Box sx={{ display: "flex", backgroundColor: "white" }}>
+    <Box sx={{ display: "flex" }}>
       <Container sx={{ mt: 3 }}>
         {isAdmin ? (
-          <Grid
-            container
-            direction="column"
-            justifyContent="center"
-            alignItems="center"
-            minHeight="100vh"
-            ml={10}
-            mt={-10}
-          >
-            <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
-              Welcome Back Admin {getUserFullName(currentUser!)}
-            </Typography>
-            <Grid container direction="row" justifyContent="space-evenly" alignItems="center" spacing={1}>
+          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" mt={-10}>
+            <Grid container direction="column" justifyContent="center" alignItems="center" ml={1}>
+              <Grid item>
+                <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+                  Welcome Back Admin {getUserFullName(currentUser!)}
+                </Typography>
+              </Grid>
               <Grid item>
                 <Button type="submit" onClick={() => navigate("/admin/loans")}>
                   Loan Control
@@ -183,10 +177,12 @@ const Home: React.FC = () => {
                 </Button>
               </Grid>
               <Grid item>
-                <Button type="submit">User Control</Button>
+                <Button type="submit" onClick={() => navigate("/admin/users")}>User Control</Button>
               </Grid>
               <Grid item>
-                <Button type="submit" onClick={() => navigate("/admin/deposits")}>Deposit Control</Button>
+                <Button type="submit" onClick={() => navigate("/admin/deposits")}>
+                  Deposit Control
+                </Button>
               </Grid>
             </Grid>
           </Grid>

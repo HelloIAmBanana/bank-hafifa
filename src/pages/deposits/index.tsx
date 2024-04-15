@@ -2,11 +2,11 @@ import { useContext, useEffect, useMemo } from "react";
 import { UserContext } from "../../UserProvider";
 import { Box, Container, Grid, Skeleton, Typography } from "@mui/material";
 import DepositRows from "../../components/Deposit/DepositRows";
-import { useFetchContext } from "../../FetchContext";
+import { useFetchDepositsContext } from "../../contexts/fetchDepositsContext";
 
 const DepositsPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
-  const { fetchUserDeposits, isLoading, deposits } = useFetchContext();
+  const { fetchDeposits, isLoading, deposits } = useFetchDepositsContext();
 
   const activeDeposits = useMemo(() => {
     return deposits.filter((deposit) => deposit.status === "Active");
@@ -23,7 +23,7 @@ const DepositsPage: React.FC = () => {
   document.title = "Deposits";
 
   useEffect(() => {
-    fetchUserDeposits();
+    fetchDeposits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 

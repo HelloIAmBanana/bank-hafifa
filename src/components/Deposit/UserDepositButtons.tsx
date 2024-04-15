@@ -1,37 +1,63 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Deposit } from "../../models/deposit";
 import { Button, CircularProgress, Grid } from "@mui/material";
 import { successAlert } from "../../utils/swalAlerts";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useFetchContext } from "../../FetchContext";
+import { User } from "../../models/user";
+import { UserContext } from "../../UserProvider";
+import { useFetchDepositsContext } from "../../contexts/fetchDepositsContext";
+import { Transaction } from "../../models/transactions";
+import { generateUniqueId, getUserFullName } from "../../utils/utils";
 
 interface UserDepositButtonsProps {
   deposit: Deposit;
 }
 
-const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit}) => {
+const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
   const [isRejectingDeposit, setIsRejectingDeposit] = useState(false);
+  const [currentUser] = useContext(UserContext);
+
   const [isAcceptingDeposit, setIsAcceptingDeposit] = useState(false);
-  const { fetchUserDeposits } = useFetchContext();
+  const { fetchDeposits } = useFetchDepositsContext();
 
   const rejectDeposit = async () => {
     setIsRejectingDeposit(true);
     await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     successAlert("Deposit was rejected!");
-    await fetchUserDeposits();
+    await fetchDeposits();
   };
-  
+
   const acceptDeposit = async () => {
     setIsAcceptingDeposit(true);
 
-    const acceptedDeposit:Deposit={
-        ...deposit,
-        status:"Active",
-    }
+    const acceptedDeposit: Deposit = {
+      ...deposit,
+      status: "Active",
+    };
 
-    await CRUDLocalStorage.updateItemInList<Deposit>("deposits",acceptedDeposit)
+    const updatedUser: User = {
+      ...currentUser!,
+      balance:currentUser!.balance-deposit.depositAmount
+    };
+
+    const date = new Date().toISOString();
+
+    const newTransaction: Transaction = {
+      senderID: currentUser!.id,
+      date: date,
+      amount: -deposit.depositAmount,
+      reason: "Created a deposit",
+      receiverID: "!bank!",
+      senderName: getUserFullName(currentUser!),
+      receiverName: "Bank",
+      id: generateUniqueId(),
+    };
+
+    await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
+    await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
+    await CRUDLocalStorage.updateItemInList<Deposit>("deposits", acceptedDeposit);
     successAlert("Deposit was accepted!");
-    await fetchUserDeposits();
+    await fetchDeposits();
   };
 
   return (
@@ -44,7 +70,7 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit}) => {
             fontSize: 18,
             borderRadius: 2,
             mb: 3,
-            width:"88.5px",
+            width: "88.5px",
             height: "43.5px",
             color: "white",
             "&:hover": {
@@ -65,7 +91,7 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit}) => {
             fontSize: 18,
             borderRadius: 2,
             mb: 3,
-            width:"88.5px",
+            width: "88.5px",
             height: "43.5px",
             color: "white",
             "&:hover": {

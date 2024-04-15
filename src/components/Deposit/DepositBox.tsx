@@ -18,7 +18,7 @@ const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);
   }, [currentUser]);
-  
+
   return (
     <Grid container direction="column" justifyContent="center" alignItems="center">
       <Paper
@@ -49,21 +49,24 @@ const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
               <Typography color="white" fontFamily="CreditCard" fontSize={18}>
                 ${deposit.depositAmount}
               </Typography>
-              <Typography sx={{ color: "white", fontFamily: "Poppins" }}>{deposit.interest}%</Typography>
-              <Typography sx={{ color: "white", fontFamily: "Poppins" }}>{deposit.interest}%</Typography>
+              <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>
+                ${Math.ceil(deposit.depositAmount + deposit.depositAmount * (deposit.interest / 100))}
+              </Typography>
             </center>
           </Grid>
-          <Grid item xs={6} sm={6} md={6} key={4} sx={{ ml: 1, mt: 4 }}>
+          <Grid item xs={6} sm={6} md={6} key={4} sx={{ ml: 1 }}>
             <Typography sx={{ color: "white", fontFamily: "Poppins" }}>{deposit.depositOwner}</Typography>
           </Grid>
 
-          <Grid item xs={5} sm={5} md={5} key={5} sx={{ mt: 4 }}>
-            <Typography sx={{ color: "white", fontFamily: "Poppins" }}>{formatIsoStringToDate(deposit.expireDate, "dd/MM/yyyy HH:mm")}</Typography>
+          <Grid item xs={6} sm={6} md={6} key={5} sx={{ mt: -2, ml: 1 }}>
+            <Typography sx={{ color: "white", fontFamily: "Poppins" }}>
+              {formatIsoStringToDate(deposit.expireDate, "dd/MM/yyyy HH:mm")}
+            </Typography>
           </Grid>
         </Grid>
       </Paper>
-      {isAdmin && deposit.status === "Offered" &&<AdminDepositButtons deposit={deposit} />}
-      {!isAdmin && deposit.status === "Offered" && <UserDepositButtons deposit={deposit} />}
+      {deposit.status === "Offered" &&
+        (isAdmin ? <AdminDepositButtons deposit={deposit} /> : <UserDepositButtons deposit={deposit} />)}
     </Grid>
   );
 };

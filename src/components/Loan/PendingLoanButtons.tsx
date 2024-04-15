@@ -7,7 +7,7 @@ import GenericForm from "../GenericForm/GenericForm";
 import Ajv, { JSONSchemaType } from "ajv";
 import ajvErrors from "ajv-errors";
 import { createNewNotification } from "../../utils/utils";
-import { useFetchContext } from "../../FetchContext";
+import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -58,7 +58,7 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
   const [isRejectLoading, setIsRejectLoading] = useState(false);
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
-  const { fetchUserLoans } = useFetchContext();
+  const { fetchLoans } = useFetchLoanContext();
 
   const rejectLoan = async () => {
     setIsRejectLoading(true);
@@ -72,7 +72,7 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
 
     await CRUDLocalStorage.updateItemInList<Loan>("loans", newLoan);
     successAlert("Loan Rejected!");
-    await fetchUserLoans();
+    await fetchLoans();
   };
 
   const acceptLoanRequest = async (data: any) => {
@@ -93,7 +93,7 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
 
     await CRUDLocalStorage.updateItemInList<Loan>("loans", newLoan);
     successAlert("Loan Offered!");
-    await fetchUserLoans();
+    await fetchLoans();
   };
 
   const openLoanApprovalModal = () => {

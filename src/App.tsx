@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignUpPage from "./pages/signup";
 import SignInPage from "./pages/signin";
 import { AuthHandlerRoute } from "./ProtectedRoutes";
+import { FetchProvider } from "./FetchProvider";
 import ProfileSettingsPage from "./pages/profileSettings";
 import LoansPage from "./pages/loans";
 import DepositsPage from "./pages/deposits";
@@ -16,8 +17,9 @@ import "./App.css";
 function App() {
   return (
     <Router>
-        <Routes>
-          <Route element={<AuthHandlerRoute />}>
+      <Routes>
+        <Route element={<AuthHandlerRoute />}>
+          <Route element={<FetchProvider />}>
             <Route path="/" element={<SignInPage />} />
             <Route path="/signup" element={<SignUpPage />} />
             <Route path="/home" element={<Home />} />
@@ -25,11 +27,12 @@ function App() {
             <Route path="/cards" element={<CardsPage />} />
             <Route path="/admin/cards" element={<AdminCardsPage />} />
             <Route path="/admin/loans" element={<AdminLoansPage />} />
-            <Route path="/admin/deposits" element={<AdminDepositsPage/>}/>
+            <Route path="/admin/deposits" element={<AdminDepositsPage />} />
             <Route path="/deposits" element={<DepositsPage />} />
             <Route path="/settings" element={<ProfileSettingsPage />} />
           </Route>
-        </Routes>
+        </Route>
+      </Routes>
     </Router>
   );
 }

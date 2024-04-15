@@ -10,9 +10,9 @@ import CRUDLocalStorage from "./CRUDLocalStorage";
 import { Loan } from "./models/loan";
 import { errorAlert, successAlert } from "./utils/swalAlerts";
 import { Notification, NotificationType } from "./models/notification";
-import { FetchContextProvider } from "./FetchContext";
 import { Deposit } from "./models/deposit";
-import { createNewNotification, getItemInList } from "./utils/utils";
+import { createNewNotification, generateUniqueId, getItemInList, getUserFullName } from "./utils/utils";
+import { Transaction } from "./models/transactions";
 
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
@@ -50,8 +50,8 @@ export const AuthHandlerRoute = () => {
     const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
 
     setCurrentUser(user);
-
-    const userNotifications = notifications.filter((notification) => notification.accountID === user.id);
+    if(!currentUser) return;
+    const userNotifications = notifications.filter((notification) => notification.accountID === currentUser.id);
 
     userNotifications.forEach(async (notification) => {
       getNotification(notification.type);
@@ -83,22 +83,36 @@ export const AuthHandlerRoute = () => {
 
   const withdrawDeposits = async () => {
     const currentDate = new Date().toISOString();
-    const deposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("loans");
+    const deposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("deposits");
 
     const expiredDeposits = deposits.filter((deposit) => deposit.expireDate < currentDate);
 
     for (const deposit of expiredDeposits) {
-      const totalDepositAmount = deposit.depositAmount + deposit.depositAmount * deposit.interest;
-      const depositOwner = (await getItemInList<User>("users", deposit.accountID))!;
+      const totalDepositAmount = deposit.depositAmount + (deposit.depositAmount * (deposit.interest/100));
+      const depositOwner = (await getItemInList<User>("users", deposit.accountID));
+      console.log(depositOwner)
 
       const updatedUser: User = {
-        ...depositOwner,
+        ...depositOwner!,
         balance: depositOwner!.balance + totalDepositAmount,
       };
-
-      await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-      await CRUDLocalStorage.deleteItemFromList("deposits", deposit);
+      
       createNewNotification(deposit.accountID, "DepositWithdrawn");
+
+      const newTransaction: Transaction = {
+        senderID: "!bank!",
+        date: currentDate,
+        amount: totalDepositAmount,
+        reason: "Deposit Withdrawn!",
+        receiverID: currentUser!.id,
+        senderName: "Bank",
+        receiverName: getUserFullName(currentUser!),
+        id: generateUniqueId(),
+      };
+  
+      await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
+      await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
+      await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     }
   };
 
@@ -158,7 +172,6 @@ export const AuthHandlerRoute = () => {
                     </Grid>
                   </Modal>
                 )}
-                <FetchContextProvider>
                   {currentUser.role === "admin" ? (
                     isAdminRoute ? (
                       <Outlet />
@@ -170,7 +183,6 @@ export const AuthHandlerRoute = () => {
                   ) : (
                     <Navigate to={exctractPathFromAdminRoute(location.pathname)} />
                   )}
-                </FetchContextProvider>
               </Grid>
             </>
           )}

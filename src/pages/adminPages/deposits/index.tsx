@@ -11,7 +11,7 @@ import Ajv, { JSONSchemaType } from "ajv";
 import GenericForm from "../../../components/GenericForm/GenericForm";
 import { User } from "../../../models/user";
 import DepositBox from "../../../components/Deposit/DepositBox";
-import { useFetchContext } from "../../../FetchContext";
+import { useFetchDepositsContext } from "../../../contexts/fetchDepositsContext";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -54,9 +54,9 @@ const fields = [
     label: "Enter deposit interest",
   },
   {
-    id: "expireTime",
-    type: "time",
-    label: "Enter expire time",
+    id: "expireDate",
+    type: "datetime-local",
+    label: "Enter expire date",
   },
 ];
 
@@ -66,7 +66,7 @@ const AdminDepositsPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
   const [isCreatingNewDeposit, setIsCreatingNewDeposit] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const { fetchUserDeposits, isLoading, deposits } = useFetchContext();
+  const { fetchDeposits, isLoading, deposits } = useFetchDepositsContext();
 
   const closeDepositModal = () => {
     if (isCreatingNewDeposit) return;
@@ -80,9 +80,9 @@ const AdminDepositsPage: React.FC = () => {
   const handleDepositModalSubmit = async (data: any) => {
     setIsCreatingNewDeposit(true);
 
-    const DepositOwner = await getItemInList<User>("users", data.accountID);
+    const depositOwner = await getItemInList<User>("users", data.accountID);
 
-    if (!DepositOwner) {
+    if (!depositOwner) {
       setIsCreatingNewDeposit(false);
 
       errorAlert("Entered ID is WRONG");
@@ -94,7 +94,7 @@ const AdminDepositsPage: React.FC = () => {
       ...data,
       id: generateUniqueId(),
       status: "Offered",
-      depositOwner: getUserFullName(DepositOwner),
+      depositOwner: getUserFullName(depositOwner),
     };
 
     if (!validateForm(newDeposit)) return;
@@ -104,11 +104,11 @@ const AdminDepositsPage: React.FC = () => {
     createNewNotification(data.accountID, "newDepositOffer");
     successAlert("Deposit was offered!");
     closeDepositModal();
-    await fetchUserDeposits();
+    await fetchDeposits();
   };
 
   useEffect(() => {
-    fetchUserDeposits();
+    fetchDeposits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 

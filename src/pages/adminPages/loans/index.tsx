@@ -3,18 +3,18 @@ import { useEffect, useContext } from "react";
 import { Grid, Box, Container, Typography, Skeleton } from "@mui/material";
 import { UserContext } from "../../../UserProvider";
 import LoanBox from "../../../components/Loan/LoanBox";
-import { useFetchContext } from "../../../FetchContext";
+import { useFetchLoanContext } from "../../../contexts/fetchLoansContext";
 
 const AdminLoansPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
-  const { fetchUserLoans, isLoading: isLoansLoading, loans } = useFetchContext();
+  const { fetchLoans, isLoading, loans } = useFetchLoanContext();
 
   const pendingLoans = React.useMemo(() => {
     return loans.filter((loan) => loan.status === "pending");
   }, [loans]);
 
   useEffect(() => {
-    fetchUserLoans();
+    fetchLoans();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
@@ -40,7 +40,7 @@ const AdminLoansPage: React.FC = () => {
                   </Grid>
                 </Grid>
 
-                {isLoansLoading ? (
+                {isLoading ? (
                   <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
                     <Skeleton height={"12rem"} width={window.innerWidth / 2} />
                   </Grid>

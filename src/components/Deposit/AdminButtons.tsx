@@ -3,7 +3,8 @@ import { Deposit } from "../../models/deposit";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { successAlert } from "../../utils/swalAlerts";
 import { Button, CircularProgress, Grid } from "@mui/material";
-import { useFetchContext } from "../../FetchContext";
+import { useFetchDepositsContext } from "../../contexts/fetchDepositsContext";
+
 
 interface AdminDepositButtonsProps {
   deposit: Deposit;
@@ -11,13 +12,13 @@ interface AdminDepositButtonsProps {
 
 const AdminDepositButtons: React.FC<AdminDepositButtonsProps> = ({ deposit}) => {
   const [isCancelingDeposit, setIsCancelingDeposit] = useState(false);
-  const { fetchUserDeposits } = useFetchContext();
+  const { fetchDeposits } = useFetchDepositsContext();
 
   const cancelDeposit = async () => {
     setIsCancelingDeposit(true);
     await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     successAlert("Deposit was canceled!");
-    await fetchUserDeposits();
+    await fetchDeposits();
   };
 
   return (
