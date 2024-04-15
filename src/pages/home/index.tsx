@@ -175,7 +175,7 @@ const Home: React.FC = () => {
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
       <Container sx={{ mt: 3 }}>
         {isAdmin ? (
-          <Grid condtainer direction="column" justifyContent="center" alignItems="center" minHeight="100vh" ml={10}  mt={-3}>
+          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" ml={10}  mt={-3}>
             <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
               Welcome Back Admin {getUserFullName(currentUser!)}
             </Typography>

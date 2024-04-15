@@ -71,14 +71,6 @@ export default function NavBar() {
     return ["Home", "Loans", "Cards", "Deposits", "Settings"];
   }, [currentUser]);
 
-  const userRoutes = useMemo(() => {
-    if (currentUser) {
-      const isAdmin = AuthService.isUserAdmin(currentUser);
-      if (isAdmin)
-        return ["Home", "Loans Management", "Cards Management", "Deposits Management", "Users Management", "Settings"];
-    }
-    return ["Home", "Loans", "Cards", "Deposits", "Settings"];
-  }, [currentUser]);
 
   return (
     <Box sx={{ display: "flex" }}>

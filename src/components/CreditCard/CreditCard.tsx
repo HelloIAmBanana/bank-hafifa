@@ -11,7 +11,7 @@ import { formatIsoStringToDate } from "../../utils/utils";
 import { UserContext } from "../../UserProvider";
 import AuthService from "../../AuthService";
 
-interface Props {
+interface CardProps {
   card: Card;
   approveCard?: (card: Card) => void;
   rejectCard?: (card: Card, data: any) => void;
@@ -28,7 +28,7 @@ const getCardProviderImage = (type: string) => {
   }
 };
 
-const CreditCard: React.FC<Props> = ({ card, approveCard, rejectCard, cancelCard }) => {
+const CreditCard: React.FC<CardProps> = ({ card, approveCard, rejectCard, cancelCard }) => {
   const [isCardBeingApproved, setIsCardBeingApproved] = useState(false);
   const [currentUser] = useContext(UserContext);
   const [isCardBeingCanceled, setIsCardBeingCanceled] = useState(false);
