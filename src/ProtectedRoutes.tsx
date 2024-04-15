@@ -114,7 +114,6 @@ export const AuthHandlerRoute = () => {
     "/settings",
     "/home",
   ].includes(currentRoute);
-
   const isUserRoute = ["/cards", "/loans", "/deposits", "/users", "/settings", "/home"].includes(currentRoute);
 
   if (!isAuthenticated) {
