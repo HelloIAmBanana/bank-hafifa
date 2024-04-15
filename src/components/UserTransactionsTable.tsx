@@ -22,7 +22,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, use
     () => [
       {
         field: "",
-        cellRenderer: () => (
+        cellRenderer: (): JSX.Element => (
           <img src={transactionIcon} alt="Transfer Icon" color="red" style={{ width: 40, height: 50, color: "red" }} />
         ),
         suppressHeaderMenuButton: true,
@@ -31,7 +31,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, use
       },
       {
         field: "senderName",
-        cellRenderer: (params: any) => (
+        cellRenderer: (params: any): JSX.Element => (
           <Box>
             <Typography fontWeight={"Bold"} fontFamily={"Poppins"}>
               {params.data.senderID === userID ? `To ${params.data.receiverName}` : `From ${params.data.senderName}`}
@@ -45,7 +45,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, use
         initialWidth: 150,
         suppressHeaderMenuButton: true,
         suppressHeaderContextMenu: true,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: any): JSX.Element => {
           return <Typography fontFamily={"Poppins"}>{`${formatIsoStringToDate(params.data.date, "dd/MM/yyyy")}`}</Typography>;
         },
       },
@@ -54,7 +54,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, use
         initialWidth: 60,
         suppressHeaderMenuButton: true,
         suppressHeaderContextMenu: true,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: any): JSX.Element => {
           if (params.data.senderID === userID) {
             return <TrendingDown sx={{ color: "red" }} />;
           } else {
@@ -64,8 +64,9 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, use
       },
       {
         field: "amount",
-        initialWidth: 100,
-        cellRenderer: (params: any) => {
+        minWidth: 150,
+        flex:1,
+        cellRenderer: (params: any): string => {
           if (params.data.senderID === userID) {
             return `${-params.data.amount}$`;
           } else {

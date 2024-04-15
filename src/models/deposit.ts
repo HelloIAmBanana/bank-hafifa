@@ -3,7 +3,7 @@ export type Deposit = {
     expireDate: string;
     depositOwner: string;
     accountID: string;
-    status: "Active" | "Offered" | "Withdrawn";
+    status: "Active" | "Offered" | "Withdrawable";
     depositAmount: number;
     interest: number;
   };

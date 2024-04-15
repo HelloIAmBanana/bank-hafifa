@@ -2,21 +2,18 @@ import { Box, Typography, Container, Grid, Paper, Modal, Skeleton, Button } from
 import AuthService from "../../AuthService";
 import { User } from "../../models/user";
 import { Transaction } from "../../models/transactions";
-import { createNewNotification, generateUniqueId, getItemInList, getUserFullName } from "../../utils/utils";
+import { createNewNotification, generateUniqueId, getUserFullName } from "../../utils/utils";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { UserContext } from "../../UserProvider";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import Ajv, { JSONSchemaType } from "ajv";
-import ajvErrors from "ajv-errors";
+import { JSONSchemaType } from "ajv";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import OverviewPanel from "./overviewPanel";
 import TransactionsTable from "../../components/UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
 import { useFetchTransactionsContext } from "../../contexts/fetchTransactionsContext";
 
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
 
 const fields = [
   {
@@ -58,7 +55,6 @@ const schema: JSONSchemaType<Transaction> = {
   },
 };
 
-const validateForm = ajv.compile(schema);
 
 const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
@@ -96,7 +92,7 @@ const Home: React.FC = () => {
   };
 
   const createNewTransaction = async (data: any) => {
-    const designatedUser = await getItemInList<User>("users", data.receiverID);
+    const designatedUser = await CRUDLocalStorage.getItemInList<User>("users", data.receiverID);
     const designatedUserName = getUserFullName(designatedUser!);
 
     const currentDateTime = new Date().toISOString();
@@ -115,7 +111,6 @@ const Home: React.FC = () => {
   };
 
   const handleSubmitTransaction = async (data: any) => {
-    if (!validateForm(data)) return;
 
     setUserOldBalance(currentUser!.balance);
 
@@ -129,7 +124,7 @@ const Home: React.FC = () => {
 
     setIsButtonLoading(true);
 
-    const receivingUser = await getItemInList<User>("users", data.receiverID);
+    const receivingUser = await CRUDLocalStorage.getItemInList<User>("users", data.receiverID);
 
     if (!receivingUser) {
       errorAlert("Entered ID is WRONG");

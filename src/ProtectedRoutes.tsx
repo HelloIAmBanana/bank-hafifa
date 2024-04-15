@@ -8,11 +8,9 @@ import { useEffect, useState } from "react";
 import LoadingScreen from "./components/Loader";
 import CRUDLocalStorage from "./CRUDLocalStorage";
 import { Loan } from "./models/loan";
-import { errorAlert, successAlert } from "./utils/swalAlerts";
+import { notificationAlert } from "./utils/swalAlerts";
 import { Notification, NotificationType } from "./models/notification";
 import { Deposit } from "./models/deposit";
-import { createNewNotification, generateUniqueId, getItemInList, getUserFullName } from "./utils/utils";
-import { Transaction } from "./models/transactions";
 
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
@@ -23,19 +21,17 @@ function exctractPathFromAdminRoute(path: string) {
 const getNotification = (notification: NotificationType) => {
   switch (notification) {
     case "cardApproved":
-      return successAlert("Your card request was approved by an admin!");
+      return notificationAlert("Your card request was approved by an admin!");
     case "cardDeclined":
-      return errorAlert("Your card request was declined by an admin!");
+      return notificationAlert("Your card request was declined by an admin!");
     case "loanApproved":
-      return successAlert("Your loan request was approved by an admin!");
+      return notificationAlert("Your loan request was approved by an admin!");
     case "loanDeclined":
-      return errorAlert("Your loan request was declined by an admin!");
+      return notificationAlert("Your loan request was declined by an admin!");
     case "newTransaction":
-      return successAlert("You have received a new transaction while you were offline!");
+      return notificationAlert("You have received a new transaction while you were offline!");
     case "newDepositOffer":
-      return successAlert("You have a new deposit offer!");
-    case "DepositWithdrawn":
-      return successAlert("One or more deposits have been withdrawn!");
+      return notificationAlert("You have a new deposit offer!");
   }
 };
 
@@ -50,7 +46,7 @@ export const AuthHandlerRoute = () => {
     const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
 
     setCurrentUser(user);
-    if(!currentUser) return;
+    if (!currentUser) return;
     const userNotifications = notifications.filter((notification) => notification.accountID === currentUser.id);
 
     userNotifications.forEach(async (notification) => {
@@ -81,47 +77,32 @@ export const AuthHandlerRoute = () => {
     setBlockedUsers(blockedList);
   };
 
-  const withdrawDeposits = async () => {
+  const updateExpiredDeposits = async () => {
     const currentDate = new Date().toISOString();
     const deposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("deposits");
 
     const expiredDeposits = deposits.filter((deposit) => deposit.expireDate < currentDate);
 
     for (const deposit of expiredDeposits) {
-      const totalDepositAmount = deposit.depositAmount + (deposit.depositAmount * (deposit.interest/100));
-      const depositOwner = (await getItemInList<User>("users", deposit.accountID));
-      console.log(depositOwner)
-
-      const updatedUser: User = {
-        ...depositOwner!,
-        balance: depositOwner!.balance + totalDepositAmount,
-      };
-      
-      createNewNotification(deposit.accountID, "DepositWithdrawn");
-
-      const newTransaction: Transaction = {
-        senderID: "!bank!",
-        date: currentDate,
-        amount: totalDepositAmount,
-        reason: "Deposit Withdrawn!",
-        receiverID: currentUser!.id,
-        senderName: "Bank",
-        receiverName: getUserFullName(currentUser!),
-        id: generateUniqueId(),
-      };
-  
-      await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
-      await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-      await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
+      if (deposit.status === "Active") {
+        const updatedDeposit: Deposit = {
+          ...deposit,
+          status: "Withdrawable",
+        };
+        await CRUDLocalStorage.updateItemInList<Deposit>("deposits", updatedDeposit);
+      }
+      if (deposit.status === "Offered") {
+        await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
+      }
     }
   };
 
   useEffect(() => {
     storeCurrentUserAndNotifications();
     blockUnpayingUsers();
-    withdrawDeposits();
+    updateExpiredDeposits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]);
+  }, [location, currentUser]);
 
   const currentRoute = location.pathname;
   const isPublicRoute = ["/", "/signup"].includes(currentRoute);
@@ -172,17 +153,17 @@ export const AuthHandlerRoute = () => {
                     </Grid>
                   </Modal>
                 )}
-                  {currentUser.role === "admin" ? (
-                    isAdminRoute ? (
-                      <Outlet />
-                    ) : (
-                      <Navigate to={`/admin${location.pathname}`} />
-                    )
-                  ) : isUserRoute ? (
+                {currentUser.role === "admin" ? (
+                  isAdminRoute ? (
                     <Outlet />
                   ) : (
-                    <Navigate to={exctractPathFromAdminRoute(location.pathname)} />
-                  )}
+                    <Navigate to={`/admin${location.pathname}`} />
+                  )
+                ) : isUserRoute ? (
+                  <Outlet />
+                ) : (
+                  <Navigate to={exctractPathFromAdminRoute(location.pathname)} />
+                )}
               </Grid>
             </>
           )}

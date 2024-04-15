@@ -4,13 +4,10 @@ import { Box, Button, Grid, Modal } from "@mui/material";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { successAlert } from "../../utils/swalAlerts";
 import GenericForm from "../GenericForm/GenericForm";
-import Ajv, { JSONSchemaType } from "ajv";
-import ajvErrors from "ajv-errors";
+import { JSONSchemaType } from "ajv";
 import { createNewNotification } from "../../utils/utils";
 import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
 
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
 
 interface PendingLoanButtonsProps {
   loan: Loan;
@@ -27,7 +24,7 @@ const schema: JSONSchemaType<Loan> = {
     status: { type: "string" },
     expireDate: { type: "string", minLength: 1 },
   },
-  required: [],
+  required: ["expireDate","interest"],
   additionalProperties: true,
   errorMessage: {
     properties: {
@@ -52,7 +49,6 @@ const fields = [
   },
 ];
 
-const validateForm = ajv.compile(schema);
 
 const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
   const [isRejectLoading, setIsRejectLoading] = useState(false);
@@ -85,7 +81,6 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
       expireDate: expiryDate
     };
 
-    if (!validateForm(newLoan)) return;
 
     setIsAcceptLoading(true);
 

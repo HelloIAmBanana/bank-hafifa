@@ -5,14 +5,10 @@ import { generateUniqueId, getUserFullName } from "../../utils/utils";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { Loan } from "../../models/loan";
 import { successAlert } from "../../utils/swalAlerts";
-import ajvErrors from "ajv-errors";
-import Ajv, { JSONSchemaType } from "ajv";
+import { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import LoansRow from "../../components/Loan/LoansRow";
 import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
-
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
 
 const schema: JSONSchemaType<Loan> = {
   type: "object",
@@ -35,7 +31,6 @@ const schema: JSONSchemaType<Loan> = {
   },
 };
 
-const validateForm = ajv.compile(schema);
 
 const fields = [
   {
@@ -80,7 +75,6 @@ const LoansPage: React.FC = () => {
       paidBack: 0,
     };
 
-    if (!validateForm(newLoan)) return;
 
     setIsCreatingNewLoan(true);
     await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);

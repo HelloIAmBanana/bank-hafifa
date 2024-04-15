@@ -1,16 +1,13 @@
 import React, { useState, useContext, useMemo } from "react";
 import { User } from "../../models/user";
 import { successAlert } from "../../utils/swalAlerts";
-import Ajv, { JSONSchemaType } from "ajv";
-import ajvErrors from "ajv-errors";
 import { Grid } from "@mui/material";
 import { UserContext } from "../../UserProvider";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import * as _ from "lodash";
 import GenericForm from "../../components/GenericForm/GenericForm";
+import { JSONSchemaType } from "ajv";
 
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -39,7 +36,6 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-const validateForm = ajv.compile(schema);
 
 const ProfileSettingsPage: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
@@ -86,7 +82,6 @@ const ProfileSettingsPage: React.FC = () => {
 
   const handleSubmitProfileInfo = async (data: any) => {
     setIsFormLoading(true);
-    if (validateForm(data)) {
       const updatedUser: User = {
         ...currentUser!,
         ...data,
@@ -96,7 +91,6 @@ const ProfileSettingsPage: React.FC = () => {
         setCurrentUser(updatedUser);
         successAlert(`Updated User!`);
       }
-    }
     setIsFormLoading(false);
   };
 

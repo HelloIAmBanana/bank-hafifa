@@ -1,16 +1,13 @@
 import React, { useState } from "react";
-import Ajv, { JSONSchemaType } from "ajv";
 import loginImage from "../../imgs/loginPage.svg";
 import GenericForm from "../../components/GenericForm/GenericForm";
-import ajvErrors from "ajv-errors";
 import { User } from "../../models/user";
 import { useNavigate, NavLink } from "react-router-dom";
 import { validateLogin } from "./login";
 import { Typography, Box, Grid, Paper } from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
+import { JSONSchemaType } from "ajv";
 
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -37,7 +34,6 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-const validateForm = ajv.compile(schema);
 
 const fields = [
   {
@@ -72,11 +68,10 @@ const SignInPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const login = async (data: Record<string, any>) => {
-    if (validateForm(data)) {
       const isRemembered = (data as User & { rememberMe: boolean }).rememberMe;
       setIsLoading(true);
 
-      const validUser = await validateLogin(data);
+      const validUser = await validateLogin(data as User & { rememberMe: boolean });
 
       if (!validUser) {
         errorAlert("Wrong Credentials!");
@@ -87,7 +82,6 @@ const SignInPage: React.FC = () => {
       storeCurrentAuthToken(validUser.id, isRemembered);
       successAlert("Signing in!");
       navigate("/home");
-    }
   };
 
   document.title = "Sign In";

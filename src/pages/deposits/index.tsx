@@ -16,8 +16,8 @@ const DepositsPage: React.FC = () => {
     return deposits.filter((deposit) => deposit.status === "Offered");
   }, [deposits]);
 
-  const withdrawnDeposits = useMemo(() => {
-    return deposits.filter((deposit) => deposit.status === "Withdrawn");
+  const WithdrawableDeposits = useMemo(() => {
+    return deposits.filter((deposit) => deposit.status === "Withdrawable");
   }, [deposits]);
 
   document.title = "Deposits";
@@ -50,7 +50,7 @@ const DepositsPage: React.FC = () => {
                   <Box>
                     <DepositRows deposits={activeDeposits} title="Active" />
                     <DepositRows deposits={offeredDeposits} title="Offered" />
-                    <DepositRows deposits={withdrawnDeposits} title="Withdrawn" />
+                    <DepositRows deposits={WithdrawableDeposits} title="Withdrawable" />
                   </Box>
                 )}
               </Grid>

@@ -15,7 +15,7 @@ interface UserDepositButtonsProps {
 
 const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
   const [isRejectingDeposit, setIsRejectingDeposit] = useState(false);
-  const [currentUser] = useContext(UserContext);
+  const [currentUser, setCurrentUser] = useContext(UserContext);
 
   const [isAcceptingDeposit, setIsAcceptingDeposit] = useState(false);
   const { fetchDeposits } = useFetchDepositsContext();
@@ -37,7 +37,7 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
 
     const updatedUser: User = {
       ...currentUser!,
-      balance:currentUser!.balance-deposit.depositAmount
+      balance: currentUser!.balance - deposit.depositAmount,
     };
 
     const date = new Date().toISOString();
@@ -55,6 +55,7 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
 
     await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
+    setCurrentUser(updatedUser);
     await CRUDLocalStorage.updateItemInList<Deposit>("deposits", acceptedDeposit);
     successAlert("Deposit was accepted!");
     await fetchDeposits();

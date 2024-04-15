@@ -43,4 +43,10 @@ export default class CRUDLocalStorage {
     const filteredList: T[] = items.filter((currentItem) => currentItem.id !== unwantedItem.id);
     await CRUDLocalStorage.setAsyncData(key, filteredList);
   }
+
+  static async getItemInList<T extends { id: string }>(key: string, itemID: string): Promise<T | undefined> {
+    const items: T[] = (await CRUDLocalStorage.getAsyncData<T[]>(key)) || [];
+    const wantedItem = items.find((currentItem) => currentItem.id === itemID);
+    return wantedItem;
+  }
 }

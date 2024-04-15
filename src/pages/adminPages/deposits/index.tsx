@@ -4,17 +4,14 @@ import { Grid, Box, Container, Typography, Skeleton, Button, Modal } from "@mui/
 import { UserContext } from "../../../UserProvider";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { errorAlert, successAlert } from "../../../utils/swalAlerts";
-import { generateUniqueId, getItemInList, getUserFullName, createNewNotification } from "../../../utils/utils";
+import { generateUniqueId, getUserFullName, createNewNotification } from "../../../utils/utils";
 import { Deposit } from "../../../models/deposit";
-import ajvErrors from "ajv-errors";
-import Ajv, { JSONSchemaType } from "ajv";
+import { JSONSchemaType } from "ajv";
 import GenericForm from "../../../components/GenericForm/GenericForm";
 import { User } from "../../../models/user";
 import DepositBox from "../../../components/Deposit/DepositBox";
 import { useFetchDepositsContext } from "../../../contexts/fetchDepositsContext";
 
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
 
 const schema: JSONSchemaType<Deposit> = {
   type: "object",
@@ -27,12 +24,14 @@ const schema: JSONSchemaType<Deposit> = {
     depositAmount: { type: "number", minimum: 1 },
     interest: { type: "number", minimum: 1 },
   },
-  required: ["depositAmount", "interest"],
+  required: ["accountID","depositAmount", "interest","expireDate"],
   additionalProperties: true,
   errorMessage: {
     properties: {
-      depositOwner: "Entered amount is less than 1",
+      depositAmount: "Entered amount is less than 1",
       interest: "Entered interest is less than 1",
+      accountID:"Enter account ID",
+      expireDate:"Enter expire date",
     },
   },
 };
@@ -60,7 +59,6 @@ const fields = [
   },
 ];
 
-const validateForm = ajv.compile(schema);
 
 const AdminDepositsPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
@@ -80,7 +78,7 @@ const AdminDepositsPage: React.FC = () => {
   const handleDepositModalSubmit = async (data: any) => {
     setIsCreatingNewDeposit(true);
 
-    const depositOwner = await getItemInList<User>("users", data.accountID);
+    const depositOwner = await CRUDLocalStorage.getItemInList<User>("users", data.accountID);
 
     if (!depositOwner) {
       setIsCreatingNewDeposit(false);
@@ -96,8 +94,6 @@ const AdminDepositsPage: React.FC = () => {
       status: "Offered",
       depositOwner: getUserFullName(depositOwner),
     };
-
-    if (!validateForm(newDeposit)) return;
 
     await CRUDLocalStorage.addItemToList<Deposit>("deposits", newDeposit);
     setIsCreatingNewDeposit(false);
@@ -140,10 +136,10 @@ const AdminDepositsPage: React.FC = () => {
                   </Grid>
                 ) : (
                   <Box>
-                    {deposits.length > 0 && (
+                    {deposits.filter((deposit)=>(deposit.status==="Offered")).length > 0 && (
                       <Grid item mt={2}>
                         <Grid container direction="row">
-                          {deposits.map((deposit, index) => (
+                          {deposits.filter((deposit)=>(deposit.status==="Offered")).map((deposit, index) => (
                             <Grid
                               container
                               direction="row"
@@ -154,7 +150,7 @@ const AdminDepositsPage: React.FC = () => {
                               sm={12}
                             >
                               <Grid item key={index} sx={{ marginRight: 2 }}>
-                                <DepositBox deposit={deposit}/>
+                                <DepositBox deposit={deposit} />
                               </Grid>
                             </Grid>
                           ))}
