@@ -16,9 +16,9 @@ const schema: JSONSchemaType<Deposit> = {
   type: "object",
   properties: {
     id: { type: "string" },
-    expireDate: { type: "string" },
+    expireDate: { type: "string", minLength:1 },
     depositOwner: { type: "string" },
-    accountID: { type: "string" },
+    accountID: { type: "string",minLength:1 },
     status: { type: "string" },
     depositAmount: { type: "number", minimum: 1 },
     interest: { type: "number", minimum: 1 },
