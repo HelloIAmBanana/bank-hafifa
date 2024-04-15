@@ -39,7 +39,6 @@ const AdminLoansPage: React.FC = () => {
                     </Typography>
                   </Grid>
                 </Grid>
-
                 {isLoading ? (
                   <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
                     <Skeleton height={"12rem"} width={window.innerWidth / 2} />

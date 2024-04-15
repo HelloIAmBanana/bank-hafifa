@@ -31,7 +31,6 @@ const schema: JSONSchemaType<Loan> = {
   },
 };
 
-
 const fields = [
   {
     id: "loanAmount",
@@ -74,7 +73,6 @@ const LoansPage: React.FC = () => {
       loanOwner: getUserFullName(currentUser!),
       paidBack: 0,
     };
-
 
     setIsCreatingNewLoan(true);
     await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);
@@ -126,10 +124,10 @@ const LoansPage: React.FC = () => {
                   </Grid>
                 ) : (
                   <Box>
-                    <LoansRow loans={approvedLoans} title="Approved"/>
-                    <LoansRow loans={offeredLoans} title="Offered"/>
-                    <LoansRow loans={pendingLoans} title="Pending"/>
-                    <LoansRow loans={rejectedLoans} title="Rejected"/>
+                    <LoansRow loans={approvedLoans} title="Approved" />
+                    <LoansRow loans={offeredLoans} title="Offered" />
+                    <LoansRow loans={pendingLoans} title="Pending" />
+                    <LoansRow loans={rejectedLoans} title="Rejected" />
                   </Box>
                 )}
               </Grid>

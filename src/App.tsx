@@ -15,22 +15,30 @@ import "./App.css";
 import { FetchLoansProvider } from "./contexts/fetchLoansContext";
 import { FetchDepositsProvider } from "./contexts/fetchDepositsContext";
 import { FetchTransactionsProvider } from "./contexts/fetchTransactionsContext";
+import { FetchCardsProvider } from "./contexts/fetchCardsContext";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route element={<AuthHandlerRoute />}>
+            {/* Public Routes */}
             <Route path="/" element={<SignInPage />} />
             <Route path="/signup" element={<SignUpPage />} />
+            
+            {/* User Routes */}
+            <Route path="/settings" element={<ProfileSettingsPage />} />
             <Route path="/home" element={<FetchTransactionsProvider><Home /></FetchTransactionsProvider>} />
+            
+            {/* Customer Routes */}
+            <Route path="/cards" element={<FetchCardsProvider><CardsPage /></FetchCardsProvider>} />
             <Route path="/loans" element={<FetchLoansProvider><LoansPage /></FetchLoansProvider>} />
-            <Route path="/cards" element={<CardsPage />} />
-            <Route path="/admin/cards" element={<AdminCardsPage />} />
+            <Route path="/deposits" element={<FetchDepositsProvider><DepositsPage /></FetchDepositsProvider>} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/cards" element={<FetchCardsProvider><AdminCardsPage /></FetchCardsProvider>} />
             <Route path="/admin/loans" element={<FetchLoansProvider><AdminLoansPage /></FetchLoansProvider>} />
             <Route path="/admin/deposits" element={<FetchDepositsProvider><AdminDepositsPage /></FetchDepositsProvider>} />
-            <Route path="/deposits" element={<FetchDepositsProvider><DepositsPage /></FetchDepositsProvider>} />
-            <Route path="/settings" element={<ProfileSettingsPage />} />
         </Route>
       </Routes>
     </Router>

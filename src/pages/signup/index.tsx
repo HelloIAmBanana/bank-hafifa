@@ -9,7 +9,6 @@ import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { User } from "../../models/user";
 import { JSONSchemaType } from "ajv";
 
-
 const fields = [
   {
     id: "firstName",
@@ -90,7 +89,6 @@ const schema: JSONSchemaType<User> = {
     },
   },
 };
-
 
 const SignUpPage: React.FC = () => {
   const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);

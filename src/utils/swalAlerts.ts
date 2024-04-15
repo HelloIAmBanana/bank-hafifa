@@ -44,7 +44,7 @@ export function notificationAlert(message:string){
   toast: true,
   position: "top-right",
   icon: "info",
-  color: "blue",
+  color: "CornflowerBlue",
   title: message,
   showConfirmButton: false,
   timer: 3750,

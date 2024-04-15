@@ -12,7 +12,6 @@ import { User } from "../../../models/user";
 import DepositBox from "../../../components/Deposit/DepositBox";
 import { useFetchDepositsContext } from "../../../contexts/fetchDepositsContext";
 
-
 const schema: JSONSchemaType<Deposit> = {
   type: "object",
   properties: {
@@ -58,7 +57,6 @@ const fields = [
     label: "Enter expire date",
   },
 ];
-
 
 const AdminDepositsPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);

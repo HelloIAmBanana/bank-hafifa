@@ -14,7 +14,6 @@ import TransactionsTable from "../../components/UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
 import { useFetchTransactionsContext } from "../../contexts/fetchTransactionsContext";
 
-
 const fields = [
   {
     id: "receiverID",
@@ -54,7 +53,6 @@ const schema: JSONSchemaType<Transaction> = {
     },
   },
 };
-
 
 const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
