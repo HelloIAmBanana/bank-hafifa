@@ -1,5 +1,5 @@
 import { Grid, Typography } from "@mui/material";
-import { Card } from "../models/card";
+import { Card } from "../../models/card";
 import CreditCard from "./CreditCard";
 
 interface CreditCardsRowsProps {
@@ -30,7 +30,6 @@ const CreditCardsRow: React.FC<CreditCardsRowsProps> = ({ cards, cancelAction, t
                         <Grid item key={index} ml={5}>
                             <CreditCard
                                 card={card}
-                                isUserAdmin={false}
                                 cancelCard={cancelAction}
                             />
                         </Grid>

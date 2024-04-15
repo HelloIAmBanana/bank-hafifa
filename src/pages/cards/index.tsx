@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { UserContext } from "../../UserProvider";
 import { Card } from "../../models/card";
-import CreditCardsRow from "../../components/CreditCardsRow";
+import CreditCardsRow from "../../components/CreditCard/CreditCardsRow";
 
 const calculateExpiredDate = (date: string) => {
   const year = Number(date.slice(0, 4));
@@ -40,16 +40,12 @@ const CardsPage: React.FC = () => {
 
   const fetchUserCards = async () => {
     setIsCardsLoading(true);
-    if (currentUser) {
-      try {
-        const fetchedCards = await CRUDLocalStorage.getAsyncData<Card[]>("cards");
-        const modifiedCards: Card[] = fetchedCards.filter(
-          (filteredCards) => filteredCards.accountID === currentUser.id
-        );
-        setCards(modifiedCards);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+    try {
+      const fetchedCards = await CRUDLocalStorage.getAsyncData<Card[]>("cards");
+      const userCards = fetchedCards.filter((card) => card.accountID === currentUser!.id);
+      setCards(userCards);
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
     setIsCardsLoading(false);
   };
@@ -80,7 +76,7 @@ const CardsPage: React.FC = () => {
     await fetchUserCards();
   };
 
-  const handleCardModalSubmit = async (data: any) => {
+  const handleCardModalSubmit = async () => {
     setIsCardCreationLoading(true);
 
     const currentDateTime = new Date().toISOString();
@@ -91,8 +87,8 @@ const CardsPage: React.FC = () => {
       accountID: currentUser!.id,
       ownerName: getUserFullName(currentUser!),
       expireDate: calculateExpiredDate(currentDateTime),
-      cardNumber: +generateUniqueNumber(18).slice(1, 17),
-      hiddenPin: +generateUniqueNumber(16).slice(1, 4),
+      cardNumber: generateUniqueNumber(16),
+      hiddenPin: generateUniqueNumber(3),
       status: "pending",
       rejectedMessage: "",
     };

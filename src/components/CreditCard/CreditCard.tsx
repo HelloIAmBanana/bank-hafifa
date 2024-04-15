@@ -1,17 +1,18 @@
-import React, { useState } from "react";
-import AmericanExpress from "../imgs/icons/AmericanExpress.svg";
-import Visa from "../imgs/icons/Visa.svg";
-import Mastercard from "../imgs/icons/Mastercard.svg";
-import ContactlessIcon from "../imgs/icons/Contactless.svg";
-import thunderIcon from "../imgs/icons/Thunder.svg";
+import React, { useContext, useMemo, useState } from "react";
+import Visa from "../../imgs/icons/Visa.svg";
+import AmericanExpress from "../../imgs/icons/AmericanExpress.svg";
+import Mastercard from "../../imgs/icons/Mastercard.svg";
+import ContactlessIcon from "../../imgs/icons/Contactless.svg";
+import thunderIcon from "../../imgs/icons/Thunder.svg";
 import { Box, Button, CircularProgress, Grid, Modal, Paper, TextField, Typography } from "@mui/material";
-import { Card } from "../models/card";
-import { normalAlert } from "../utils/swalAlerts";
-import { formatIsoStringToDate } from "../utils/utils";
+import { Card } from "../../models/card";
+import { normalAlert } from "../../utils/swalAlerts";
+import { formatIsoStringToDate } from "../../utils/utils";
+import { UserContext } from "../../UserProvider";
+import AuthService from "../../AuthService";
 
-interface Props {
+interface CardProps {
   card: Card;
-  isUserAdmin: Boolean;
   approveCard?: (card: Card) => void;
   rejectCard?: (card: Card, data: any) => void;
   cancelCard?: (card: Card) => void;
@@ -24,18 +25,21 @@ const getCardProviderImage = (type: string) => {
       return AmericanExpress;
     case "Mastercard":
       return Mastercard;
-    default:
-      return null;
   }
 };
 
-const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCard, cancelCard }) => {
+const CreditCard: React.FC<CardProps> = ({ card, approveCard, rejectCard, cancelCard }) => {
   const [isCardBeingApproved, setIsCardBeingApproved] = useState(false);
+  const [currentUser] = useContext(UserContext);
   const [isCardBeingCanceled, setIsCardBeingCanceled] = useState(false);
   const [isCardBeingRejected, setIsCardBeingRejected] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejectCardModalOpen, setIsRejectCardModalOpen] = useState(false);
   const [isShowRejectionReasonModalOpen, setIsShowRejectionReasonModalOpen] = useState(false);
+
+  const isAdmin = useMemo(() => {
+    return AuthService.isUserAdmin(currentUser);
+  }, [currentUser]);
 
   const handleRejectionReasonModalOpen = () => setIsShowRejectionReasonModalOpen(true);
   const handleRejectionReasonModalClose = () => setIsShowRejectionReasonModalOpen(false);
@@ -85,7 +89,7 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
           <Grid item xs={12} sm={12} md={12} key={3} sx={{ mt: -3 }}>
             <center>
               <Typography color="silver" fontFamily="CreditCard" fontSize={16}>
-                {(card.status!=="approved")&&(!isUserAdmin)?"???? ???? ???? ????":card.cardNumber
+                {(card.status!=="approved")&&(!isAdmin)?"???? ???? ???? ????":card.cardNumber
                   .toString()
                   .match(/.{1,4}/g)
                   ?.join(" ") || ""}
@@ -94,14 +98,14 @@ const CreditCard: React.FC<Props> = ({ card, isUserAdmin, approveCard, rejectCar
           </Grid>
           <Grid item xs={2} sm={5} md={8} key={4} sx={{ ml: 1, mt: 2 }}>
             <Typography color="white">{card.ownerName}</Typography>
-            <Typography color="white">{(card.status!=="approved")&&(!isUserAdmin)?"??/??":formatIsoStringToDate(card.expireDate, "MM/yyyy")}</Typography>
+            <Typography color="white">{(card.status!=="approved")&&(!isAdmin)?"??/??":formatIsoStringToDate(card.expireDate, "MM/yyyy")}</Typography>
           </Grid>
           <Grid item xs={2} sm={3} md={4} key={5} sx={{ mr: -2 }}>
             <img width="60rem" height="60rem" src={`${getCardProviderImage(card.type)}`} alt="Card Provider" />
           </Grid>
         </Grid>
       </Paper>
-      {isUserAdmin &&(
+      {isAdmin &&(
         <Grid container direction="row" justifyContent="center" alignItems="center">
           <Grid item>
             <Button

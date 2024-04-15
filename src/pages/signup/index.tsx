@@ -8,7 +8,7 @@ import ajvErrors from "ajv-errors";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import { User } from "../../models/user"; 
+import { User } from "../../models/user";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -42,14 +42,12 @@ const fields = [
     id: "birthDate",
     label: "Date Of Birth",
     type: "date",
-    name: "hasfd",
     placeholder: "Enter your birthday",
   },
   {
     id: "gender",
     label: "Gender",
     type: "select",
-    placeholder: "Enter your gender",
     options: [
       { value: "Male", label: "Male" },
       { value: "Female", label: "Female" },
@@ -59,7 +57,6 @@ const fields = [
     id: "accountType",
     label: "Account Type",
     type: "select",
-    placeholder: "Enter your Account Type",
     options: [
       { value: "Personal", label: "Personal" },
       { value: "Business", label: "Business" },
@@ -78,14 +75,9 @@ const schema: JSONSchemaType<User> = {
     birthDate: { type: "string", minLength: 1 },
     avatarUrl: { type: "string" },
     gender: { type: "string", enum: ["Male", "Female"], minLength: 1 },
-    accountType: {
-      type: "string",
-      enum: ["Business", "Personal"],
-      minLength: 1,
-    },
+    accountType: { type: "string", enum: ["Business", "Personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
-
   },
   required: ["id", "birthDate", "email", "firstName", "lastName", "password", "gender", "accountType"],
   additionalProperties: true,
@@ -133,14 +125,18 @@ const SignUpPage: React.FC = () => {
     };
     if (validateForm(newUser)) {
       setIsLoading(true);
-      if (await doesUserExist(newUser.email)) {
+
+      const isDuplicatedUser = await doesUserExist(newUser.email);
+
+      if (isDuplicatedUser) {
         errorAlert("User already exists!");
-      } else {
-        await CRUDLocalStorage.addItemToList<User>("users", newUser);
-        successAlert("Account Created! Navigating to Signin Page!");
-        navigate("/");
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+
+      await CRUDLocalStorage.addItemToList<User>("users", newUser);
+      successAlert("Account Created! Navigating to Signin Page...");
+      navigate("/");
     }
   };
 
@@ -244,7 +240,6 @@ const SignUpPage: React.FC = () => {
               fontFamily: "Poppins",
               color: "#181818",
               fontSize: "18px",
-              textAlign: "center",
               marginLeft: 10,
             }}
           >

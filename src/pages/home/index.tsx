@@ -1,9 +1,8 @@
 import { Box, Typography, Container, Grid, Paper, Modal, Skeleton, Button } from "@mui/material";
 import AuthService from "../../AuthService";
 import { User } from "../../models/user";
-import { TransactionRow } from "../../models/transactionRow";
 import { Transaction } from "../../models/transactions";
-import { generateUniqueId, getUserFullName } from "../../utils/utils";
+import { createNewNotification, generateUniqueId, getItemInList, getUserFullName } from "../../utils/utils";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { UserContext } from "../../UserProvider";
@@ -43,7 +42,7 @@ const schema: JSONSchemaType<Transaction> = {
     senderID: { type: "string" },
     receiverID: { type: "string", minLength: 1 },
     reason: { type: "string" },
-    amount: { type: "string", minLength: 1 },
+    amount: { type: "number", minimum: 1 },
     senderName: { type: "string" },
     receiverName: { type: "string" },
     date: { type: "string" },
@@ -52,8 +51,8 @@ const schema: JSONSchemaType<Transaction> = {
   additionalProperties: false,
   errorMessage: {
     properties: {
-      receiverID: "Enter ID",
-      amount: "Enter Amount",
+      receiverID: "Please enter ID",
+      amount: "Please enter an amount larger than 0",
     },
   },
 };
@@ -64,12 +63,11 @@ const Home: React.FC = () => {
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
-  const [transactions, setTransactions] = useState<TransactionRow[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
   const navigate = useNavigate();
 
   const isAdmin = useMemo(() => {
-    if (!currentUser) return false;
     return AuthService.isUserAdmin(currentUser);
   }, [currentUser]);
 
@@ -97,14 +95,13 @@ const Home: React.FC = () => {
   };
 
   const createNewTransaction = async (data: any) => {
-    const designatedUser = (await AuthService.getUserFromStorage(data.receiverID)) as User;
-    const designatedUserName = getUserFullName(designatedUser);
+    const designatedUser = await getItemInList<User>("users", data.receiverID)
+    const designatedUserName = getUserFullName(designatedUser!);
 
     const currentDateTime = new Date().toISOString();
 
     const newTransaction = {
       ...data,
-      amount: Number(data.amount),
       senderID: currentUser!.id,
       id: generateUniqueId(),
       senderName: getUserFullName(currentUser!),
@@ -112,31 +109,27 @@ const Home: React.FC = () => {
       date: currentDateTime,
     };
 
+    await createNewNotification(data.receiverID, "newTransaction");
     await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
   };
 
   const handleSubmitTransaction = async (data: any) => {
-    setUserOldBalance(currentUser!.balance);
     if (!validateForm(data)) return;
 
-    const amount = +data.amount;
+    setUserOldBalance(currentUser!.balance);
 
-    if (amount <= 0) {
-      errorAlert("You can't enter a negative transaction amount!");
+    const amount = data.amount;
+
+    if (data.receiverID === currentUser!.id) {
+      errorAlert("You can't enter your own ID!");
       closePaymentModal();
       return;
     }
 
     setIsButtonLoading(true);
 
-    if (data.receiverID === currentUser!.id) {
-      errorAlert("You can't enter your own ID!");
-      setIsButtonLoading(false);
-      closePaymentModal();
-      return;
-    }
+    const receivingUser = await getItemInList<User>("users", data.receiverID);
 
-    const receivingUser = await AuthService.getUserFromStorage(data.receiverID);
     if (!receivingUser) {
       errorAlert("Entered ID is WRONG");
       setIsButtonLoading(false);
@@ -148,7 +141,7 @@ const Home: React.FC = () => {
     await updateBalance(receivingUser, amount);
     await updateBalance(currentUser!, -amount);
 
-    successAlert(`Transferred ${amount}$ to ${receivingUser.firstName}`);
+    successAlert(`Transferred $${amount} to ${receivingUser.firstName}`);
 
     setIsButtonLoading(false);
     closePaymentModal();
@@ -156,22 +149,21 @@ const Home: React.FC = () => {
 
   const fetchUserTransactions = async () => {
     setIsTableLoading(true);
-    if (currentUser) {
-      try {
-        const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
-        const sortedTransactions = fetchedTransactions.sort((a, b) => {
-          return DateTime.fromISO(b.date).toMillis() - DateTime.fromISO(a.date).toMillis();
-        });
-        const userTransactions = sortedTransactions.filter(
-          (transaction) => transaction.senderID === currentUser.id || transaction.receiverID === currentUser.id
-        );
-        setTransactions(userTransactions);
-        setIsTableLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+    try {
+      const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
+      const sortedTransactions = fetchedTransactions.sort((a, b) => {
+        return DateTime.fromISO(b.date).toMillis() - DateTime.fromISO(a.date).toMillis();
+      });
+      const userTransactions = sortedTransactions.filter(
+        (transaction) => transaction.senderID === currentUser!.id || transaction.receiverID === currentUser!.id
+      );
+      setTransactions(userTransactions);
+      setIsTableLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
   };
+
   useEffect(() => {
     fetchUserTransactions();
     // eslint-disable-next-line
@@ -181,16 +173,17 @@ const Home: React.FC = () => {
 
   return (
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
-
       <Container sx={{ mt: 3 }}>
         {isAdmin ? (
-          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh">
+          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" ml={10}  mt={-3}>
             <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
               Welcome Back Admin {getUserFullName(currentUser!)}
             </Typography>
             <Grid container direction="row" justifyContent="space-evenly" alignItems="center" spacing={1}>
               <Grid item>
-                <Button type="submit">Loans Management</Button>
+                <Button type="submit" onClick={() => navigate("/admin/loans")}>
+                  Loans Management
+                </Button>
               </Grid>
               <Grid item>
                 <Button type="submit" onClick={() => navigate("/admin/cards")}>
@@ -220,7 +213,6 @@ const Home: React.FC = () => {
                   isTableLoading={isTableLoading}
                   userOldBalance={userOldBalance}
                   isButtonLoading={isButtonLoading}
-                  currentUser={currentUser!}
                   openPaymentModal={openPaymentModal}
                 />
               </Paper>

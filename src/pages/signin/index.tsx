@@ -3,8 +3,8 @@ import Ajv, { JSONSchemaType } from "ajv";
 import loginImage from "../../imgs/loginPage.svg";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import ajvErrors from "ajv-errors";
-import { User } from "../../models/user"; 
-import { useNavigate , NavLink} from "react-router-dom";
+import { User } from "../../models/user";
+import { useNavigate, NavLink } from "react-router-dom";
 import { validateLogin } from "./login";
 import { Typography, Box, Grid, Paper } from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
@@ -39,51 +39,54 @@ const schema: JSONSchemaType<User> = {
 
 const validateForm = ajv.compile(schema);
 
+const fields = [
+  {
+    id: "email",
+    label: "Email",
+    type: "email",
+    placeholder: "Enter your email",
+  },
+  {
+    id: "password",
+    label: "Password",
+    type: "password",
+    placeholder: "Password",
+  },
+  {
+    id: "rememberMe",
+    label: "Remember Me",
+    type: "checkbox",
+  },
+];
+
+function storeCurrentAuthToken(userID: string, rememberMe: boolean) {
+  if (rememberMe) {
+    localStorage.setItem("rememberedAuthToken", userID);
+  } else {
+    sessionStorage.setItem("currentAuthToken", userID);
+  }
+}
+
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-
-  const fields = [
-    {
-      id: "email",
-      label: "Email",
-      type: "email",
-      placeholder: "Enter your email",
-    },
-    {
-      id: "password",
-      label: "Password",
-      type: "password",
-      placeholder: "Password",
-    },
-    {
-      id: "rememberMe",
-      label: "Remember Me",
-      type: "checkbox",
-    },
-  ];
-
-  function storeCurrentAuthToken(userID: string, rememberMe: boolean) {
-    if (rememberMe) {
-      localStorage.setItem("rememberedAuthToken", userID);
-    } else {
-      sessionStorage.setItem("currentAuthToken", userID);
-    }
-  }
 
   const login = async (data: Record<string, any>) => {
     if (validateForm(data)) {
       const isRemembered = (data as User & { rememberMe: boolean }).rememberMe;
       setIsLoading(true);
+
       const validUser = await validateLogin(data);
-      if (validUser) {
-        storeCurrentAuthToken(validUser.id, isRemembered);
-        successAlert("Signing in!");
-        navigate("/home")
-      } else {
+
+      if (!validUser) {
         errorAlert("Wrong Credentials!");
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+      
+      storeCurrentAuthToken(validUser.id, isRemembered);
+      successAlert("Signing in!");
+      navigate("/home");
     }
   };
 

@@ -1,17 +1,7 @@
-import CRUDLocalStorage from "./CRUDLocalStorage";
 import { User } from "./models/user";
+import { getItemInList } from "./utils/utils";
 
-class AuthService {
-  static async getUserFromStorage(id: string) {
-    const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-    try {
-      const user = users.find((user) => user.id === id);
-      return user;
-    } catch (error) {
-      return null;
-    }
-  }
-
+export default class AuthService {
   static getRememberedToken() {
     return localStorage.getItem("rememberedAuthToken");
   }
@@ -24,11 +14,12 @@ class AuthService {
 
   static async getCurrentUser(): Promise<User | null> {
     const authToken = AuthService.getAuthToken();
-    if (authToken) {
-      return (await AuthService.getUserFromStorage(authToken)) as User;
-    }
-    return null;
+
+    if (!authToken) return null;
+
+    return (await getItemInList<User>("users", authToken))!;
   }
+
   static isUserAuthenticated() {
     return Boolean(AuthService.getAuthToken());
   }
@@ -40,5 +31,3 @@ class AuthService {
     return user;
   }
 }
-
-export default AuthService;

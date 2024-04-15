@@ -11,7 +11,10 @@ const fieldsRegistry: FieldsRegistry = {
   email: Input,
   password: Input,
   number: Input,
+  file: Input,
   date: Input,
+  time: Input,
+  "datetime-local":Input,
   select: Select,
   checkbox: Checkbox,
 };

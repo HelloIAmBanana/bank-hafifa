@@ -1,10 +1,10 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Box, CircularProgress, MenuItem, FormControl, FormHelperText, Button, Typography } from "@mui/material";
-import Ajv, { Schema } from "ajv";
-import ajvErrors from "ajv-errors";
 import fieldsRegistry from "./fieldsRegistry";
 import { Field } from "../../models/field";
+import Ajv, { Schema } from "ajv";
+import ajvErrors from "ajv-errors";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
@@ -34,6 +34,24 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
     clearErrors();
   };
 
+  const formatFormData = (data: Record<string, any>) => {
+    const formattedData = data;
+    for (const key in formattedData) {
+      const fieldType = fields.find((field) => field.id === key)!.type;
+      if (fieldType === "number") {
+        formattedData[key] = parseFloat(formattedData[key]);
+      }
+      if (fieldType === "file") {
+        if (formattedData[key][0] instanceof File) {
+          formattedData[key] = URL.createObjectURL(formattedData[key][0]);
+        } else {
+          formattedData[key] = "";
+        }
+      }
+    }
+    return formattedData;
+  };
+
   const validateForm = (data: Record<string, any>) => {
     validate(data);
     const formErrors = validate.errors;
@@ -45,8 +63,9 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
   };
 
   const internalHandleSubmit = async (data: Record<string, any>) => {
-    validateForm(data);
-    onSubmit(data);
+    const formattedData = formatFormData(data);
+    validateForm(formattedData);
+    onSubmit(formattedData);
   };
 
   return (

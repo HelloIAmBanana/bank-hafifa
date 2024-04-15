@@ -3,7 +3,7 @@ import { User } from "../../models/user";
 import { successAlert } from "../../utils/swalAlerts";
 import Ajv, { JSONSchemaType } from "ajv";
 import ajvErrors from "ajv-errors";
-import { Button, Grid, Typography, Modal, CircularProgress, Input, Box } from "@mui/material";
+import { Grid } from "@mui/material";
 import { UserContext } from "../../UserProvider";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import * as _ from "lodash";
@@ -44,8 +44,6 @@ const validateForm = ajv.compile(schema);
 const ProfileSettingsPage: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isFormLoading, setIsFormLoading] = useState(false);
-  const [isProfilePicLoading, setIsProfilePicLoading] = useState(false);
-  const [isProfilePictureModalOpen, setIsProfilePictureModalOpen] = useState(false);
 
   const fields = useMemo(() => {
     return [
@@ -67,7 +65,6 @@ const ProfileSettingsPage: React.FC = () => {
         type: "date",
         initValue: `${currentUser?.birthDate}`,
       },
-
       {
         id: "gender",
         label: "Gender",
@@ -78,58 +75,35 @@ const ProfileSettingsPage: React.FC = () => {
           { value: "Female", label: "Female" },
         ],
       },
+      {
+        id: "avatarUrl",
+        label: "Profile Picture",
+        type: "file",
+      },
     ];
   }, [currentUser]);
 
-  const updateCurrentUser = async (updatedCurrentUser: User) => {
-    await CRUDLocalStorage.updateItemInList<User>("users", updatedCurrentUser);
-    setCurrentUser(updatedCurrentUser);
-    successAlert(`Updated User!`);
-  };
 
   const handleSubmitProfileInfo = async (data: any) => {
     setIsFormLoading(true);
     if (validateForm(data)) {
       const updatedUser: User = {
-        ...(currentUser as User),
+        ...currentUser!,
         ...data,
       };
       if (!_.isEqual(updatedUser, currentUser)) {
-        await updateCurrentUser(updatedUser);
+        await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
+        setCurrentUser(updatedUser);
+        successAlert(`Updated User!`);
       }
     }
     setIsFormLoading(false);
   };
 
-  const openProfilePicModal = () => {
-    setIsProfilePictureModalOpen(true);
-  };
-
-  const closeProfilePicModal = () => {
-    setIsProfilePictureModalOpen(false);
-  };
-
-  const handleProfilePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setIsProfilePicLoading(true);
-      const imageUrl: string = URL.createObjectURL(file);
-      const updatedUser: User = {
-        ...(currentUser as User),
-        avatarUrl: imageUrl,
-      };
-      await updateCurrentUser(updatedUser);
-      setIsProfilePicLoading(false);
-      closeProfilePicModal();
-    }
-  };
-
   document.title = "Account Settings";
 
   return (
-    <Box sx={{ display: "flex", backgroundColor: "white" }}>
       <Grid container direction="column" justifyContent="flex-start" alignItems="center" marginTop={5} mr={15}>
-        <Grid item>
           <GenericForm
             fields={fields}
             onSubmit={handleSubmitProfileInfo}
@@ -137,45 +111,7 @@ const ProfileSettingsPage: React.FC = () => {
             schema={schema}
             isLoading={isFormLoading}
           />
-        </Grid>
-        <Grid item>
-          <Button type="submit" onClick={openProfilePicModal}>
-            Change Profile Photo🖼️
-          </Button>
-        </Grid>
       </Grid>
-
-      <Modal
-        id="ProfilePictureChange"
-        open={isProfilePictureModalOpen}
-        onClose={closeProfilePicModal}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Box
-          sx={{
-            width: 400,
-            bgcolor: "background.paper",
-            p: 4,
-            borderRadius: 2,
-          }}
-        >
-          <Typography id="modal-title" variant="h6" gutterBottom sx={{ fontFamily: "Poppins" }}>
-            Change Profile Picture
-          </Typography>
-          {isProfilePicLoading ? (
-            <center>
-              <CircularProgress />
-            </center>
-          ) : (
-            <Input type="file" onChange={handleProfilePictureChange} sx={{ mt: 2, fontFamily: "Poppins" }} />
-          )}
-        </Box>
-      </Modal>
-    </Box>
   );
 };
 
