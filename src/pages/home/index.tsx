@@ -7,13 +7,15 @@ import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { UserContext } from "../../UserProvider";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import ajv from "../../ajvSettings";
-import { JSONSchemaType } from "ajv";
+import Ajv, { JSONSchemaType } from "ajv";
+import ajvErrors from "ajv-errors";
 import { DateTime } from "luxon";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import OverviewPanel from "./overviewPanel";
 import TransactionsTable from "../../components/UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
+const ajv = new Ajv({ allErrors: true, $data: true });
+ajvErrors(ajv);
 
 const fields = [
   {
@@ -173,7 +175,7 @@ const Home: React.FC = () => {
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
       <Container sx={{ mt: 3 }}>
         {isAdmin ? (
-          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" ml={10}  mt={-3}>
+          <Grid condtainer direction="column" justifyContent="center" alignItems="center" minHeight="100vh" ml={10}  mt={-3}>
             <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
               Welcome Back Admin {getUserFullName(currentUser!)}
             </Typography>
