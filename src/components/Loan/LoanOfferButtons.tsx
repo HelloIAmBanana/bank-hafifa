@@ -5,7 +5,9 @@ import { Loan } from "../../models/loan";
 import { successAlert } from "../../utils/swalAlerts";
 import { User } from "../../models/user";
 import { UserContext } from "../../UserProvider";
-import { useFetchLoansContext } from "./FetchLoansContext";
+import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
+import { Transaction } from "../../models/transactions";
+import { generateUniqueId, getUserFullName } from "../../utils/utils";
 
 interface LoanOfferButtonsProps {
   loan: Loan;
@@ -15,14 +17,13 @@ const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = ({ loan }) => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isRejectLoading, setIsRejectLoading] = useState(false);
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
-  const { fetchUserLoans } = useFetchLoansContext();
-
+  const { fetchLoans } = useFetchLoanContext();
 
   const rejectLoanOffer = async () => {
     setIsRejectLoading(true);
     await CRUDLocalStorage.deleteItemFromList<Loan>("loans", loan);
     successAlert("Loan Offer Rejected!");
-    await fetchUserLoans();
+    await fetchLoans();
   };
 
   const acceptLoanOffer = async () => {
@@ -37,10 +38,24 @@ const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = ({ loan }) => {
       status: "approved",
     };
 
+    const date = new Date().toISOString();
+
+    const newTransaction: Transaction = {
+      senderID: "!bank!",
+      date: date,
+      amount: loan.loanAmount,
+      reason: "Took a loan",
+      receiverID: currentUser!.id,
+      senderName: "Bank",
+      receiverName: getUserFullName(currentUser!),
+      id: generateUniqueId(),
+    };
+
+    await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
     await CRUDLocalStorage.updateItemInList<Loan>("loans", updatedLoan);
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
     setCurrentUser(updatedUser);
-    await fetchUserLoans();
+    await fetchLoans();
     setIsAcceptLoading(false);
   };
   return (

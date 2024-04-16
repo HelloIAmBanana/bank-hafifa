@@ -8,9 +8,9 @@ import { useEffect, useState } from "react";
 import LoadingScreen from "./components/Loader";
 import CRUDLocalStorage from "./CRUDLocalStorage";
 import { Loan } from "./models/loan";
-import { errorAlert, successAlert } from "./utils/swalAlerts";
+import { notificationAlert } from "./utils/swalAlerts";
 import { Notification, NotificationType } from "./models/notification";
-import { FetchLoansContextProvider } from "./components/Loan/FetchLoansContext";
+import { Deposit } from "./models/deposit";
 
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
@@ -21,15 +21,17 @@ function exctractPathFromAdminRoute(path: string) {
 const getNotification = (notification: NotificationType) => {
   switch (notification) {
     case "cardApproved":
-      return successAlert("Your card request was approved by an admin!");
+      return notificationAlert("Your card request was approved by an admin!");
     case "cardDeclined":
-      return errorAlert("Your card request was declined by an admin!");
+      return notificationAlert("Your card request was declined by an admin!");
     case "loanApproved":
-      return successAlert("Your loan request was approved by an admin!");
+      return notificationAlert("Your loan request was approved by an admin!");
     case "loanDeclined":
-      return errorAlert("Your loan request was declined by an admin!");
+      return notificationAlert("Your loan request was declined by an admin!");
     case "newTransaction":
-      return successAlert("You have received a new transaction while you were offline!");
+      return notificationAlert("You have received a new transaction while you were offline!");
+    case "newDepositOffer":
+      return notificationAlert("You have a new deposit offer!");
   }
 };
 
@@ -44,9 +46,7 @@ export const AuthHandlerRoute = () => {
     const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
 
     setCurrentUser(user);
-    
-    if(!currentUser) return;
-    
+    if (!currentUser) return;
     const userNotifications = notifications.filter((notification) => notification.accountID === currentUser.id);
 
     userNotifications.forEach(async (notification) => {
@@ -77,11 +77,32 @@ export const AuthHandlerRoute = () => {
     setBlockedUsers(blockedList);
   };
 
+  const updateExpiredDeposits = async () => {
+    const currentDate = new Date().toISOString();
+    const deposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("deposits");
+
+    const expiredDeposits = deposits.filter((deposit) => deposit.expireDate < currentDate);
+
+    for (const deposit of expiredDeposits) {
+      if (deposit.status === "Active") {
+        const updatedDeposit: Deposit = {
+          ...deposit,
+          status: "Withdrawable",
+        };
+        await CRUDLocalStorage.updateItemInList<Deposit>("deposits", updatedDeposit);
+      }
+      if (deposit.status === "Offered") {
+        await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
+      }
+    }
+  };
+
   useEffect(() => {
     storeCurrentUserAndNotifications();
     blockUnpayingUsers();
+    updateExpiredDeposits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]);
+  }, [location, currentUser]);
 
   const currentRoute = location.pathname;
   const isPublicRoute = ["/", "/signup"].includes(currentRoute);
@@ -110,8 +131,8 @@ export const AuthHandlerRoute = () => {
             <Navigate to="/home" />
           ) : (
             <>
-          <NavBar />
-              
+              <NavBar />
+
               <Grid container direction="column" justifyContent="flex-start" alignItems="center">
                 {blockedUsers.includes(currentUser.id) && (
                   <Modal open={true} sx={{ backgroundColor: "white" }}>
@@ -132,7 +153,6 @@ export const AuthHandlerRoute = () => {
                     </Grid>
                   </Modal>
                 )}
-                <FetchLoansContextProvider>
                 {currentUser.role === "admin" ? (
                   isAdminRoute ? (
                     <Outlet />
@@ -144,7 +164,6 @@ export const AuthHandlerRoute = () => {
                 ) : (
                   <Navigate to={exctractPathFromAdminRoute(location.pathname)} />
                 )}
-                </FetchLoansContextProvider>
               </Grid>
             </>
           )}

@@ -2,20 +2,17 @@ import { Box, Typography, Container, Grid, Paper, Modal, Skeleton, Button } from
 import AuthService from "../../AuthService";
 import { User } from "../../models/user";
 import { Transaction } from "../../models/transactions";
-import { createNewNotification, generateUniqueId, getItemInList, getUserFullName } from "../../utils/utils";
+import { createNewNotification, generateUniqueId, getUserFullName } from "../../utils/utils";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { UserContext } from "../../UserProvider";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import Ajv, { JSONSchemaType } from "ajv";
-import ajvErrors from "ajv-errors";
-import { DateTime } from "luxon";
+import { JSONSchemaType } from "ajv";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import OverviewPanel from "./overviewPanel";
 import TransactionsTable from "../../components/UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
+import { useFetchTransactionsContext } from "../../contexts/fetchTransactionsContext";
 
 const fields = [
   {
@@ -56,14 +53,12 @@ const schema: JSONSchemaType<Transaction> = {
     },
   },
 };
-const validateForm = ajv.compile(schema);
 
 const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const [isTableLoading, setIsTableLoading] = useState(false);
+  const { fetchTransactions, isLoading, transactions } = useFetchTransactionsContext();
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
   const navigate = useNavigate();
 
@@ -95,7 +90,7 @@ const Home: React.FC = () => {
   };
 
   const createNewTransaction = async (data: any) => {
-    const designatedUser = await getItemInList<User>("users", data.receiverID)
+    const designatedUser = await CRUDLocalStorage.getItemInList<User>("users", data.receiverID);
     const designatedUserName = getUserFullName(designatedUser!);
 
     const currentDateTime = new Date().toISOString();
@@ -114,7 +109,6 @@ const Home: React.FC = () => {
   };
 
   const handleSubmitTransaction = async (data: any) => {
-    if (!validateForm(data)) return;
 
     setUserOldBalance(currentUser!.balance);
 
@@ -128,7 +122,7 @@ const Home: React.FC = () => {
 
     setIsButtonLoading(true);
 
-    const receivingUser = await getItemInList<User>("users", data.receiverID);
+    const receivingUser = await CRUDLocalStorage.getItemInList<User>("users", data.receiverID);
 
     if (!receivingUser) {
       errorAlert("Entered ID is WRONG");
@@ -147,54 +141,41 @@ const Home: React.FC = () => {
     closePaymentModal();
   };
 
-  const fetchUserTransactions = async () => {
-    setIsTableLoading(true);
-    try {
-      const fetchedTransactions = await CRUDLocalStorage.getAsyncData<Transaction[]>("transactions");
-      const sortedTransactions = fetchedTransactions.sort((a, b) => {
-        return DateTime.fromISO(b.date).toMillis() - DateTime.fromISO(a.date).toMillis();
-      });
-      const userTransactions = sortedTransactions.filter(
-        (transaction) => transaction.senderID === currentUser!.id || transaction.receiverID === currentUser!.id
-      );
-      setTransactions(userTransactions);
-      setIsTableLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchUserTransactions();
+    fetchTransactions();
     // eslint-disable-next-line
   }, [currentUser]);
 
   document.title = "Home";
 
   return (
-    <Box sx={{ display: "flex", backgroundColor: "white" }}>
+    <Box sx={{ display: "flex" }}>
       <Container sx={{ mt: 3 }}>
         {isAdmin ? (
-          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" ml={10}  mt={-3}>
-            <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
-              Welcome Back Admin {getUserFullName(currentUser!)}
-            </Typography>
-            <Grid container direction="row" justifyContent="space-evenly" alignItems="center" spacing={1}>
+          <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" mt={-10}>
+            <Grid container direction="column" justifyContent="center" alignItems="center" ml={1}>
+              <Grid item>
+                <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
+                  Welcome Back Admin {getUserFullName(currentUser!)}
+                </Typography>
+              </Grid>
               <Grid item>
                 <Button type="submit" onClick={() => navigate("/admin/loans")}>
-                  Loans Management
+                  Loan Control
                 </Button>
               </Grid>
               <Grid item>
                 <Button type="submit" onClick={() => navigate("/admin/cards")}>
-                  Cards Management
+                  Card Control
                 </Button>
               </Grid>
               <Grid item>
-                <Button type="submit">Users Management</Button>
+                <Button type="submit" onClick={() => navigate("/admin/users")}>User Control</Button>
               </Grid>
               <Grid item>
-                <Button type="submit">Deposits Management</Button>
+                <Button type="submit" onClick={() => navigate("/admin/deposits")}>
+                  Deposit Control
+                </Button>
               </Grid>
             </Grid>
           </Grid>
@@ -210,7 +191,7 @@ const Home: React.FC = () => {
                 elevation={0}
               >
                 <OverviewPanel
-                  isTableLoading={isTableLoading}
+                  isTableLoading={isLoading}
                   userOldBalance={userOldBalance}
                   isButtonLoading={isButtonLoading}
                   openPaymentModal={openPaymentModal}
@@ -253,7 +234,7 @@ const Home: React.FC = () => {
                 <Typography variant="h4" gutterBottom fontWeight={"bold"} fontFamily={"Poppins"}>
                   Transactions
                 </Typography>
-                {isTableLoading ? (
+                {isLoading ? (
                   <Skeleton height={350} />
                 ) : (
                   <TransactionsTable transactions={transactions} userID={currentUser!.id} />

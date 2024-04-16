@@ -1,17 +1,13 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import GenericForm from "../../components/GenericForm/GenericForm";
-import Ajv, { JSONSchemaType } from "ajv";
 import { Box, Button, Input, Typography, Grid, Paper } from "@mui/material";
 import signupImage from "../../imgs/signupPage.svg";
-import ajvErrors from "ajv-errors";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { generateUniqueId } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { User } from "../../models/user";
-
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
+import { JSONSchemaType } from "ajv";
 
 const fields = [
   {
@@ -79,7 +75,7 @@ const schema: JSONSchemaType<User> = {
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
   },
-  required: ["id", "birthDate", "email", "firstName", "lastName", "password", "gender", "accountType"],
+  required: ["birthDate", "email", "firstName", "lastName", "password", "gender", "accountType"],
   additionalProperties: true,
   errorMessage: {
     properties: {
@@ -93,8 +89,6 @@ const schema: JSONSchemaType<User> = {
     },
   },
 };
-
-const validateForm = ajv.compile(schema);
 
 const SignUpPage: React.FC = () => {
   const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
@@ -123,7 +117,6 @@ const SignUpPage: React.FC = () => {
       avatarUrl: avatarImgURL,
       balance: 0,
     };
-    if (validateForm(newUser)) {
       setIsLoading(true);
 
       const isDuplicatedUser = await doesUserExist(newUser.email);
@@ -137,7 +130,6 @@ const SignUpPage: React.FC = () => {
       await CRUDLocalStorage.addItemToList<User>("users", newUser);
       successAlert("Account Created! Navigating to Signin Page...");
       navigate("/");
-    }
   };
 
   document.title = "Sign Up";

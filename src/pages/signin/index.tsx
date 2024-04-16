@@ -1,16 +1,12 @@
 import React, { useState } from "react";
-import Ajv, { JSONSchemaType } from "ajv";
 import loginImage from "../../imgs/loginPage.svg";
 import GenericForm from "../../components/GenericForm/GenericForm";
-import ajvErrors from "ajv-errors";
 import { User } from "../../models/user";
 import { useNavigate, NavLink } from "react-router-dom";
 import { validateLogin } from "./login";
 import { Typography, Box, Grid, Paper } from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-
-const ajv = new Ajv({ allErrors: true, $data: true });
-ajvErrors(ajv);
+import { JSONSchemaType } from "ajv";
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -22,8 +18,8 @@ const schema: JSONSchemaType<User> = {
     password: { type: "string", minLength: 6 },
     birthDate: { type: "string", minLength: 1 },
     avatarUrl: { type: "string" },
-    gender: { type: "string", enum: ["male", "female"] },
-    accountType: { type: "string", enum: ["business", "personal"] },
+    gender: { type: "string", enum: ["Male", "Female"] },
+    accountType: { type: "string", enum: ["Business", "Personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
   },
@@ -36,8 +32,6 @@ const schema: JSONSchemaType<User> = {
     },
   },
 };
-
-const validateForm = ajv.compile(schema);
 
 const fields = [
   {
@@ -72,11 +66,9 @@ const SignInPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const login = async (data: Record<string, any>) => {
-    if (validateForm(data)) {
-      const isRemembered = (data as User & { rememberMe: boolean }).rememberMe;
       setIsLoading(true);
 
-      const validUser = await validateLogin(data);
+      const validUser = await validateLogin(data.email,data.password);
 
       if (!validUser) {
         errorAlert("Wrong Credentials!");
@@ -84,10 +76,9 @@ const SignInPage: React.FC = () => {
         return;
       }
       
-      storeCurrentAuthToken(validUser.id, isRemembered);
+      storeCurrentAuthToken(validUser.id, data.rememberMe);
       successAlert("Signing in!");
       navigate("/home");
-    }
   };
 
   document.title = "Sign In";

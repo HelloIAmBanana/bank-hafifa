@@ -6,8 +6,8 @@ export type User = {
   email: string;
   password: string;
   avatarUrl: string;
-  gender: string;
-  accountType: string;
-  role: string;
+  gender: "Male" | "Female";
+  accountType: "Business" | "Personal";
+  role: "customer" | "admin";
   balance: number;
 };

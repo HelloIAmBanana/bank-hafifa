@@ -39,6 +39,19 @@ export function warningAlert(message:string){
 });
 }
 
+export function notificationAlert(message:string){
+  Swal.fire({
+  toast: true,
+  position: "top-right",
+  icon: "info",
+  color: "CornflowerBlue",
+  title: message,
+  showConfirmButton: false,
+  timer: 3750,
+  timerProgressBar: true,
+});
+}
+
 export function normalAlert(message:string){
   Swal.fire({
   toast: true,

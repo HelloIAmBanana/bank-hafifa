@@ -53,18 +53,19 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
   };
 
   const validateForm = (data: Record<string, any>) => {
-    validate(data);
+    const isValidated = validate(data);
     const formErrors = validate.errors;
     formErrors?.forEach((currentError) => {
       setError(currentError.instancePath.substring(1), {
         message: currentError.message,
       });
     });
+    return isValidated;
   };
 
   const internalHandleSubmit = async (data: Record<string, any>) => {
     const formattedData = formatFormData(data);
-    validateForm(formattedData);
+    if (!validateForm(formattedData)) return;
     onSubmit(formattedData);
   };
 

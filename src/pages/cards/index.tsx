@@ -18,6 +18,7 @@ import {
 import { UserContext } from "../../UserProvider";
 import { Card } from "../../models/card";
 import CreditCardsRow from "../../components/CreditCard/CreditCardsRow";
+import { useFetchCardsContext } from "../../contexts/fetchCardsContext";
 
 const calculateExpiredDate = (date: string) => {
   const year = Number(date.slice(0, 4));
@@ -28,26 +29,13 @@ const calculateExpiredDate = (date: string) => {
 
 const CardsPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
-  const [isCardsLoading, setIsCardsLoading] = useState(false);
   const [isCardCreationLoading, setIsCardCreationLoading] = useState(false);
-  const [cards, setCards] = useState<Card[]>([]);
   const [cardProvider, setCardProvider] = useState("Visa");
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
+  const { fetchCards, isLoading, cards } = useFetchCardsContext();
 
   const handleCardProviderChange = (event: { target: { value: string } }) => {
     setCardProvider(event.target.value);
-  };
-
-  const fetchUserCards = async () => {
-    setIsCardsLoading(true);
-    try {
-      const fetchedCards = await CRUDLocalStorage.getAsyncData<Card[]>("cards");
-      const userCards = fetchedCards.filter((card) => card.accountID === currentUser!.id);
-      setCards(userCards);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-    setIsCardsLoading(false);
   };
 
   const pendingCards = useMemo(() => {
@@ -67,13 +55,14 @@ const CardsPage: React.FC = () => {
   };
 
   const closeCardModal = () => {
+    if (isCardCreationLoading) return;
     setIsNewCardModalOpen(false);
   };
 
   const cancelCard = async (card: Card) => {
     await CRUDLocalStorage.deleteItemFromList<Card>("cards", card);
     successAlert("Card Canceled!");
-    await fetchUserCards();
+    await fetchCards();
   };
 
   const handleCardModalSubmit = async () => {
@@ -95,13 +84,13 @@ const CardsPage: React.FC = () => {
 
     await CRUDLocalStorage.addItemToList<Card>("cards", newCard);
     successAlert("New Card Request Was Created!");
-    closeCardModal();
-    fetchUserCards();
     setIsCardCreationLoading(false);
+    closeCardModal();
+    await fetchCards();
   };
 
   useEffect(() => {
-    fetchUserCards();
+    fetchCards();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
@@ -127,7 +116,7 @@ const CardsPage: React.FC = () => {
                   </Grid>
                 </Grid>
 
-                {isCardsLoading ? (
+                {isLoading ? (
                   <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
                     <Skeleton height={"12rem"} width={window.innerWidth / 2} />
                   </Grid>
@@ -165,7 +154,6 @@ const CardsPage: React.FC = () => {
               Select Card Provider
             </Typography>
             <Select
-              variant="outlined"
               value={cardProvider}
               onChange={handleCardProviderChange}
               sx={{ mt: 2, fontFamily: "Poppins", width: "100%" }}

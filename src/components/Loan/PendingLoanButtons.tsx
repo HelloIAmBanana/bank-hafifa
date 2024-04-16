@@ -4,10 +4,10 @@ import { Box, Button, CircularProgress, Grid, Modal } from "@mui/material";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { successAlert } from "../../utils/swalAlerts";
 import GenericForm from "../GenericForm/GenericForm";
-import { createNewNotification } from "../../utils/utils";
-import { useFetchLoansContext } from "./FetchLoansContext";
-import ajv from "../../ajvSettings";
 import { JSONSchemaType } from "ajv";
+import { createNewNotification } from "../../utils/utils";
+import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
+
 
 interface PendingLoanButtonsProps {
   loan: Loan;
@@ -25,7 +25,7 @@ const schema: JSONSchemaType<Loan> = {
     status: { type: "string" },
     expireDate: { type: "string", minLength: 1 },
   },
-  required: [],
+  required: ["expireDate","interest"],
   additionalProperties: true,
   errorMessage: {
     properties: {
@@ -50,13 +50,12 @@ const fields = [
   },
 ];
 
-const validateForm = ajv.compile(schema);
 
 const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
   const [isRejectLoading, setIsRejectLoading] = useState(false);
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
-  const { fetchUserLoans } = useFetchLoansContext();
+  const { fetchLoans } = useFetchLoanContext();
 
   const rejectLoan = async () => {
     setIsRejectLoading(true);
@@ -67,9 +66,10 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
     };
 
     await createNewNotification(loan.accountID,"loanDeclined");
+
     await CRUDLocalStorage.updateItemInList<Loan>("loans", newLoan);
     successAlert("Loan Rejected!");
-    await fetchUserLoans();
+    await fetchLoans();
   };
 
   const acceptLoanRequest = async (data: any) => {
@@ -82,7 +82,6 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
       expireDate: expiryDate
     };
 
-    if (!validateForm(newLoan)) return;
 
     setIsAcceptLoading(true);
 
@@ -90,7 +89,7 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
 
     await CRUDLocalStorage.updateItemInList<Loan>("loans", newLoan);
     successAlert("Loan Offered!");
-    await fetchUserLoans();
+    await fetchLoans();
   };
 
   const openLoanApprovalModal = () => {

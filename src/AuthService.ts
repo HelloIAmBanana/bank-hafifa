@@ -1,5 +1,5 @@
 import { User } from "./models/user";
-import { getItemInList } from "./utils/utils";
+import CRUDLocalStorage from "./CRUDLocalStorage";
 
 export default class AuthService {
   static getRememberedToken() {
@@ -17,7 +17,7 @@ export default class AuthService {
 
     if (!authToken) return null;
 
-    return (await getItemInList<User>("users", authToken))!;
+    return (await CRUDLocalStorage.getItemInList<User>("users", authToken))!;
   }
 
   static isUserAuthenticated() {

@@ -5,11 +5,10 @@ import { generateUniqueId, getUserFullName } from "../../utils/utils";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { Loan } from "../../models/loan";
 import { successAlert } from "../../utils/swalAlerts";
+import { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import LoansRow from "../../components/Loan/LoansRow";
-import { useFetchLoansContext } from "../../components/Loan/FetchLoansContext";
-import ajv from "../../ajvSettings";
-import { JSONSchemaType } from "ajv";
+import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
 
 const schema: JSONSchemaType<Loan> = {
   type: "object",
@@ -32,8 +31,6 @@ const schema: JSONSchemaType<Loan> = {
   },
 };
 
-const validateForm = ajv.compile(schema);
-
 const fields = [
   {
     id: "loanAmount",
@@ -47,7 +44,7 @@ const LoansPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
   const [isNewLoanModalOpen, setIsNewLoanModalOpen] = useState(false);
   const [isCreatingNewLoan, setIsCreatingNewLoan] = useState(false);
-  const { fetchUserLoans, isLoansLoading, loans } = useFetchLoansContext();
+  const { fetchLoans, isLoading: isLoansLoading, loans } = useFetchLoanContext();
 
   const pendingLoans = useMemo(() => {
     return loans.filter((loan) => loan.status === "pending");
@@ -77,13 +74,11 @@ const LoansPage: React.FC = () => {
       paidBack: 0,
     };
 
-    if (!validateForm(newLoan)) return;
-
     setIsCreatingNewLoan(true);
     await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);
     successAlert("Loan was created!");
     closeLoanModal();
-    await fetchUserLoans();
+    await fetchLoans();
     setIsCreatingNewLoan(false);
   };
 
@@ -99,7 +94,7 @@ const LoansPage: React.FC = () => {
   document.title = "Loans";
 
   useEffect(() => {
-    fetchUserLoans();
+    fetchLoans();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 

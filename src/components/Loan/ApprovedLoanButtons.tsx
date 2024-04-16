@@ -2,9 +2,11 @@ import React, { ChangeEvent, useContext, useState } from "react";
 import { Loan } from "../../models/loan";
 import { Box, Button, CircularProgress, Grid, Modal, TextField, Typography } from "@mui/material";
 import { UserContext } from "../../UserProvider";
-import { useFetchLoansContext } from "./FetchLoansContext";
 import { User } from "../../models/user";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
+import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
+import { Transaction } from "../../models/transactions";
+import { generateUniqueId, getUserFullName } from "../../utils/utils";
 
 interface ApprovedLoansButtonsProps {
   loan: Loan;
@@ -15,7 +17,7 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState(0);
-  const { fetchUserLoans } = useFetchLoansContext();
+  const { fetchLoans } = useFetchLoanContext();
 
   const openLoanApprovalModal = () => {
     setIsLoanApprovalModalOpen(true);
@@ -26,16 +28,16 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
   };
 
   const handlePayBackLoan = async () => {
-    if (currentUser!.balance < depositAmount) return;
-
+    if (!currentUser || currentUser.balance < depositAmount) return;
+    const date = new Date().toISOString();
     const totalLoanAmount = loan.loanAmount + loan.loanAmount * (loan.interest / 100);
     const neededAmount = Math.ceil(totalLoanAmount - loan.paidBack);
     setIsDepositing(true);
 
     const amountToDeduct = depositAmount >= neededAmount ? neededAmount : depositAmount;
     const updatedUser: User = {
-      ...currentUser!,
-      balance: currentUser!.balance - amountToDeduct,
+      ...currentUser,
+      balance: currentUser.balance - amountToDeduct,
     };
     const updatedLoan: Loan = {
       ...loan,
@@ -46,11 +48,23 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
       await CRUDLocalStorage.deleteItemFromList<Loan>("loans", loan);
     }
 
+    const newTransaction: Transaction = {
+      senderID: currentUser.id,
+      date: date,
+      amount: -amountToDeduct,
+      reason: "Repaid a loan",
+      receiverID: "!bank!",
+      senderName: getUserFullName(currentUser),
+      receiverName: "Bank",
+      id: generateUniqueId(),
+    };
+
+    await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
     await CRUDLocalStorage.updateItemInList<Loan>("loans", updatedLoan);
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
     setCurrentUser(updatedUser);
 
-    await fetchUserLoans();
+    await fetchLoans();
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

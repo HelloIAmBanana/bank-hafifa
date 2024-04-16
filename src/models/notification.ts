@@ -4,4 +4,4 @@ export type Notification = {
     type: NotificationType;
   };
   
-export type NotificationType="cardDeclined"|"cardApproved"|"loanDeclined"|"loanApproved"|"newTransaction";
+export type NotificationType="cardDeclined"|"cardApproved"|"loanDeclined"|"loanApproved"|"newTransaction"|"newDepositOffer"|"DepositWithdrawn";
