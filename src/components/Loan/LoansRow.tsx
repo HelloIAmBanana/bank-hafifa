@@ -27,7 +27,7 @@ const LoansRow: React.FC<LoanRowsProps> = ({ loans, title }) => {
       >
         {loans.map((loan, index) => (
           <Grid item key={index} mr={2}>
-            <LoanBox loan={loan}/>
+            <LoanBox loan={loan} />
           </Grid>
         ))}
       </Grid>

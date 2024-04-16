@@ -194,7 +194,6 @@ const Home: React.FC = () => {
                   isTableLoading={isLoading}
                   userOldBalance={userOldBalance}
                   isButtonLoading={isButtonLoading}
-                  currentUser={currentUser!}
                   openPaymentModal={openPaymentModal}
                 />
               </Paper>

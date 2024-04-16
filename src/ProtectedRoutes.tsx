@@ -125,6 +125,7 @@ export const AuthHandlerRoute = () => {
       {!currentUser ? (
         <LoadingScreen />
       ) : (
+        
         <Box sx={{ display: "flex", backgroundColor: "white" }}>
           {isPublicRoute ? (
             <Navigate to="/home" />

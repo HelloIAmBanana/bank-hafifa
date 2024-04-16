@@ -102,7 +102,6 @@ const AdminCardsPage: React.FC = () => {
                                   card={card}
                                   approveCard={approveCard}
                                   rejectCard={rejectCard}
-                                  isUserAdmin={true}
                                 />
                               </Grid>
                             </Grid>

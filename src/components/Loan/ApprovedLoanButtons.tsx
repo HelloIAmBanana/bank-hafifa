@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { ChangeEvent, useContext, useState } from "react";
 import { Loan } from "../../models/loan";
 import { Box, Button, CircularProgress, Grid, Modal, TextField, Typography } from "@mui/material";
 import { UserContext } from "../../UserProvider";
@@ -66,8 +66,18 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
 
     await fetchLoans();
   };
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const neededAmount = Math.ceil(
+      loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack
+    );
+    const value = +e.target.value;
+    if (value > neededAmount) return;
+    setDepositAmount(value);
+  };
+
   return (
-    <Grid container direction="row" justifyContent="space-between" alignItems="center">
+    <Grid container direction="row" justifyContent="center" alignItems="center">
       <Grid item>
         <Button
           sx={{
@@ -110,14 +120,9 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
               type="number"
               placeholder="Enter Amount"
               value={depositAmount}
-              InputProps={{
-                inputProps: {
-                  max: Math.ceil(loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack),
-                  min: 1,
-                },
-              }}
-              onChange={(e) => setDepositAmount(+e.target.value)}
-              sx={{ mt: 2, width: "100%", fontFamily: "Poppins" }}
+              inputProps={{ min: 1 }}
+              onChange={handleChange}
+              sx={{ mt: 2, width: "50%", fontFamily: "Poppins" }}
             />
 
             <Button type="submit" onClick={handlePayBackLoan} disabled={isDepositing} sx={{ width: "227.5px" }}>

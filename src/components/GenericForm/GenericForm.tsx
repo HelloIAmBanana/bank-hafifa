@@ -1,10 +1,10 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Box, CircularProgress, MenuItem, FormControl, FormHelperText, Button, Typography } from "@mui/material";
-import Ajv, { Schema } from "ajv";
-import ajvErrors from "ajv-errors";
 import fieldsRegistry from "./fieldsRegistry";
 import { Field } from "../../models/field";
+import Ajv, { Schema } from "ajv";
+import ajvErrors from "ajv-errors";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);

@@ -99,11 +99,10 @@ const LoansPage: React.FC = () => {
   }, [currentUser]);
 
   return (
-    <Grid container justifyContent="flex-start">
-      <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>
+    <Grid container justifyContent="flex-start"  sx={{overflowX:"hidden"}}>
+      <Box sx={{ ml: 15 }}>
         <Container sx={{ mt: 2 }}>
           <Grid container spacing={5}>
-            <Box sx={{ flexGrow: 1 }}>
               <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start">
                 <Grid container direction="row" justifyContent="space-between" alignItems="center" mt={5}>
                   <Grid item xs={12} justifyContent="flex-start">
@@ -124,14 +123,13 @@ const LoansPage: React.FC = () => {
                   </Grid>
                 ) : (
                   <Box>
-                    <LoansRow loans={approvedLoans} title="Approved" />
-                    <LoansRow loans={offeredLoans} title="Offered" />
-                    <LoansRow loans={pendingLoans} title="Pending" />
-                    <LoansRow loans={rejectedLoans} title="Rejected" />
+                    <LoansRow loans={approvedLoans} title="Approved"/>
+                    <LoansRow loans={offeredLoans} title="Offered"/>
+                    <LoansRow loans={pendingLoans} title="Pending"/>
+                    <LoansRow loans={rejectedLoans} title="Rejected"/>
                   </Box>
                 )}
               </Grid>
-            </Box>
           </Grid>
         </Container>
       </Box>

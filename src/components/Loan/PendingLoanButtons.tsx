@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Loan } from "../../models/loan";
-import { Box, Button, Grid, Modal } from "@mui/material";
+import { Box, Button, CircularProgress, Grid, Modal } from "@mui/material";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { successAlert } from "../../utils/swalAlerts";
 import GenericForm from "../GenericForm/GenericForm";
@@ -12,6 +12,7 @@ import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
 interface PendingLoanButtonsProps {
   loan: Loan;
 }
+
 const schema: JSONSchemaType<Loan> = {
   type: "object",
   properties: {
@@ -37,9 +38,9 @@ const schema: JSONSchemaType<Loan> = {
 const fields = [
   {
     id: "expireDate",
-    label: "Exp Time",
+    label: "Expiry Date",
     type: "datetime-local",
-    placeholder: "Enter Loan Expire Time",
+    placeholder: "Enter Loan Expire Date",
   },
   {
     id: "interest",
@@ -125,6 +126,8 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
             fontFamily: "Poppins",
             color: "white",
             fontSize: 18,
+            height:"43.5px",
+            width:"82px",
             mb: 3,
             "&:hover": {
               backgroundColor: "darkred",
@@ -133,7 +136,7 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
           disabled={isRejectLoading}
           onClick={() => rejectLoan()}
         >
-          Reject
+          {isRejectLoading?<CircularProgress size={25} sx={{color:"white"}}/>:"Reject"}
         </Button>
       </Grid>
       <Modal
