@@ -21,6 +21,8 @@ export function FetchCardsProvider({ children }: React.PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const [cards, setCards] = useState<Card[]>([]);
 
+  const spectatingToken = sessionStorage.getItem("spectatingToken");
+
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);
   }, [currentUser]);
@@ -28,12 +30,15 @@ export function FetchCardsProvider({ children }: React.PropsWithChildren) {
   const fetchCards = async () => {
     setIsLoading(true);
     try {
+
       const fetchedCards = await CRUDLocalStorage.getAsyncData<Card[]>("cards");
-      const currentCards = isAdmin
+      const currentCards = spectatingToken
+        ? fetchedCards.filter((card) => card.accountID === spectatingToken)
+        : isAdmin
         ? fetchedCards
         : fetchedCards.filter((card) => card.accountID === currentUser!.id);
-
-        setCards(currentCards);
+console.log(fetchedCards)
+      setCards(currentCards);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
