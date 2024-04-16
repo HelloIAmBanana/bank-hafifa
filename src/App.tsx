@@ -16,6 +16,8 @@ import { FetchLoansProvider } from "./contexts/fetchLoansContext";
 import { FetchDepositsProvider } from "./contexts/fetchDepositsContext";
 import { FetchTransactionsProvider } from "./contexts/fetchTransactionsContext";
 import { FetchCardsProvider } from "./contexts/fetchCardsContext";
+import { FetchUsersProvider } from "./contexts/fetchUserContext";
+import AdminUsersPage from "./pages/adminPages/users";
 
 function App() {
   return (
@@ -39,6 +41,7 @@ function App() {
             <Route path="/admin/cards" element={<FetchCardsProvider><AdminCardsPage /></FetchCardsProvider>} />
             <Route path="/admin/loans" element={<FetchLoansProvider><AdminLoansPage /></FetchLoansProvider>} />
             <Route path="/admin/deposits" element={<FetchDepositsProvider><AdminDepositsPage /></FetchDepositsProvider>} />
+            <Route path="/admin/users" element={<FetchUsersProvider><AdminUsersPage /></FetchUsersProvider>} />
         </Route>
       </Routes>
     </Router>

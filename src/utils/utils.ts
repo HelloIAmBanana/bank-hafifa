@@ -34,3 +34,8 @@ export async function createNewNotification(accountID: string, type: Notificatio
 
   await CRUDLocalStorage.addItemToList<Notification>("notifications", newNotification);
 }
+
+export async function doesUserExist(userEmail: string) {
+  const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
+  return Boolean(users.find((user) => user.email === userEmail));
+}
