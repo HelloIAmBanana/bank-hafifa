@@ -1,7 +1,6 @@
 import * as React from "react";
-import { useState, useEffect, useContext } from "react";
+import { useState } from "react";
 import { Grid, Box, Container, Typography, Skeleton, Button, Modal } from "@mui/material";
-import { UserContext } from "../../../UserProvider";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { errorAlert, successAlert } from "../../../utils/swalAlerts";
 import { generateUniqueId, getUserFullName, createNewNotification } from "../../../utils/utils";
@@ -59,10 +58,9 @@ const fields = [
 ];
 
 const AdminDepositsPage: React.FC = () => {
-  const [currentUser] = useContext(UserContext);
   const [isCreatingNewDeposit, setIsCreatingNewDeposit] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const { fetchDeposits, isLoading, deposits } = useFetchDepositsContext();
+  const { isLoading, deposits } = useFetchDepositsContext();
 
   const closeDepositModal = () => {
     if (isCreatingNewDeposit) return;
@@ -98,13 +96,7 @@ const AdminDepositsPage: React.FC = () => {
     createNewNotification(data.accountID, "newDepositOffer");
     successAlert("Deposit was offered!");
     closeDepositModal();
-    await fetchDeposits();
   };
-
-  useEffect(() => {
-    fetchDeposits();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser]);
 
   document.title = "Deposits Management";
 

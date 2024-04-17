@@ -5,12 +5,11 @@ import { UserContext } from "../../../UserProvider";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 import { useFetchUsersContext } from "../../../contexts/fetchUserContext";
-import * as XLSX from "xlsx";
 import UsersTable from "../../../components/UserManangement/UsersTable";
 import GenericForm from "../../../components/GenericForm/GenericForm";
 import { JSONSchemaType } from "ajv";
 import { User } from "../../../models/user";
-import { doesUserExist, generateUniqueId } from "../../../utils/utils";
+import { doesUserExist, exportToExcel, generateUniqueId } from "../../../utils/utils";
 import { errorAlert, successAlert } from "../../../utils/swalAlerts";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 
@@ -72,6 +71,17 @@ const fields = [
       { value: "customer", label: "Customer" },
     ],
   },
+  {
+    id: "balance",
+    label: "Balance",
+    type: "number",
+    initValue:0,
+  },
+  {
+    id: "avatarUrl",
+    label: "Profile Picture",
+    type: "file",
+  },
 ];
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -88,7 +98,7 @@ const schema: JSONSchemaType<User> = {
     role: { type: "string", enum: ["admin", "customer"], minLength: 1  },
     balance: { type: "number" },
   },
-  required: ["birthDate", "email", "firstName", "lastName", "password", "gender", "accountType", "role"],
+  required: ["birthDate", "email", "firstName", "lastName", "password", "gender", "accountType", "role","balance"],
   additionalProperties: true,
   errorMessage: {
     properties: {
@@ -100,7 +110,7 @@ const schema: JSONSchemaType<User> = {
       gender: "Please Select Gender",
       accountType: "Please Select Account Type",
       role: "Please Select Account Role",
-
+      balance:"Please Enter A Number Larger Than 0"
     },
   },
 };
@@ -110,14 +120,6 @@ const AdminUsersPage: React.FC = () => {
   const { fetchUsers, users } = useFetchUsersContext();
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isUserCreationModalOpen, setIsUserCreationModalOpen] = useState(false);
-
-  const exportToExcel = () => {
-    const fileName = "users.xlsx";
-    const ws = XLSX.utils.json_to_sheet(users);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Users");
-    XLSX.writeFile(wb, fileName);
-  };
 
   const closeUserCreationModal = () => {
     if (isCreatingUser) return;
@@ -129,7 +131,6 @@ const AdminUsersPage: React.FC = () => {
       ...data,
       id: generateUniqueId(),
       email: data.email.toLowerCase(),
-      balance: 0,
     };
 
     setIsCreatingUser(true);
@@ -172,7 +173,7 @@ const AdminUsersPage: React.FC = () => {
                 </Grid>
                 <Grid container direction="row" justifyContent="flex-start" alignItems="center" columnSpacing={2}>
                   <Grid item>
-                    <Button type="submit" onClick={exportToExcel}>
+                    <Button type="submit" onClick={()=>exportToExcel<User>("users",users)}>
                       Export to Excel
                     </Button>
                   </Grid>
@@ -197,18 +198,21 @@ const AdminUsersPage: React.FC = () => {
       <Modal
         open={isUserCreationModalOpen}
         onClose={closeUserCreationModal}
+
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          overflowY:"auto",
         }}
       >
         <Box
           sx={{
             width: 360,
             bgcolor: "white",
-            p: 4,
             borderRadius: 5,
+            paddingLeft:5,
+            paddingRight:5,
           }}
         >
           <center>

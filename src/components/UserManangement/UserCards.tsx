@@ -59,8 +59,9 @@ const UserCardsModal: React.FC<UserCardsModalProps> = ({ isOpen, closeModal, use
       <Box
         sx={{
           bgcolor: "white",
-          p: 4,
           borderRadius: 5,
+          paddingLeft:5,
+          paddingRight:5,
         }}
       >
         <Grid container justifyContent="flex-start">

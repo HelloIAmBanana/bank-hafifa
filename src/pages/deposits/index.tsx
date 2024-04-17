@@ -6,7 +6,7 @@ import { useFetchDepositsContext } from "../../contexts/fetchDepositsContext";
 
 const DepositsPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
-  const { fetchDeposits, isLoading, deposits } = useFetchDepositsContext();
+  const { isLoading, deposits } = useFetchDepositsContext();
 
   const activeDeposits = useMemo(() => {
     return deposits.filter((deposit) => deposit.status === "Active");
@@ -21,11 +21,6 @@ const DepositsPage: React.FC = () => {
   }, [deposits]);
 
   document.title = "Deposits";
-
-  useEffect(() => {
-    fetchDeposits();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser]);
 
   return (
     <Grid container justifyContent="flex-start">

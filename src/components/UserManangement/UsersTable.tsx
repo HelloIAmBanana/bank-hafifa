@@ -1,13 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useEffect, useContext } from "react";
-import { Grid, Box, Container, Typography, Skeleton, Button, Menu, MenuItem} from "@mui/material";
+import { Grid, Box, Container, Typography, Skeleton, Button, Menu, MenuItem, CircularProgress } from "@mui/material";
 import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
-import { ColDef, RowNode } from "@ag-grid-community/core";
+import { ColDef, IRowNode, RowNode, SelectionChangedEvent } from "@ag-grid-community/core";
 import { useFetchUsersContext } from "../../contexts/fetchUserContext";
 import { UserContext } from "../../UserProvider";
-import { capitalizeFirstLetter, formatIsoStringToDate} from "../../utils/utils";
+import { capitalizeFirstLetter, formatIsoStringToDate } from "../../utils/utils";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { User } from "../../models/user";
 import _ from "lodash";
@@ -27,13 +27,15 @@ const UsersTable: React.FC = () => {
   const [isUserLoansModalOpen, setIsUserLoansModalOpen] = useState(false);
   const [isUserCardsModalOpen, setIsUserCardsModalOpen] = useState(false);
   const [isUserDepositsModalOpen, setIsUserDepositsModalOpen] = useState(false);
-
+  const [isContextMenuDeleting, setIsContextMenuDeleting] = useState(false);
+  const [isDeletingRow, setIsDeletingRow] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
     mouseX: number;
     mouseY: number;
   } | null>(null);
 
   const handleContextMenu = (event: React.MouseEvent) => {
+    if (isContextMenuDeleting) return;
     event.preventDefault();
     setContextMenu(
       contextMenu === null
@@ -46,6 +48,7 @@ const UsersTable: React.FC = () => {
   };
 
   const handleClose = () => {
+    if (isContextMenuDeleting) return;
     setContextMenu(null);
   };
 
@@ -90,7 +93,6 @@ const UsersTable: React.FC = () => {
       {
         field: "firstName",
         headerName: "First Name",
-        maxWidth: 150,
         cellRenderer: (params: any): JSX.Element => {
           return <Typography fontFamily={"Poppins"}>{capitalizeFirstLetter(params.data.firstName)}</Typography>;
         },
@@ -98,15 +100,12 @@ const UsersTable: React.FC = () => {
       {
         field: "lastName",
         headerName: "Last Name",
-        maxWidth: 150,
         cellRenderer: (params: any): JSX.Element => {
           return <Typography fontFamily={"Poppins"}>{capitalizeFirstLetter(params.data.lastName)}</Typography>;
         },
       },
       {
         field: "email",
-        initialWidth: 150,
-        flex: 1,
         cellRenderer: (params: any): JSX.Element => {
           return <Typography fontFamily={"Poppins"}>{params.data.email}</Typography>;
         },
@@ -114,7 +113,8 @@ const UsersTable: React.FC = () => {
       {
         field: "birthDate",
         headerName: "Birthday",
-        maxWidth: 150,
+        initialWidth: 150,
+
         filter: "agDateColumnFilter",
         cellRenderer: (params: any): JSX.Element => {
           return (
@@ -127,22 +127,21 @@ const UsersTable: React.FC = () => {
       },
       {
         field: "gender",
-        maxWidth: 150,
+        initialWidth: 150,
         cellRenderer: (params: any): JSX.Element => {
           return <Typography fontFamily={"Poppins"}>{params.data.gender}</Typography>;
         },
       },
       {
         field: "balance",
-        initialWidth: 150,
-        flex: 1,
         cellRenderer: (params: any): JSX.Element => {
           return <Typography fontFamily={"Poppins"}>{params.data.balance.toLocaleString()}$</Typography>;
         },
       },
       {
         field: "role",
-        flex: 1,
+        initialWidth: 150,
+
         cellRenderer: (params: any): JSX.Element => {
           return <Typography fontFamily={"Poppins"}>{capitalizeFirstLetter(params.data.role)}</Typography>;
         },
@@ -159,39 +158,41 @@ const UsersTable: React.FC = () => {
     };
   }, []);
 
-  const handleSelectionChanged = () => {
-    const selectedNodes = gridApi?.getSelectedNodes();
-    setSelectedRows(selectedNodes.map((node: RowNode) => node.data));
-  };
+  const onSelectionChanged = useCallback((event: SelectionChangedEvent) => {
+    const selectedNodes = event.api.getSelectedNodes();
+    setSelectedRows(selectedNodes.map((node: IRowNode<any>) => node as RowNode<any>).map((node) => node.data));
+  }, []);
 
   const onCellMouseOver = (params: any) => {
     const hoveredRow: User = params.data;
-    setHoveredUser(hoveredRow); // 0
-
-    sessionStorage.setItem("spectatingToken", hoveredRow.id);
+    setHoveredUser(hoveredRow);
   };
 
-  const deleteUser = async (user: User) => {
+  const contextMenuDeleteUser = async (user: User) => {
     if (user.id === currentUser!.id) return;
+    setIsContextMenuDeleting(true);
     await CRUDLocalStorage.deleteItemFromList<User>("users", user);
+    await fetchUsers();
     successAlert(`Deleted User`);
+    setIsContextMenuDeleting(false);
   };
 
   const handleDeleteUsersButtonClicked = async () => {
+    setIsDeletingRow(true);
     selectedRows.forEach(async (row) => {
       const user = await CRUDLocalStorage.getItemInList<User>("users", row.id);
       if (user!.id === currentUser!.id) return;
       await CRUDLocalStorage.deleteItemFromList<User>("users", user!);
-      successAlert(`Deleted Users`);
-
     });
+    await fetchUsers();
+    setIsDeletingRow(false);
+    successAlert(`Deleted Users`);
   };
 
   let gridApi: any;
 
   const onGridReady = (params: any) => {
     gridApi = params.api;
-    gridApi.addEventListener("selectionChanged", handleSelectionChanged);
     gridApi.addEventListener("cellMouseOver", onCellMouseOver);
   };
 
@@ -203,9 +204,9 @@ const UsersTable: React.FC = () => {
     };
     if (!_.isEqual(updatedUser, currentUser)) {
       await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-      
+
       await fetchUsers();
-      
+
       successAlert(`Updated User!`);
       if (hoveredUser.id === currentUser!.id) {
         setCurrentUser(updatedUser);
@@ -234,7 +235,7 @@ const UsersTable: React.FC = () => {
                 <Grid container mt={2}>
                   <Box sx={{ width: "100%" }}>
                     <div onContextMenu={handleContextMenu}>
-                      <Box className="ag-theme-quartz" style={{ width: "100%" }} mt={2}>
+                      <Box className="ag-user-management" style={{ width: "100%" }} mt={2}>
                         <AgGridReact
                           rowData={users}
                           columnDefs={colDefs}
@@ -247,13 +248,14 @@ const UsersTable: React.FC = () => {
                           defaultColDef={defaultColDef}
                           onGridReady={onGridReady}
                           rowSelection="multiple"
+                          onSelectionChanged={onSelectionChanged}
                         />
                       </Box>
                     </div>
                   </Box>
                   {selectedRows.length > 0 && (
-                    <Button type="submit" onClick={handleDeleteUsersButtonClicked}>
-                      Delete Selected Users
+                    <Button type="submit" disabled={isDeletingRow} onClick={handleDeleteUsersButtonClicked}>
+                      {isDeletingRow ? <CircularProgress /> : "Delete Selected Users"}
                     </Button>
                   )}
                   <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
@@ -266,6 +268,7 @@ const UsersTable: React.FC = () => {
                       }
                     >
                       <MenuItem
+                        disabled={isContextMenuDeleting}
                         onClick={() => {
                           setIsUpdateUserModalOpen(true);
                           handleClose();
@@ -274,10 +277,17 @@ const UsersTable: React.FC = () => {
                         <Typography fontFamily={"Poppins"}>Edit User</Typography>
                       </MenuItem>
 
-                      <MenuItem onClick={() => deleteUser(hoveredUser!)} divider={true}>
-                        <Typography fontFamily={"Poppins"}>Delete User</Typography>
+                      <MenuItem
+                        onClick={() => contextMenuDeleteUser(hoveredUser!)}
+                        divider={true}
+                        disabled={isContextMenuDeleting}
+                      >
+                        <Typography fontFamily={"Poppins"}>
+                          {isContextMenuDeleting ? <CircularProgress size={15} /> : "Delete User"}
+                        </Typography>
                       </MenuItem>
                       <MenuItem
+                        disabled={isContextMenuDeleting}
                         onClick={() => {
                           setIsUserLoansModalOpen(true);
                           handleClose();
@@ -286,6 +296,7 @@ const UsersTable: React.FC = () => {
                         <Typography fontFamily={"Poppins"}>User Loans</Typography>
                       </MenuItem>
                       <MenuItem
+                        disabled={isContextMenuDeleting}
                         onClick={() => {
                           setIsUserCardsModalOpen(true);
                           handleClose();
@@ -294,6 +305,7 @@ const UsersTable: React.FC = () => {
                         <Typography fontFamily={"Poppins"}>User Cards</Typography>
                       </MenuItem>
                       <MenuItem
+                        disabled={isContextMenuDeleting}
                         onClick={() => {
                           setIsUserDepositsModalOpen(true);
                           handleClose();

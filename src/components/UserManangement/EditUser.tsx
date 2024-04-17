@@ -108,6 +108,16 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user,isLoading,isOpen,upd
       ],
       initValue: `${user.role}`,
     },
+    {
+      id: "balance",
+      label: "Balance",
+      type: "number",
+    },
+    {
+      id: "avatarUrl",
+      label: "Profile Picture",
+      type: "file",
+    },
   ];
   return (
     <Modal
@@ -123,8 +133,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user,isLoading,isOpen,upd
         sx={{
           width: 360,
           bgcolor: "white",
-          p: 4,
           borderRadius: 5,
+          paddingLeft:5,
+          paddingRight:5,
         }}
       >
         <center>

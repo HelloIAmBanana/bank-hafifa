@@ -18,13 +18,11 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
 
   const [isAcceptingDeposit, setIsAcceptingDeposit] = useState(false);
-  const { fetchDeposits } = useFetchDepositsContext();
 
   const rejectDeposit = async () => {
     setIsRejectingDeposit(true);
     await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     successAlert("Deposit was rejected!");
-    await fetchDeposits();
   };
 
   const acceptDeposit = async () => {
@@ -58,7 +56,6 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
     setCurrentUser(updatedUser);
     await CRUDLocalStorage.updateItemInList<Deposit>("deposits", acceptedDeposit);
     successAlert("Deposit was accepted!");
-    await fetchDeposits();
   };
 
   return (

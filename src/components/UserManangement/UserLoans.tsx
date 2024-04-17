@@ -35,61 +35,69 @@ const UserLoansModal: React.FC<UserLoansModalProps> = ({ isOpen, closeModal, use
   }, [loans]);
 
   const approvedLoans = useMemo(() => {
-    return loans.filter((loan) => loan.status === "approved");
+    return loans.filter((loan) => loan.status === "approved" && loan.accountID === user.id);
   }, [loans]);
 
   const offeredLoans = useMemo(() => {
-    return loans.filter((loan) => loan.status === "offered");
+    return loans.filter((loan) => loan.status === "offered" && loan.accountID === user.id);
   }, [loans]);
 
   const rejectedLoans = useMemo(() => {
-    return loans.filter((loan) => loan.status === "rejected");
+    return loans.filter((loan) => loan.status === "rejected" && loan.accountID === user.id);
   }, [loans]);
 
   useEffect(() => {
-
     fetchLoans();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id]);
 
   return (
-    <Modal
-      open={isOpen}
-      onClose={closeModal}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Box
+    <Grid container justifyContent="center">
+      <Modal
+        open={isOpen}
+        onClose={closeModal}
         sx={{
-          bgcolor: "white",
-          p: 4,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflowY: "auto",
           borderRadius: 5,
         }}
       >
-        <Grid container justifyContent="flex-start">
-          <Box component="main" sx={{ flexGrow: 0 }}>
-            {isLoading ? (
-              <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
-                <Skeleton height={"12rem"} width={window.innerWidth / 2} />
-              </Grid>
-            ) : loans.length < 1 ? (
-              <Typography fontFamily={"Poppins"} variant="h3">{getUserFullName(user)} doesn't have any loans</Typography>
-            ) : (
-              <Box>
-                <Typography fontFamily={"Poppins"} variant="h3">{getUserFullName(user)} Loans</Typography>
-                <LoansRow loans={approvedLoans} title="Approved" />
-                <LoansRow loans={offeredLoans} title="Offered" />
-                <LoansRow loans={pendingLoans} title="Pending" />
-                <LoansRow loans={rejectedLoans} title="Rejected" />
-              </Box>
-            )}
-          </Box>
-        </Grid>
-      </Box>
-    </Modal>
+        <Box
+          sx={{
+            bgcolor: "white",
+            paddingLeft: 5,
+            paddingRight: 5,
+            borderRadius: 5,
+          }}
+        >
+          <Grid container justifyContent="flex-start">
+            <Box component="main">
+              {isLoading ? (
+                <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
+                  <Skeleton height={"12rem"} width={window.innerWidth / 2} />
+                </Grid>
+              ) : loans.length < 1 ? (
+                <Typography fontFamily={"Poppins"} variant="h3">
+                  {getUserFullName(user)} doesn't have any loans
+                </Typography>
+              ) : (
+                <Box mt={15}>
+                  <Typography fontFamily={"Poppins"} variant="h3">
+                    {getUserFullName(user)} Loans
+                  </Typography>
+                  <LoansRow loans={approvedLoans} title="Approved" />
+                  <LoansRow loans={offeredLoans} title="Offered" />
+                  <LoansRow loans={pendingLoans} title="Pending" />
+                  <LoansRow loans={rejectedLoans} title="Rejected" />
+                </Box>
+              )}
+            </Box>
+          </Grid>
+        </Box>
+      </Modal>
+    </Grid>
   );
 };
 

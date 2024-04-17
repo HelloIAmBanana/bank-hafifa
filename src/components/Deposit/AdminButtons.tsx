@@ -12,13 +12,11 @@ interface AdminDepositButtonsProps {
 
 const AdminDepositButtons: React.FC<AdminDepositButtonsProps> = ({ deposit}) => {
   const [isCancelingDeposit, setIsCancelingDeposit] = useState(false);
-  const { fetchDeposits } = useFetchDepositsContext();
 
   const cancelDeposit = async () => {
     setIsCancelingDeposit(true);
     await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     successAlert("Deposit was canceled!");
-    await fetchDeposits();
   };
 
   return (
