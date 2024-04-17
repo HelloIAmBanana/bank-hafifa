@@ -112,6 +112,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user,isLoading,isOpen,upd
       id: "balance",
       label: "Balance",
       type: "number",
+      initValue: `${user.balance}`,
+
     },
     {
       id: "avatarUrl",

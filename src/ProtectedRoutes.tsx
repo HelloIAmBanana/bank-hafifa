@@ -17,7 +17,7 @@ function exctractPathFromAdminRoute(path: string) {
   return normalPath;
 }
 
-const getNotification = (notification: NotificationType) => {
+const ShowNotification = (notification: NotificationType) => {
   switch (notification) {
     case "cardApproved":
       return notificationAlert("Your card request was approved by an admin!");
@@ -40,16 +40,20 @@ export const AuthHandlerRoute = () => {
   const [currentUser, setCurrentUser] = useState<User>();
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
 
-  const storeCurrentUserAndNotifications = async () => {
+  const storeCurrentUser = async () => {
     const user = (await AuthService.getCurrentUser()) as User;
-    const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
 
     setCurrentUser(user);
+  };
+
+  const getNotification = async () => {
+    const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
+
     if (!currentUser) return;
     const userNotifications = notifications.filter((notification) => notification.accountID === currentUser.id);
 
     userNotifications.forEach(async (notification) => {
-      getNotification(notification.type);
+      ShowNotification(notification.type);
 
       await CRUDLocalStorage.deleteItemFromList("notifications", notification);
     });
@@ -77,14 +81,15 @@ export const AuthHandlerRoute = () => {
   };
 
   useEffect(() => {
-    storeCurrentUserAndNotifications();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    getNotification();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
 
   useEffect(() => {
     blockUnpayingUsers();
+    storeCurrentUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, currentUser]);
+  }, [location]);
 
   const currentRoute = location.pathname;
   const isPublicRoute = ["/", "/signup"].includes(currentRoute);

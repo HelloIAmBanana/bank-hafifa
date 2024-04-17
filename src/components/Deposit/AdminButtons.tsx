@@ -3,7 +3,6 @@ import { Deposit } from "../../models/deposit";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { successAlert } from "../../utils/swalAlerts";
 import { Button, CircularProgress, Grid } from "@mui/material";
-import { useFetchDepositsContext } from "../../contexts/fetchDepositsContext";
 
 
 interface AdminDepositButtonsProps {

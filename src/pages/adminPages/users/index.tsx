@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { useEffect, useContext } from "react";
 import { Grid, Box, Container, Typography, Button, Modal } from "@mui/material";
-import { UserContext } from "../../../UserProvider";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 import { useFetchUsersContext } from "../../../contexts/fetchUserContext";
@@ -157,7 +155,6 @@ const AdminUsersPage: React.FC = () => {
   }
 
   document.title = "Users Management";
-console.log("User Page")
 
   return (
     <Grid container justifyContent="flex-start">

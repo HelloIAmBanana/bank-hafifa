@@ -1,5 +1,4 @@
-import { useContext, useEffect, useMemo } from "react";
-import { UserContext } from "../../UserProvider";
+import { useEffect, useMemo } from "react";
 import { Box, Container, Grid, Skeleton, Typography } from "@mui/material";
 import DepositRows from "../../components/Deposit/DepositRows";
 import { useFetchDepositsContext } from "../../contexts/fetchDepositsContext";
@@ -7,7 +6,6 @@ import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { Deposit } from "../../models/deposit";
 
 const DepositsPage: React.FC = () => {
-  const [currentUser] = useContext(UserContext);
   const { isLoading, deposits } = useFetchDepositsContext();
 
   const updateExpiredDeposits = async () => {

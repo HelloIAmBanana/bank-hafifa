@@ -5,7 +5,6 @@ import { successAlert } from "../../utils/swalAlerts";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { User } from "../../models/user";
 import { UserContext } from "../../UserProvider";
-import { useFetchDepositsContext } from "../../contexts/fetchDepositsContext";
 import { Transaction } from "../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../utils/utils";
 
