@@ -4,7 +4,7 @@ import { Grid, Box, Container, Typography, Skeleton, Button, Menu, MenuItem, Cir
 import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
-import { ColDef, IRowNode, RowNode, SelectionChangedEvent } from "@ag-grid-community/core";
+import { CellMouseOverEvent, ColDef, IRowNode, RowNode, SelectionChangedEvent } from "@ag-grid-community/core";
 import { useFetchUsersContext } from "../../contexts/fetchUserContext";
 import { UserContext } from "../../UserProvider";
 import { capitalizeFirstLetter, formatIsoStringToDate } from "../../utils/utils";
@@ -147,7 +147,7 @@ const UsersTable: React.FC = () => {
         },
       },
     ],
-    [users]
+    []
   );
 
   const defaultColDef = useMemo<ColDef>(() => {
@@ -160,13 +160,14 @@ const UsersTable: React.FC = () => {
 
   const onSelectionChanged = useCallback((event: SelectionChangedEvent) => {
     const selectedNodes = event.api.getSelectedNodes();
-    setSelectedRows(selectedNodes.map((node: IRowNode<any>) => node as RowNode<any>).map((node) => node.data));
+    const rows= selectedNodes.map((node: IRowNode<any>) => node as RowNode<any>).map((node) => node.data)
+    setSelectedRows(rows);
   }, []);
 
-  const onCellMouseOver = (params: any) => {
-    const hoveredRow: User = params.data;
-    setHoveredUser(hoveredRow);
-  };
+  const onCellHover = useCallback((event: CellMouseOverEvent) => {
+    const hoveredCell:User = event.data;
+    setHoveredUser(hoveredCell);
+  }, []);
 
   const contextMenuDeleteUser = async (user: User) => {
     if (user.id === currentUser!.id) return;
@@ -189,13 +190,6 @@ const UsersTable: React.FC = () => {
     successAlert(`Deleted Users`);
   };
 
-  let gridApi: any;
-
-  const onGridReady = (params: any) => {
-    gridApi = params.api;
-    gridApi.addEventListener("cellMouseOver", onCellMouseOver);
-  };
-
   const handleUpdateUser = async (data: any) => {
     setIsUpdatingProfile(true);
     const updatedUser: User = {
@@ -215,11 +209,11 @@ const UsersTable: React.FC = () => {
     setIsUpdatingProfile(false);
     setIsUpdateUserModalOpen(false);
   };
-
-  useEffect(() => {
+  
+useEffect(() => {
     fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Grid container justifyContent="flex-start">
@@ -246,9 +240,9 @@ const UsersTable: React.FC = () => {
                           getRowStyle={getRowColor}
                           paginationPageSizeSelector={[10]}
                           defaultColDef={defaultColDef}
-                          onGridReady={onGridReady}
                           rowSelection="multiple"
                           onSelectionChanged={onSelectionChanged}
+                          onCellMouseOver={onCellHover}
                         />
                       </Box>
                     </div>

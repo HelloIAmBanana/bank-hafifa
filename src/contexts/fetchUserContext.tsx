@@ -17,9 +17,8 @@ const FetchUsersContext = createContext<FetchUsersContextType>({
 export function FetchUsersProvider({ children }: React.PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
-
-
   const fetchUsers = async () => {
+
     setIsLoading(true);
     try {
       const fetchedUsers = await CRUDLocalStorage.getAsyncData<User[]>("users");

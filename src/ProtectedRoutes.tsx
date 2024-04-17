@@ -10,7 +10,6 @@ import CRUDLocalStorage from "./CRUDLocalStorage";
 import { Loan } from "./models/loan";
 import { notificationAlert } from "./utils/swalAlerts";
 import { Notification, NotificationType } from "./models/notification";
-import { Deposit } from "./models/deposit";
 
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
@@ -77,30 +76,13 @@ export const AuthHandlerRoute = () => {
     setBlockedUsers(blockedList);
   };
 
-  const updateExpiredDeposits = async () => {
-    const currentDate = new Date().toISOString();
-    const deposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("deposits");
-
-    const expiredDeposits = deposits.filter((deposit) => deposit.expireDate < currentDate);
-
-    for (const deposit of expiredDeposits) {
-      if (deposit.status === "Active") {
-        const updatedDeposit: Deposit = {
-          ...deposit,
-          status: "Withdrawable",
-        };
-        await CRUDLocalStorage.updateItemInList<Deposit>("deposits", updatedDeposit);
-      }
-      if (deposit.status === "Offered") {
-        await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
-      }
-    }
-  };
-
   useEffect(() => {
     storeCurrentUserAndNotifications();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     blockUnpayingUsers();
-    updateExpiredDeposits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, currentUser]);
 
@@ -125,7 +107,6 @@ export const AuthHandlerRoute = () => {
       {!currentUser ? (
         <LoadingScreen />
       ) : (
-        
         <Box sx={{ display: "flex", backgroundColor: "white" }}>
           {isPublicRoute ? (
             <Navigate to="/home" />

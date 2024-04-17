@@ -75,7 +75,7 @@ const fields = [
     id: "balance",
     label: "Balance",
     type: "number",
-    initValue:0,
+    initValue: 0,
   },
   {
     id: "avatarUrl",
@@ -95,10 +95,10 @@ const schema: JSONSchemaType<User> = {
     avatarUrl: { type: "string" },
     gender: { type: "string", enum: ["Male", "Female"], minLength: 1 },
     accountType: { type: "string", enum: ["Business", "Personal"], minLength: 1 },
-    role: { type: "string", enum: ["admin", "customer"], minLength: 1  },
+    role: { type: "string", enum: ["admin", "customer"], minLength: 1 },
     balance: { type: "number" },
   },
-  required: ["birthDate", "email", "firstName", "lastName", "password", "gender", "accountType", "role","balance"],
+  required: ["birthDate", "email", "firstName", "lastName", "password", "gender", "accountType", "role", "balance"],
   additionalProperties: true,
   errorMessage: {
     properties: {
@@ -110,13 +110,11 @@ const schema: JSONSchemaType<User> = {
       gender: "Please Select Gender",
       accountType: "Please Select Account Type",
       role: "Please Select Account Role",
-      balance:"Please Enter A Number Larger Than 0"
+      balance: "Please Enter A Number Larger Than 0",
     },
   },
 };
-
 const AdminUsersPage: React.FC = () => {
-  const [currentUser] = useContext(UserContext);
   const { fetchUsers, users } = useFetchUsersContext();
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isUserCreationModalOpen, setIsUserCreationModalOpen] = useState(false);
@@ -150,12 +148,16 @@ const AdminUsersPage: React.FC = () => {
     closeUserCreationModal();
   };
 
-  useEffect(() => {
-    fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser]);
+  const handleOpenCreationModal = () => {
+    setIsUserCreationModalOpen(true);
+  };
+
+  const onExportButtonClick=()=>{
+    exportToExcel<User>("users", users)
+  }
 
   document.title = "Users Management";
+console.log("User Page")
 
   return (
     <Grid container justifyContent="flex-start">
@@ -173,12 +175,12 @@ const AdminUsersPage: React.FC = () => {
                 </Grid>
                 <Grid container direction="row" justifyContent="flex-start" alignItems="center" columnSpacing={2}>
                   <Grid item>
-                    <Button type="submit" onClick={()=>exportToExcel<User>("users",users)}>
+                    <Button type="submit" onClick={onExportButtonClick}>
                       Export to Excel
                     </Button>
                   </Grid>
                   <Grid item>
-                    <Button type="submit" onClick={() => setIsUserCreationModalOpen(true)}>
+                    <Button type="submit" onClick={handleOpenCreationModal}>
                       Create New User
                     </Button>
                   </Grid>
@@ -198,12 +200,11 @@ const AdminUsersPage: React.FC = () => {
       <Modal
         open={isUserCreationModalOpen}
         onClose={closeUserCreationModal}
-
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          overflowY:"auto",
+          overflowY: "auto",
         }}
       >
         <Box
@@ -211,8 +212,8 @@ const AdminUsersPage: React.FC = () => {
             width: 360,
             bgcolor: "white",
             borderRadius: 5,
-            paddingLeft:5,
-            paddingRight:5,
+            paddingLeft: 5,
+            paddingRight: 5,
           }}
         >
           <center>

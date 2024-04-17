@@ -46,10 +46,11 @@ const UserLoansModal: React.FC<UserLoansModalProps> = ({ isOpen, closeModal, use
     return loans.filter((loan) => loan.status === "rejected" && loan.accountID === user.id);
   }, [loans]);
 
+
   useEffect(() => {
     fetchLoans();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.id]);
+  }, []);
 
   return (
     <Grid container justifyContent="center">

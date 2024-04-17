@@ -3,10 +3,32 @@ import { UserContext } from "../../UserProvider";
 import { Box, Container, Grid, Skeleton, Typography } from "@mui/material";
 import DepositRows from "../../components/Deposit/DepositRows";
 import { useFetchDepositsContext } from "../../contexts/fetchDepositsContext";
+import CRUDLocalStorage from "../../CRUDLocalStorage";
+import { Deposit } from "../../models/deposit";
 
 const DepositsPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
   const { isLoading, deposits } = useFetchDepositsContext();
+
+  const updateExpiredDeposits = async () => {
+    const currentDate = new Date().toISOString();
+    const deposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("deposits");
+
+    const expiredDeposits = deposits.filter((deposit) => deposit.expireDate < currentDate);
+
+    for (const deposit of expiredDeposits) {
+      if (deposit.status === "Active") {
+        const updatedDeposit: Deposit = {
+          ...deposit,
+          status: "Withdrawable",
+        };
+        await CRUDLocalStorage.updateItemInList<Deposit>("deposits", updatedDeposit);
+      }
+      if (deposit.status === "Offered") {
+        await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
+      }
+    }
+  };
 
   const activeDeposits = useMemo(() => {
     return deposits.filter((deposit) => deposit.status === "Active");
@@ -22,6 +44,9 @@ const DepositsPage: React.FC = () => {
 
   document.title = "Deposits";
 
+  useEffect(() => {
+    updateExpiredDeposits();
+  }, []);
   return (
     <Grid container justifyContent="flex-start">
       <Box component="main" sx={{ flexGrow: 0, ml: 15 }}>

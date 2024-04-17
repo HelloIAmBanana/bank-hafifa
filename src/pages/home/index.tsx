@@ -147,7 +147,7 @@ const Home: React.FC = () => {
   }, [currentUser]);
 
   document.title = "Home";
-
+console.log("HOMEEEEEEEEEEEEE")
   return (
     <Box sx={{ display: "flex" }}>
       <Container sx={{ mt: 3 }}>

@@ -24,16 +24,8 @@ export function FetchDepositsProvider({ children }: React.PropsWithChildren) {
 
   const { isLoading, data: deposits = [] } = useQuery(["deposits", isAdmin, currentUser], async () => {
     const fetchedDeposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("deposits");
-    return isAdmin
-      ? fetchedDeposits
-      : fetchedDeposits.filter((deposit) => deposit.accountID === currentUser!.id);
+    return isAdmin ? fetchedDeposits : fetchedDeposits.filter((deposit) => deposit.accountID === currentUser!.id);
   });
-
-  return (
-    <FetchDepositsContext.Provider value={{ isLoading, deposits }}>
-      {children}
-    </FetchDepositsContext.Provider>
-  );
+  return <FetchDepositsContext.Provider value={{ isLoading, deposits }}>{children}</FetchDepositsContext.Provider>;
 }
-
 export const useFetchDepositsContext = () => useContext(FetchDepositsContext);
