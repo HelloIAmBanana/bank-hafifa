@@ -35,7 +35,7 @@ const CardsPage: React.FC = () => {
   const [isCardCreationLoading, setIsCardCreationLoading] = useState(false);
   const [cardProvider, setCardProvider] = useState("Visa");
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
-  const { fetchCards, isLoading, cards } = useFetchCardsContext();
+  const { isLoading, cards } = useFetchCardsContext();
 
   const navigate = useNavigate();
   const { userID } = useParams();
@@ -91,7 +91,6 @@ const CardsPage: React.FC = () => {
     successAlert("New Card Request Was Created!");
     setIsCardCreationLoading(false);
     closeCardModal();
-    await fetchCards();
   };
 
   const isSpectatedUserReal = async () => {
@@ -106,7 +105,6 @@ const CardsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchCards();
     isSpectatedUserReal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);

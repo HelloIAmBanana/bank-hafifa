@@ -47,7 +47,7 @@ const LoansPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
   const [isNewLoanModalOpen, setIsNewLoanModalOpen] = useState(false);
   const [isCreatingNewLoan, setIsCreatingNewLoan] = useState(false);
-  const { fetchLoans, isLoading: isLoansLoading, loans } = useFetchLoanContext();
+  const { isLoading, loans } = useFetchLoanContext();
 
   const navigate = useNavigate();
 
@@ -106,7 +106,6 @@ const LoansPage: React.FC = () => {
     await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);
     successAlert("Loan was created!");
     closeLoanModal();
-    await fetchLoans();
     setIsCreatingNewLoan(false);
   };
 
@@ -121,7 +120,6 @@ const LoansPage: React.FC = () => {
   document.title = isAdmin ? "Manage Loans" : "Loans";
 
   useEffect(() => {
-    fetchLoans();
     isSpectatedUserReal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -147,7 +145,7 @@ const LoansPage: React.FC = () => {
                 )}
               </Grid>
 
-              {isLoansLoading ? (
+              {isLoading ? (
                 <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
                   <Skeleton height={"12rem"} width={window.innerWidth / 2} />
                 </Grid>

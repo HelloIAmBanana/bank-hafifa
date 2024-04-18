@@ -151,7 +151,7 @@ const DepositsPage: React.FC = () => {
     return userID ? withdrawableDeposits.filter((deposit) => deposit.accountID === userID) : withdrawableDeposits;
   }, [deposits]);
 
-  document.title = "Deposits";
+  document.title = isAdmin ? "Manage Deposits" : "Deposits";
 
   useEffect(() => {
     updateExpiredDeposits();
@@ -184,8 +184,8 @@ const DepositsPage: React.FC = () => {
                   </Grid>
                 ) : (
                   <Box>
-                    <DepositRows deposits={activeDeposits} title="Active" />
-                    {(!isAdmin || userID) && <DepositRows deposits={offeredDeposits} title="Offered" />}
+                    <DepositRows deposits={offeredDeposits} title="Offered" />
+                    {(!isAdmin || userID) && <DepositRows deposits={activeDeposits} title="Active" />}
                     {(!isAdmin || userID) && <DepositRows deposits={withdrawableDeposits} title="Withdrawable" />}
                   </Box>
                 )}

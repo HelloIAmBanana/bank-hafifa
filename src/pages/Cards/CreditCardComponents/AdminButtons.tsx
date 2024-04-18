@@ -4,7 +4,6 @@ import { useState } from "react";
 import { createNewNotification } from "../../../utils/utils";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { successAlert } from "../../../utils/swalAlerts";
-import { useFetchCardsContext } from "../../../contexts/fetchCardsContext";
 
 interface AdminCreditCardButtonsProps {
   card: Card;
@@ -12,7 +11,6 @@ interface AdminCreditCardButtonsProps {
 
 const AdminCreditCardButtons: React.FC<AdminCreditCardButtonsProps> = ({ card }) => {
   const [isCardBeingApproved, setIsCardBeingApproved] = useState(false);
-  const { fetchCards } = useFetchCardsContext();
   const [isCardBeingRejected, setIsCardBeingRejected] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejectCardModalOpen, setIsRejectCardModalOpen] = useState(false);
@@ -28,7 +26,6 @@ const AdminCreditCardButtons: React.FC<AdminCreditCardButtonsProps> = ({ card })
 
     await CRUDLocalStorage.updateItemInList<Card>("cards", newCard);
     successAlert("Card rejected!");
-    await fetchCards();
   };
 
   const approveCard = async (card: Card) => {
@@ -40,7 +37,6 @@ const AdminCreditCardButtons: React.FC<AdminCreditCardButtonsProps> = ({ card })
     await createNewNotification(card.accountID, "cardApproved");
     await CRUDLocalStorage.updateItemInList<Card>("cards", newCard);
     successAlert("Card approved!");
-    await fetchCards();
   };
 
   const approveCardButtonClicked = () => {

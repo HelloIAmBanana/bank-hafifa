@@ -2,7 +2,6 @@ import { Button, CircularProgress, Grid } from "@mui/material";
 import { Card } from "../../../models/card";
 import { normalAlert, successAlert } from "../../../utils/swalAlerts";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import { useFetchCardsContext } from "../../../contexts/fetchCardsContext";
 import { useState } from "react";
 
 interface ApprovedCreditCardButtonsProps {
@@ -10,7 +9,6 @@ interface ApprovedCreditCardButtonsProps {
 }
 
 const ApprovedCreditCardButtons: React.FC<ApprovedCreditCardButtonsProps> = ({ card }) => {
-  const { fetchCards } = useFetchCardsContext();
   const [isCardBeingCanceled, setIsCardBeingCanceled] = useState(false);
 
   const cancelCardButtonClicked = () => {
@@ -21,7 +19,6 @@ const ApprovedCreditCardButtons: React.FC<ApprovedCreditCardButtonsProps> = ({ c
   const cancelCard = async (card: Card) => {
     await CRUDLocalStorage.deleteItemFromList<Card>("cards", card);
     successAlert("Card Canceled!");
-    await fetchCards();
   };
   
   return (

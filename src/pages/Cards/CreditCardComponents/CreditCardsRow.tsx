@@ -8,33 +8,35 @@ interface CreditCardsRowsProps {
 }
 
 const CreditCardsRow: React.FC<CreditCardsRowsProps> = ({ cards, title }) => {
-  if (cards.length > 0) {
-    return (
-      <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
-        <Typography variant="h5" fontFamily="Poppins">
-          {title}
-        </Typography>
-        <Grid
-          sx={{
-            mt: 2,
-            overflowX: cards.length > 2 ? "auto" : "visible",
-            display: "flex",
-            flexDirection: "row",
-            maxWidth: "100vh",
-            width: "auto",
-          }}
-        >
-          {cards.map((card, index) => (
-            <Grid item key={index} ml={5}>
+  return (
+    <Grid item xs={12} sm={12} md={12} xl={12} mt={4}>
+      <Typography variant="h4" fontFamily="Poppins">
+        {title}
+      </Typography>
+      <Grid
+        sx={{
+          mt: 2,
+          overflowX: cards.length > 2 ? "auto" : "visible",
+          display: "flex",
+          flexDirection: "row",
+          maxWidth: "100vh",
+          width: "auto",
+        }}
+      >
+        {cards.length > 0 ? (
+          cards.map((card, index) => (
+            <Grid item key={index} mr={2}>
               <CreditCard card={card} />
             </Grid>
-          ))}
-        </Grid>
+          ))
+        ) : (
+          <Typography variant="h6" fontFamily="Poppins" gutterBottom mb={5}>
+            There Aren't Any {title} Cards
+          </Typography>
+        )}
       </Grid>
-    );
-  } else {
-    return null;
-  }
+    </Grid>
+  );
 };
 
 export default CreditCardsRow;
