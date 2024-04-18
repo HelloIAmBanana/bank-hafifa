@@ -1,21 +1,19 @@
 import React, { useState } from "react";
 import { useEffect, useMemo } from "react";
-import { Box, Grid, Modal, Skeleton, Typography } from "@mui/material";
+import { Box, Grid, Skeleton, Typography } from "@mui/material";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { User } from "../../models/user";
 import { getUserFullName } from "../../utils/utils";
 import { Deposit } from "../../models/deposit";
 import DepositRows from "../Deposit/DepositRows";
+import { useLocation } from "react-router-dom";
 
-interface UserDepositsModalProps {
-  isOpen: boolean;
-  closeModal: () => void;
-  user: User;
-}
 
-const UserDepositsModal: React.FC<UserDepositsModalProps> = ({ isOpen, closeModal, user }) => {
+
+const SpectatedUserDeposits: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const { state } = useLocation();
+  const { user } = state;
 
   const fetchDeposits = async () => {
     setIsLoading(true);
@@ -47,15 +45,6 @@ const UserDepositsModal: React.FC<UserDepositsModalProps> = ({ isOpen, closeModa
   }, [user.id]);
 
   return (
-    <Modal
-      open={isOpen}
-      onClose={closeModal}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
       <Box
         sx={{
           bgcolor: "white",
@@ -86,8 +75,7 @@ const UserDepositsModal: React.FC<UserDepositsModalProps> = ({ isOpen, closeModa
           </Box>
         </Grid>
       </Box>
-    </Modal>
   );
 };
 
-export default UserDepositsModal;
+export default SpectatedUserDeposits;

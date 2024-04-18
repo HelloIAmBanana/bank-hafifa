@@ -1,21 +1,19 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { useEffect, useContext } from "react";
-import { Grid, Box, Container, Typography, Skeleton, Button, Menu, MenuItem, CircularProgress } from "@mui/material";
+import { Grid, Box, Container, Skeleton, Button, CircularProgress } from "@mui/material";
 import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 import { CellMouseOverEvent, ColDef, IRowNode, RowNode, SelectionChangedEvent } from "@ag-grid-community/core";
 import { useFetchUsersContext } from "../../contexts/fetchUserContext";
 import { UserContext } from "../../UserProvider";
-import { capitalizeFirstLetter, formatIsoStringToDate } from "../../utils/utils";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { User } from "../../models/user";
 import _ from "lodash";
 import { successAlert } from "../../utils/swalAlerts";
 import EditUserModal from "./EditUser";
-import UserCardsModal from "./UserCards";
-import UserLoansModal from "./UserLoans";
-import UserDepositsModal from "./UserDeposits";
+import { colDefs } from "./UserTableColumns";
+import TableContextMenu from "./ContextMenu";
 
 const UsersTable: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
@@ -24,12 +22,9 @@ const UsersTable: React.FC = () => {
   const [hoveredUser, setHoveredUser] = useState<User>(currentUser!);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUpdateUserModalOpen, setIsUpdateUserModalOpen] = useState(false);
-  const [isUserLoansModalOpen, setIsUserLoansModalOpen] = useState(false);
-  const [isUserCardsModalOpen, setIsUserCardsModalOpen] = useState(false);
-  const [isUserDepositsModalOpen, setIsUserDepositsModalOpen] = useState(false);
   const [isContextMenuDeleting, setIsContextMenuDeleting] = useState(false);
   const [isDeletingRow, setIsDeletingRow] = useState(false);
-  const [contextMenu, setContextMenu] = useState<{
+  const [contextMenuPos, setContextMenuPos] = useState<{
     mouseX: number;
     mouseY: number;
   } | null>(null);
@@ -37,8 +32,8 @@ const UsersTable: React.FC = () => {
   const handleContextMenu = (event: React.MouseEvent) => {
     if (isContextMenuDeleting) return;
     event.preventDefault();
-    setContextMenu(
-      contextMenu === null
+    setContextMenuPos(
+      contextMenuPos === null
         ? {
             mouseX: event.clientX + 2,
             mouseY: event.clientY - 6,
@@ -49,106 +44,17 @@ const UsersTable: React.FC = () => {
 
   const handleClose = () => {
     if (isContextMenuDeleting) return;
-    setContextMenu(null);
+    setContextMenuPos(null);
   };
 
   const handleCloseUserEditModal = () => {
     setIsUpdateUserModalOpen(false);
   };
 
-  const handleCloseUserLoansModal = () => {
-    setIsUserLoansModalOpen(false);
-  };
-
-  const handleCloseUserCardsModal = () => {
-    setIsUserCardsModalOpen(false);
-  };
-
-  const handleCloseUserDepositsModal = () => {
-    setIsUserDepositsModalOpen(false);
-  };
-
   const getRowColor = (params: any) => {
     const inDebt = params.data.balance < 0;
     return inDebt ? { background: "red" } : { background: "white" };
   };
-
-  const colDefs = useMemo(
-    () => [
-      {
-        headerCheckboxSelection: true,
-        checkboxSelection: true,
-        suppressMenu: true,
-        width: 40,
-      },
-      {
-        field: "id",
-        initialWidth: 100,
-        suppressHeaderMenuButton: true,
-        suppressHeaderContextMenu: true,
-        cellRenderer: (params: any): JSX.Element => {
-          return <Typography fontFamily={"Poppins"}>{params.data.id}</Typography>;
-        },
-      },
-      {
-        field: "firstName",
-        headerName: "First Name",
-        cellRenderer: (params: any): JSX.Element => {
-          return <Typography fontFamily={"Poppins"}>{capitalizeFirstLetter(params.data.firstName)}</Typography>;
-        },
-      },
-      {
-        field: "lastName",
-        headerName: "Last Name",
-        cellRenderer: (params: any): JSX.Element => {
-          return <Typography fontFamily={"Poppins"}>{capitalizeFirstLetter(params.data.lastName)}</Typography>;
-        },
-      },
-      {
-        field: "email",
-        cellRenderer: (params: any): JSX.Element => {
-          return <Typography fontFamily={"Poppins"}>{params.data.email}</Typography>;
-        },
-      },
-      {
-        field: "birthDate",
-        headerName: "Birthday",
-        initialWidth: 150,
-
-        filter: "agDateColumnFilter",
-        cellRenderer: (params: any): JSX.Element => {
-          return (
-            <Typography fontFamily={"Poppins"}>{`${formatIsoStringToDate(
-              params.data.birthDate,
-              "dd/MM/yyyy"
-            )}`}</Typography>
-          );
-        },
-      },
-      {
-        field: "gender",
-        initialWidth: 150,
-        cellRenderer: (params: any): JSX.Element => {
-          return <Typography fontFamily={"Poppins"}>{params.data.gender}</Typography>;
-        },
-      },
-      {
-        field: "balance",
-        cellRenderer: (params: any): JSX.Element => {
-          return <Typography fontFamily={"Poppins"}>{params.data.balance.toLocaleString()}$</Typography>;
-        },
-      },
-      {
-        field: "role",
-        initialWidth: 150,
-
-        cellRenderer: (params: any): JSX.Element => {
-          return <Typography fontFamily={"Poppins"}>{capitalizeFirstLetter(params.data.role)}</Typography>;
-        },
-      },
-    ],
-    []
-  );
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -160,12 +66,12 @@ const UsersTable: React.FC = () => {
 
   const onSelectionChanged = useCallback((event: SelectionChangedEvent) => {
     const selectedNodes = event.api.getSelectedNodes();
-    const rows= selectedNodes.map((node: IRowNode<any>) => node as RowNode<any>).map((node) => node.data)
+    const rows = selectedNodes.map((node: IRowNode<any>) => node as RowNode<any>).map((node) => node.data);
     setSelectedRows(rows);
   }, []);
 
   const onCellHover = useCallback((event: CellMouseOverEvent) => {
-    const hoveredCell:User = event.data;
+    const hoveredCell: User = event.data;
     setHoveredUser(hoveredCell);
   }, []);
 
@@ -209,16 +115,15 @@ const UsersTable: React.FC = () => {
     setIsUpdatingProfile(false);
     setIsUpdateUserModalOpen(false);
   };
-  
-useEffect(() => {
+
+  useEffect(() => {
     fetchUsers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <Grid container justifyContent="flex-start">
       <Container sx={{ mt: 2 }}>
-        <Grid container spacing={5}>
+        <Grid container spacing={5} justifyContent="flex-start">
           <Box sx={{ flexGrow: 1 }}>
             <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start">
               {isLoading ? (
@@ -253,61 +158,15 @@ useEffect(() => {
                     </Button>
                   )}
                   <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
-                    <Menu
-                      open={contextMenu !== null}
-                      onClose={handleClose}
-                      anchorReference="anchorPosition"
-                      anchorPosition={
-                        contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
-                      }
-                    >
-                      <MenuItem
-                        disabled={isContextMenuDeleting}
-                        onClick={() => {
-                          setIsUpdateUserModalOpen(true);
-                          handleClose();
-                        }}
-                      >
-                        <Typography fontFamily={"Poppins"}>Edit User</Typography>
-                      </MenuItem>
-
-                      <MenuItem
-                        onClick={() => contextMenuDeleteUser(hoveredUser!)}
-                        divider={true}
-                        disabled={isContextMenuDeleting}
-                      >
-                        <Typography fontFamily={"Poppins"}>
-                          {isContextMenuDeleting ? <CircularProgress size={15} /> : "Delete User"}
-                        </Typography>
-                      </MenuItem>
-                      <MenuItem
-                        disabled={isContextMenuDeleting}
-                        onClick={() => {
-                          setIsUserLoansModalOpen(true);
-                          handleClose();
-                        }}
-                      >
-                        <Typography fontFamily={"Poppins"}>User Loans</Typography>
-                      </MenuItem>
-                      <MenuItem
-                        disabled={isContextMenuDeleting}
-                        onClick={() => {
-                          setIsUserCardsModalOpen(true);
-                          handleClose();
-                        }}
-                      >
-                        <Typography fontFamily={"Poppins"}>User Cards</Typography>
-                      </MenuItem>
-                      <MenuItem
-                        disabled={isContextMenuDeleting}
-                        onClick={() => {
-                          setIsUserDepositsModalOpen(true);
-                          handleClose();
-                        }}
-                      >
-                        <Typography fontFamily={"Poppins"}>User Deposits</Typography>
-                      </MenuItem>
-                    </Menu>
+                    <TableContextMenu
+                      contextMenuDeleteUser={contextMenuDeleteUser}
+                      contextMenuPos={contextMenuPos}
+                      handleClose={handleClose}
+                      handleContextMenu={handleContextMenu}
+                      hoveredUser={hoveredUser!}
+                      isContextMenuDeleting={isContextMenuDeleting}
+                      setIsUpdateUserModalOpen={setIsUpdateUserModalOpen}
+                    />
                   </div>
                 </Grid>
               )}
@@ -321,16 +180,7 @@ useEffect(() => {
           user={hoveredUser!}
           updateProfile={handleUpdateUser}
         />
-        <UserLoansModal isOpen={isUserLoansModalOpen} closeModal={handleCloseUserLoansModal} user={hoveredUser} />
-        <UserCardsModal isOpen={isUserCardsModalOpen} closeModal={handleCloseUserCardsModal} user={hoveredUser} />
-        <UserDepositsModal
-          isOpen={isUserDepositsModalOpen}
-          closeModal={handleCloseUserDepositsModal}
-          user={hoveredUser}
-        />
       </Container>
-    </Grid>
   );
 };
-
 export default UsersTable;

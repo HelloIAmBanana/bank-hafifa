@@ -8,6 +8,7 @@ import { formatIsoStringToDate } from "../../utils/utils";
 import { useContext, useMemo } from "react";
 import AuthService from "../../AuthService";
 import { UserContext } from "../../UserProvider";
+import { useLocation } from "react-router-dom";
 
 interface LoansProps {
   loan: Loan;
@@ -15,6 +16,9 @@ interface LoansProps {
 
 const LoanBox: React.FC<LoansProps> = ({ loan }) => {
   const [currentUser] = useContext(UserContext);
+  const location = useLocation();
+
+  const isSpectating = "/admin/users/loans".includes(location.pathname);
 
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);
@@ -40,8 +44,7 @@ const LoanBox: React.FC<LoansProps> = ({ loan }) => {
               <Grid item xs={4} sm={4} md={6} sx={{ ml: 2, mt: 2 }}>
                 {loan.status === "approved" && (
                   <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>
-                    Left to pay: $
-                    {Math.ceil(loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack)}
+                    Left to pay: ${Math.ceil(loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack)}
                   </Typography>
                 )}
               </Grid>
@@ -59,11 +62,11 @@ const LoanBox: React.FC<LoansProps> = ({ loan }) => {
               </center>
             </Grid>
             {isAdmin && loan.status === "pending" && (
-              <Grid item xs={8} sm={8} md={8}sx={{ ml: 1, mt: 8 }}>
+              <Grid item xs={8} sm={8} md={8} sx={{ ml: 1, mt: 8 }}>
                 <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>{loan.loanOwner}</Typography>
               </Grid>
             )}
-            {(loan.status === "approved"||loan.status==="offered") && (
+            {(loan.status === "approved" || loan.status === "offered") && (
               <>
                 <Grid item xs={8} sm={8} md={8} sx={{ ml: 1, mt: 1 }}>
                   <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>Interest Rate</Typography>
@@ -81,9 +84,9 @@ const LoanBox: React.FC<LoansProps> = ({ loan }) => {
           </Grid>
         </Paper>
         {/* Loan Buttons */}
-        {loan.status === "approved" && <ApprovedLoansButtons loan={loan}/>}
-        {loan.status === "offered" && !isAdmin && <LoanOfferButtons loan={loan}/>}
-        {loan.status === "pending" && isAdmin && <PendingLoanButtons loan={loan}/>}
+        {!isSpectating && loan.status === "approved" && <ApprovedLoansButtons loan={loan} />}
+        {!isSpectating && loan.status === "offered" && !isAdmin && <LoanOfferButtons loan={loan} />}
+        {!isSpectating && loan.status === "pending" && isAdmin && <PendingLoanButtons loan={loan} />}
       </Grid>
     </Grid>
   );

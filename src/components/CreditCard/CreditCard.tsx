@@ -10,6 +10,7 @@ import { normalAlert } from "../../utils/swalAlerts";
 import { formatIsoStringToDate } from "../../utils/utils";
 import { UserContext } from "../../UserProvider";
 import AuthService from "../../AuthService";
+import { useLocation } from "react-router-dom";
 
 interface CardProps {
   card: Card;
@@ -36,10 +37,13 @@ const CreditCard: React.FC<CardProps> = ({ card, approveCard, rejectCard, cancel
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejectCardModalOpen, setIsRejectCardModalOpen] = useState(false);
   const [isShowRejectionReasonModalOpen, setIsShowRejectionReasonModalOpen] = useState(false);
+  const location = useLocation();
 
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);
   }, [currentUser]);
+
+  const isSpectating = "/admin/users/cards".includes(location.pathname)
 
   const handleRejectionReasonModalOpen = () => setIsShowRejectionReasonModalOpen(true);
   const handleRejectionReasonModalClose = () => setIsShowRejectionReasonModalOpen(false);
@@ -105,7 +109,7 @@ const CreditCard: React.FC<CardProps> = ({ card, approveCard, rejectCard, cancel
           </Grid>
         </Grid>
       </Paper>
-      {isAdmin &&(
+      {!isSpectating&& (isAdmin &&(
         <Grid container direction="row" justifyContent="center" alignItems="center">
           <Grid item>
             <Button
@@ -143,8 +147,8 @@ const CreditCard: React.FC<CardProps> = ({ card, approveCard, rejectCard, cancel
             </Button>
           </Grid>
         </Grid>
-      )}
-      {card.status === "rejected" &&(
+      ))}
+      {!isSpectating && card.status === "rejected" &&(
         <Grid container direction="row" justifyContent="center" alignItems="center">
           <Grid item>
             <Button
@@ -169,7 +173,7 @@ const CreditCard: React.FC<CardProps> = ({ card, approveCard, rejectCard, cancel
           </Grid>
         </Grid>
       )}
-      {card.status === "approved" && (
+      {!isSpectating && card.status === "approved" && (
         <Grid container direction="row" justifyContent="space-between" alignItems="center">
           <Grid item>
             <Button

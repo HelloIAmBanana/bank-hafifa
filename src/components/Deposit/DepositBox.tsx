@@ -8,6 +8,7 @@ import AuthService from "../../AuthService";
 import { UserContext } from "../../UserProvider";
 import { formatIsoStringToDate } from "../../utils/utils";
 import WithdrawDepositButton from "./WithdrawDepositButton";
+import { useLocation } from "react-router-dom";
 
 interface DepositBoxProps {
   deposit: Deposit;
@@ -15,6 +16,9 @@ interface DepositBoxProps {
 
 const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
   const [currentUser] = useContext(UserContext);
+  const location = useLocation();
+
+  const isSpectating = "/admin/users/deposits".includes(location.pathname);
 
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);
@@ -78,10 +82,11 @@ const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
           </Paper>
         </Grid>
       </Grid>
-      {deposit.status === "Offered" &&
+      (
+      {!isSpectating &&
+        deposit.status === "Offered" &&
         (isAdmin ? <AdminDepositButtons deposit={deposit} /> : <UserDepositButtons deposit={deposit} />)}
-      {deposit.status === "Withdrawable" &&
-        (<WithdrawDepositButton deposit={deposit} />)}
+      {!isSpectating && deposit.status === "Withdrawable" && <WithdrawDepositButton deposit={deposit} />})
     </>
   );
 };

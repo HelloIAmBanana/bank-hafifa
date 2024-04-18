@@ -18,6 +18,9 @@ import { FetchTransactionsProvider } from "./contexts/fetchTransactionsContext";
 import { FetchCardsProvider } from "./contexts/fetchCardsContext";
 import { FetchUsersProvider } from "./contexts/fetchUserContext";
 import AdminUsersPage from "./pages/adminPages/users";
+import SpectatedUserCards from "./components/UserManangement/SpectatedUserCards";
+import SpectatedUserLoans from "./components/UserManangement/SpectatedUserLoans";
+import SpectatedUserDeposits from "./components/UserManangement/SpectatedUserDeposits";
 
 function App() {
   return (
@@ -42,6 +45,11 @@ function App() {
             <Route path="/admin/loans" element={<FetchLoansProvider><AdminLoansPage /></FetchLoansProvider>} />
             <Route path="/admin/deposits" element={<FetchDepositsProvider><AdminDepositsPage /></FetchDepositsProvider>} />
             <Route path="/admin/users" element={<FetchUsersProvider><AdminUsersPage /></FetchUsersProvider>} />
+
+            {/* User Spectating Routes */}
+            <Route path="/admin/users/cards" element={<SpectatedUserCards />} />
+            <Route path="/admin/users/loans" element={<SpectatedUserLoans />} />
+            <Route path="/admin/users/deposits" element={<SpectatedUserDeposits />} />
         </Route>
       </Routes>
     </Router>

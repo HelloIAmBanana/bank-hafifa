@@ -1,21 +1,17 @@
 import React, { useState } from "react";
 import { useEffect, useMemo } from "react";
-import { Box, Grid, Modal, Skeleton, Typography } from "@mui/material";
+import { Box, Grid, Skeleton, Typography } from "@mui/material";
 import LoansRow from "../Loan/LoansRow";
 import { Loan } from "../../models/loan";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { User } from "../../models/user";
 import { getUserFullName } from "../../utils/utils";
+import { useLocation } from "react-router-dom";
 
-interface UserLoansModalProps {
-  isOpen: boolean;
-  closeModal: () => void;
-  user: User;
-}
-
-const UserLoansModal: React.FC<UserLoansModalProps> = ({ isOpen, closeModal, user }) => {
+const SpectatedUserLoans: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loans, setLoans] = useState<Loan[]>([]);
+  const { state } = useLocation();
+  const { user } = state;
 
   const fetchLoans = async () => {
     setIsLoading(true);
@@ -54,17 +50,6 @@ const UserLoansModal: React.FC<UserLoansModalProps> = ({ isOpen, closeModal, use
 
   return (
     <Grid container justifyContent="center">
-      <Modal
-        open={isOpen}
-        onClose={closeModal}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflowY: "auto",
-          borderRadius: 5,
-        }}
-      >
         <Box
           sx={{
             bgcolor: "white",
@@ -97,9 +82,8 @@ const UserLoansModal: React.FC<UserLoansModalProps> = ({ isOpen, closeModal, use
             </Box>
           </Grid>
         </Box>
-      </Modal>
     </Grid>
   );
 };
 
-export default UserLoansModal;
+export default SpectatedUserLoans;

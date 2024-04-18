@@ -10,77 +10,8 @@ import { User } from "../../../models/user";
 import { doesUserExist, exportToExcel, generateUniqueId } from "../../../utils/utils";
 import { errorAlert, successAlert } from "../../../utils/swalAlerts";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
+import { userFields } from "../../../components/UserManangement/UserFields";
 
-const fields = [
-  {
-    id: "firstName",
-    label: "First Name",
-    type: "text",
-    placeholder: "Enter first name",
-  },
-  {
-    id: "lastName",
-    label: "Last Name",
-    type: "text",
-    placeholder: "Enter last name",
-  },
-  {
-    id: "email",
-    label: "Email",
-    type: "text",
-    placeholder: "Enter email",
-  },
-  {
-    id: "password",
-    label: "Password",
-    type: "text",
-    placeholder: "Enter Password",
-  },
-  {
-    id: "birthDate",
-    label: "Date Of Birth",
-    type: "date",
-    placeholder: "Enter birthday",
-  },
-  {
-    id: "gender",
-    label: "Gender",
-    type: "select",
-    options: [
-      { value: "Male", label: "Male" },
-      { value: "Female", label: "Female" },
-    ],
-  },
-  {
-    id: "accountType",
-    label: "Account Type",
-    type: "select",
-    options: [
-      { value: "Personal", label: "Personal" },
-      { value: "Business", label: "Business" },
-    ],
-  },
-  {
-    id: "role",
-    label: "Account Role",
-    type: "select",
-    options: [
-      { value: "admin", label: "Admin" },
-      { value: "customer", label: "Customer" },
-    ],
-  },
-  {
-    id: "balance",
-    label: "Balance",
-    type: "number",
-    initValue: 0,
-  },
-  {
-    id: "avatarUrl",
-    label: "Profile Picture",
-    type: "file",
-  },
-];
 const schema: JSONSchemaType<User> = {
   type: "object",
   properties: {
@@ -219,7 +150,7 @@ const AdminUsersPage: React.FC = () => {
             </Typography>
             <Grid item mx="auto">
               <GenericForm
-                fields={fields}
+                fields={userFields()}
                 onSubmit={createUser}
                 schema={schema}
                 isLoading={isCreatingUser}
