@@ -1,15 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import SignUpPage from "./pages/signup";
-import SignInPage from "./pages/signin";
+import SignUpPage from "./pages/Signup";
+import SignInPage from "./pages/Signin";
 import { AuthHandlerRoute } from "./ProtectedRoutes";
-import ProfileSettingsPage from "./pages/profileSettings";
-import LoansPage from "./pages/loans";
-import DepositsPage from "./pages/deposits";
-import AdminCardsPage from "./pages/adminPages/cards";
-import AdminLoansPage from "./pages/adminPages/loans";
-import AdminDepositsPage from "./pages/adminPages/deposits";
-import Home from "./pages/home";
-import CardsPage from "./pages/cards";
+import ProfileSettingsPage from "./pages/ProfileSettings";
+import LoansPage from "./pages/Loans";
+import DepositsPage from "./pages/Deposits";
+import Home from "./pages/Home";
+import CardsPage from "./pages/Cards";
 import "./style.css";
 import "./App.css";
 import { FetchLoansProvider } from "./contexts/fetchLoansContext";
@@ -18,9 +15,6 @@ import { FetchTransactionsProvider } from "./contexts/fetchTransactionsContext";
 import { FetchCardsProvider } from "./contexts/fetchCardsContext";
 import { FetchUsersProvider } from "./contexts/fetchUserContext";
 import AdminUsersPage from "./pages/adminPages/users";
-import SpectatedUserCards from "./components/UserManangement/SpectatedUserCards";
-import SpectatedUserLoans from "./components/UserManangement/SpectatedUserLoans";
-import SpectatedUserDeposits from "./components/UserManangement/SpectatedUserDeposits";
 
 function App() {
   return (
@@ -41,15 +35,19 @@ function App() {
             <Route path="/deposits" element={<FetchDepositsProvider><DepositsPage /></FetchDepositsProvider>} />
             
             {/* Admin Routes */}
-            <Route path="/admin/cards" element={<FetchCardsProvider><AdminCardsPage /></FetchCardsProvider>} />
-            <Route path="/admin/loans" element={<FetchLoansProvider><AdminLoansPage /></FetchLoansProvider>} />
-            <Route path="/admin/deposits" element={<FetchDepositsProvider><AdminDepositsPage /></FetchDepositsProvider>} />
-            <Route path="/admin/users" element={<FetchUsersProvider><AdminUsersPage /></FetchUsersProvider>} />
+            <Route path="admin">
+              <Route path="cards" element={<FetchCardsProvider><CardsPage /></FetchCardsProvider>} />
+              <Route path="loans" element={<FetchLoansProvider><LoansPage /></FetchLoansProvider>} />
+              <Route path="deposits" element={<FetchDepositsProvider><DepositsPage /></FetchDepositsProvider>} />
+              <Route path="users" element={<FetchUsersProvider><AdminUsersPage /></FetchUsersProvider>} />
+            </Route>
 
             {/* User Spectating Routes */}
-            <Route path="/admin/users/cards" element={<SpectatedUserCards />} />
-            <Route path="/admin/users/loans" element={<SpectatedUserLoans />} />
-            <Route path="/admin/users/deposits" element={<SpectatedUserDeposits />} />
+            <Route path="admin/user">
+              <Route path="cards/:userID" element={<FetchCardsProvider><CardsPage /></FetchCardsProvider>} />
+              <Route path='loans/:userID' element={<FetchLoansProvider><LoansPage /></FetchLoansProvider>} />
+              <Route path="deposits/:userID" element={<FetchDepositsProvider><DepositsPage /></FetchDepositsProvider>} />
+            </Route> 
         </Route>
       </Routes>
     </Router>

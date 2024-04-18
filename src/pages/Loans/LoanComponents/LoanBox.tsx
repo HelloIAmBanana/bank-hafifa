@@ -1,13 +1,13 @@
 import { Grid, Paper, Typography } from "@mui/material";
-import { Loan } from "../../models/loan";
-import thunderIcon from "../../imgs/icons/Thunder.svg";
+import { Loan } from "../../../models/loan";
+import thunderIcon from "../../../imgs/icons/Thunder.svg"
 import LoanOfferButtons from "./LoanOfferButtons";
 import PendingLoanButtons from "./PendingLoanButtons";
 import ApprovedLoansButtons from "./ApprovedLoanButtons";
-import { formatIsoStringToDate } from "../../utils/utils";
+import { formatIsoStringToDate } from "../../../utils/utils";
 import { useContext, useMemo } from "react";
-import AuthService from "../../AuthService";
-import { UserContext } from "../../UserProvider";
+import AuthService from "../../../AuthService";
+import { UserContext } from "../../../UserProvider";
 import { useLocation } from "react-router-dom";
 
 interface LoansProps {
@@ -18,7 +18,7 @@ const LoanBox: React.FC<LoansProps> = ({ loan }) => {
   const [currentUser] = useContext(UserContext);
   const location = useLocation();
 
-  const isSpectating = "/admin/users/loans".includes(location.pathname);
+  const isSpectating = `/admin/user/loans/${loan.accountID}` === location.pathname;
 
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);

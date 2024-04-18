@@ -1,12 +1,12 @@
 import React, { useContext, useState } from "react";
-import { Deposit } from "../../models/deposit";
+import { Deposit } from "../../../models/deposit";
 import { Button, CircularProgress, Grid } from "@mui/material";
-import { successAlert } from "../../utils/swalAlerts";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { User } from "../../models/user";
-import { UserContext } from "../../UserProvider";
-import { Transaction } from "../../models/transactions";
-import { generateUniqueId, getUserFullName } from "../../utils/utils";
+import { successAlert } from "../../../utils/swalAlerts";
+import CRUDLocalStorage from "../../../CRUDLocalStorage";
+import { User } from "../../../models/user";
+import { UserContext } from "../../../UserProvider";
+import { Transaction } from "../../../models/transactions";
+import { generateUniqueId, getUserFullName } from "../../../utils/utils";
 
 interface UserDepositButtonsProps {
   deposit: Deposit;

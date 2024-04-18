@@ -5,15 +5,20 @@ import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 import { CellMouseOverEvent, ColDef, IRowNode, RowNode, SelectionChangedEvent } from "@ag-grid-community/core";
-import { useFetchUsersContext } from "../../contexts/fetchUserContext";
-import { UserContext } from "../../UserProvider";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { User } from "../../models/user";
+import { useFetchUsersContext } from "../../../../contexts/fetchUserContext";
+import { UserContext } from "../../../../UserProvider";
+import CRUDLocalStorage from "../../../../CRUDLocalStorage";
+import { User } from "../../../../models/user";
 import _ from "lodash";
-import { successAlert } from "../../utils/swalAlerts";
+import { successAlert } from "../../../../utils/swalAlerts";
 import EditUserModal from "./EditUser";
 import { colDefs } from "./UserTableColumns";
 import TableContextMenu from "./ContextMenu";
+
+const getRowColor = (params: any) => {
+  const inDebt = params.data.balance < 0;
+  return inDebt ? { background: "red" } : { background: "white" };
+};
 
 const UsersTable: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
@@ -51,10 +56,6 @@ const UsersTable: React.FC = () => {
     setIsUpdateUserModalOpen(false);
   };
 
-  const getRowColor = (params: any) => {
-    const inDebt = params.data.balance < 0;
-    return inDebt ? { background: "red" } : { background: "white" };
-  };
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {

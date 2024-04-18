@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { capitalizeFirstLetter, formatIsoStringToDate } from "../../utils/utils";
+import { capitalizeFirstLetter, formatIsoStringToDate } from "../../../../utils/utils";
 
 export const colDefs = [
   {

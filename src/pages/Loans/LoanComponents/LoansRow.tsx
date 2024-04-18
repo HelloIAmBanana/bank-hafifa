@@ -1,14 +1,14 @@
 import { Grid, Typography } from "@mui/material";
-import { Deposit } from "../../models/deposit";
-import DepositBox from "./DepositBox";
+import { Loan } from "../../../models/loan";
+import LoanBox from "./LoanBox";
 
-interface DepositRowsProps {
-  deposits: Deposit[];
+interface LoanRowsProps {
+  loans: Loan[];
   title: string;
 }
 
-const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title}) => {
-  if (deposits.length <= 0) return null;
+const LoansRow: React.FC<LoanRowsProps> = ({ loans, title }) => {
+  if (loans.length <= 0) return null;
   
   return (
     <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
@@ -18,16 +18,16 @@ const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title}) => {
       <Grid
         sx={{
           mt: 2,
-          overflowX: deposits.length > 2 ? "auto" : "visible",
+          overflowX: loans.length > 2 ? "auto" : "visible",
           display: "flex",
           flexDirection: "row",
           maxWidth: "100vh",
           width: "auto",
         }}
       >
-        {deposits.map((deposit, index) => (
+        {loans.map((loan, index) => (
           <Grid item key={index} mr={2}>
-            <DepositBox deposit={deposit}/>
+            <LoanBox loan={loan} />
           </Grid>
         ))}
       </Grid>
@@ -35,4 +35,4 @@ const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title}) => {
   );
 };
 
-export default DepositRows;
+export default LoansRow;

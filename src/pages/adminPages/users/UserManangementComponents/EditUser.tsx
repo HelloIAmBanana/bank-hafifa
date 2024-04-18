@@ -1,8 +1,8 @@
 import { JSONSchemaType } from "ajv";
-import { User } from "../../models/user";
+import { User } from "../../../../models/user";
 import { Grid, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import GenericForm from "../GenericForm/GenericForm";
+import GenericForm from "../../../../components/GenericForm/GenericForm";
 import { userFields } from "./UserFields";
 
 interface EditUserModalProps {

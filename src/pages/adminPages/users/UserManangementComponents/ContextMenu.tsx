@@ -1,5 +1,5 @@
 import { CircularProgress, Menu, MenuItem, Typography } from "@mui/material";
-import { User } from "../../models/user";
+import { User } from "../../../../models/user";
 import { useNavigate } from "react-router-dom";
 
 interface TableContextMenuProps {
@@ -49,7 +49,7 @@ const TableContextMenu: React.FC<TableContextMenuProps> = ({
       <MenuItem
         disabled={isContextMenuDeleting}
         onClick={() => {
-          navigate("/admin/users/loans", { state: { user: hoveredUser } });
+          navigate(`/admin/user/loans/${hoveredUser.id}`);
         }}
       >
         <Typography fontFamily={"Poppins"}>User Loans</Typography>
@@ -57,7 +57,7 @@ const TableContextMenu: React.FC<TableContextMenuProps> = ({
       <MenuItem
         disabled={isContextMenuDeleting}
         onClick={() => {
-          navigate("/admin/users/cards", { state: { user: hoveredUser } });
+          navigate(`/admin/user/cards/${hoveredUser.id}`)
         }}
       >
         <Typography fontFamily={"Poppins"}>User Cards</Typography>
@@ -65,7 +65,7 @@ const TableContextMenu: React.FC<TableContextMenuProps> = ({
       <MenuItem
         disabled={isContextMenuDeleting}
         onClick={() => {
-          navigate("/admin/users/deposits", { state: { user: hoveredUser } });
+          navigate(`/admin/user/deposits/${hoveredUser.id}`)
         }}
       >
         <Typography fontFamily={"Poppins"}>User Deposits</Typography>

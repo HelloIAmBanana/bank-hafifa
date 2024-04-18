@@ -17,7 +17,7 @@ function exctractPathFromAdminRoute(path: string) {
   return normalPath;
 }
 
-const ShowNotification = (notification: NotificationType) => {
+const showNotification = (notification: NotificationType) => {
   switch (notification) {
     case "cardApproved":
       return notificationAlert("Your card request was approved by an admin!");
@@ -46,14 +46,14 @@ export const AuthHandlerRoute = () => {
     setCurrentUser(user);
   };
 
-  const getNotification = async () => {
+  const triggerNotifications = async () => {
     const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
 
     if (!currentUser) return;
     const userNotifications = notifications.filter((notification) => notification.accountID === currentUser.id);
 
     userNotifications.forEach(async (notification) => {
-      ShowNotification(notification.type);
+      showNotification(notification.type);
 
       await CRUDLocalStorage.deleteItemFromList("notifications", notification);
     });
@@ -81,7 +81,7 @@ export const AuthHandlerRoute = () => {
   };
 
   useEffect(() => {
-    getNotification();
+    triggerNotifications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
@@ -92,9 +92,9 @@ export const AuthHandlerRoute = () => {
   }, [location]);
 
   const currentRoute = location.pathname;
-  const isPublicRoute = ["/", "/signup"].includes(currentRoute);
+
   const isAdminRoute = [
-    "/admin/cards",
+    "/admin/",
     "/admin/loans",
     "/admin/deposits",
     "/admin/users",
@@ -102,8 +102,13 @@ export const AuthHandlerRoute = () => {
     "/home",
     "/admin/users/cards",
     "/admin/users/deposits",
-    "/admin/users/loans",
-  ].includes(currentRoute);
+    "/admin/users/loans/:userID",
+    "/admin/users/cards/:userID",
+    "/admin/users/deposits/:userID",
+  ].some((route) => currentRoute.startsWith(route));
+
+  const isPublicRoute = ["/", "/signup"].includes(currentRoute);
+
   
   const isUserRoute = ["/cards", "/loans", "/deposits", "/users", "/settings", "/home"].includes(currentRoute);
 
@@ -122,7 +127,6 @@ export const AuthHandlerRoute = () => {
           ) : (
             <>
               <NavBar />
-
               <Grid container direction="column" justifyContent="flex-start" alignItems="center">
                 {blockedUsers.includes(currentUser.id) && (
                   <Modal open={true} sx={{ backgroundColor: "white" }}>

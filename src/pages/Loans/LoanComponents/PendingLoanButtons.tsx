@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Loan } from "../../models/loan";
+import { Loan } from "../../../models/loan";
 import { Box, Button, CircularProgress, Grid, Modal } from "@mui/material";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { successAlert } from "../../utils/swalAlerts";
-import GenericForm from "../GenericForm/GenericForm";
+import CRUDLocalStorage from "../../../CRUDLocalStorage";
+import { successAlert } from "../../../utils/swalAlerts";
+import GenericForm from "../../../components/GenericForm/GenericForm";
 import { JSONSchemaType } from "ajv";
-import { createNewNotification } from "../../utils/utils";
-import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
+import { createNewNotification } from "../../../utils/utils";
+import { useFetchLoanContext } from "../../../contexts/fetchLoansContext";
 
 
 interface PendingLoanButtonsProps {
