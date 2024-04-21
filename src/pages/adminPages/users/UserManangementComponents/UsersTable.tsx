@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { useEffect, useContext } from "react";
+import { useContext } from "react";
 import { Grid, Box, Container, Skeleton, Button, CircularProgress } from "@mui/material";
 import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
@@ -22,7 +22,7 @@ const getRowColor = (params: any) => {
 
 const UsersTable: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
-  const { fetchUsers, isLoading, users } = useFetchUsersContext();
+  const { isLoading, users } = useFetchUsersContext();
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
   const [hoveredUser, setHoveredUser] = useState<User>(currentUser!);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
@@ -80,7 +80,6 @@ const UsersTable: React.FC = () => {
     if (user.id === currentUser!.id) return;
     setIsContextMenuDeleting(true);
     await CRUDLocalStorage.deleteItemFromList<User>("users", user);
-    await fetchUsers();
     successAlert(`Deleted User`);
     setIsContextMenuDeleting(false);
   };
@@ -92,7 +91,6 @@ const UsersTable: React.FC = () => {
       if (user!.id === currentUser!.id) return;
       await CRUDLocalStorage.deleteItemFromList<User>("users", user!);
     });
-    await fetchUsers();
     setIsDeletingRow(false);
     successAlert(`Deleted Users`);
   };
@@ -106,7 +104,6 @@ const UsersTable: React.FC = () => {
     if (!_.isEqual(updatedUser, currentUser)) {
       await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
 
-      await fetchUsers();
 
       successAlert(`Updated User!`);
       if (hoveredUser.id === currentUser!.id) {
@@ -116,11 +113,6 @@ const UsersTable: React.FC = () => {
     setIsUpdatingProfile(false);
     setIsUpdateUserModalOpen(false);
   };
-
-  useEffect(() => {
-    fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
       <Container sx={{ mt: 2 }}>

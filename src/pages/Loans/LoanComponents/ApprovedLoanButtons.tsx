@@ -4,7 +4,6 @@ import { Box, Button, CircularProgress, Grid, Modal, TextField, Typography } fro
 import { UserContext } from "../../../UserProvider";
 import { User } from "../../../models/user";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import { useFetchLoanContext } from "../../../contexts/fetchLoansContext";
 import { Transaction } from "../../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../../utils/utils";
 
@@ -17,7 +16,6 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState(0);
-  const { fetchLoans } = useFetchLoanContext();
 
   const openLoanApprovalModal = () => {
     setIsLoanApprovalModalOpen(true);
@@ -64,7 +62,6 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
     setCurrentUser(updatedUser);
 
-    await fetchLoans();
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

@@ -5,7 +5,6 @@ import { Loan } from "../../../models/loan";
 import { successAlert } from "../../../utils/swalAlerts";
 import { User } from "../../../models/user";
 import { UserContext } from "../../../UserProvider";
-import { useFetchLoanContext } from "../../../contexts/fetchLoansContext";
 import { Transaction } from "../../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../../utils/utils";
 
@@ -17,13 +16,11 @@ const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = ({ loan }) => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isRejectLoading, setIsRejectLoading] = useState(false);
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
-  const { fetchLoans } = useFetchLoanContext();
 
   const rejectLoanOffer = async () => {
     setIsRejectLoading(true);
     await CRUDLocalStorage.deleteItemFromList<Loan>("loans", loan);
     successAlert("Loan Offer Rejected!");
-    await fetchLoans();
   };
 
   const acceptLoanOffer = async () => {
@@ -55,7 +52,6 @@ const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = ({ loan }) => {
     await CRUDLocalStorage.updateItemInList<Loan>("loans", updatedLoan);
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
     setCurrentUser(updatedUser);
-    await fetchLoans();
     setIsAcceptLoading(false);
   };
   return (

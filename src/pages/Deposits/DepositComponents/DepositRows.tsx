@@ -7,9 +7,7 @@ interface DepositRowsProps {
   title: string;
 }
 
-const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title}) => {
-  if (deposits.length <= 0) return null;
-  
+const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title }) => {
   return (
     <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
       <Typography variant="h5" fontFamily="Poppins">
@@ -25,11 +23,17 @@ const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title}) => {
           width: "auto",
         }}
       >
-        {deposits.map((deposit, index) => (
-          <Grid item key={index} mr={2}>
-            <DepositBox deposit={deposit}/>
-          </Grid>
-        ))}
+        {deposits.length > 0 ? (
+          deposits.map((deposit, index) => (
+            <Grid item key={index} mr={2}>
+              <DepositBox deposit={deposit} />
+            </Grid>
+          ))
+        ) : (
+          <Typography variant="h6" fontFamily="Poppins" gutterBottom mb={5}>
+            There Aren't Any {title} Deposits
+          </Typography>
+        )}
       </Grid>
     </Grid>
   );

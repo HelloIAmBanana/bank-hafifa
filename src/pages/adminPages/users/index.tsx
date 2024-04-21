@@ -44,7 +44,7 @@ const schema: JSONSchemaType<User> = {
   },
 };
 const AdminUsersPage: React.FC = () => {
-  const { fetchUsers, users } = useFetchUsersContext();
+  const { users } = useFetchUsersContext();
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isUserCreationModalOpen, setIsUserCreationModalOpen] = useState(false);
 
@@ -71,7 +71,6 @@ const AdminUsersPage: React.FC = () => {
     }
 
     await CRUDLocalStorage.addItemToList<User>("users", newUser);
-    await fetchUsers();
     setIsCreatingUser(false);
     successAlert("Account Created!");
     closeUserCreationModal();

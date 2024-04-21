@@ -4,7 +4,7 @@ import { User } from "../../models/user";
 import { Transaction } from "../../models/transactions";
 import { createNewNotification, generateUniqueId, getUserFullName } from "../../utils/utils";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { UserContext } from "../../UserProvider";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { JSONSchemaType } from "ajv";
@@ -57,7 +57,7 @@ const schema: JSONSchemaType<Transaction> = {
 const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const { fetchTransactions, isLoading, transactions } = useFetchTransactionsContext();
+  const { isLoading, transactions } = useFetchTransactionsContext();
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
   const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
   const navigate = useNavigate();
@@ -141,13 +141,7 @@ const Home: React.FC = () => {
     closePaymentModal();
   };
 
-  useEffect(() => {
-    fetchTransactions();
-    // eslint-disable-next-line
-  }, [currentUser]);
-
   document.title = "Home";
-console.log("HOMEEEEEEEEEEEEE")
   return (
     <Box sx={{ display: "flex" }}>
       <Container sx={{ mt: 3 }}>

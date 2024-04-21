@@ -6,7 +6,6 @@ import { successAlert } from "../../../utils/swalAlerts";
 import GenericForm from "../../../components/GenericForm/GenericForm";
 import { JSONSchemaType } from "ajv";
 import { createNewNotification } from "../../../utils/utils";
-import { useFetchLoanContext } from "../../../contexts/fetchLoansContext";
 
 
 interface PendingLoanButtonsProps {
@@ -55,7 +54,6 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
   const [isRejectLoading, setIsRejectLoading] = useState(false);
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
-  const { fetchLoans } = useFetchLoanContext();
 
   const rejectLoan = async () => {
     setIsRejectLoading(true);
@@ -69,7 +67,6 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
 
     await CRUDLocalStorage.updateItemInList<Loan>("loans", newLoan);
     successAlert("Loan Rejected!");
-    await fetchLoans();
   };
 
   const acceptLoanRequest = async (data: any) => {
@@ -89,7 +86,6 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
 
     await CRUDLocalStorage.updateItemInList<Loan>("loans", newLoan);
     successAlert("Loan Offered!");
-    await fetchLoans();
   };
 
   const openLoanApprovalModal = () => {
