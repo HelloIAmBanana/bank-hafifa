@@ -1,17 +1,17 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { Suspense, useContext, useEffect, useState } from "react";
 import { UserContext } from "../../UserProvider";
 import { Box, Button, Container, Grid, Modal, Skeleton, Typography } from "@mui/material";
-import { generateUniqueId, getUserFullName } from "../../utils/utils";
+import { filterArrayByStatus, generateUniqueId, getUserFullName } from "../../utils/utils";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { Loan } from "../../models/loan";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import LoansRow from "./LoanComponents/LoansRow";
-import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
 import AuthService from "../../AuthService";
-import { useNavigate, useParams } from "react-router-dom";
+import { Await, useLoaderData, useNavigate, useParams, useRevalidator } from "react-router-dom";
 import { User } from "../../models/user";
+import { LoansLoaderData } from "./loansLoader";
 
 const schema: JSONSchemaType<Loan> = {
   type: "object",
@@ -47,11 +47,13 @@ const LoansPage: React.FC = () => {
   const [currentUser] = useContext(UserContext);
   const [isNewLoanModalOpen, setIsNewLoanModalOpen] = useState(false);
   const [isCreatingNewLoan, setIsCreatingNewLoan] = useState(false);
-  const { isLoading, loans } = useFetchLoanContext();
 
   const navigate = useNavigate();
-
   const { userID } = useParams();
+
+
+  const data = useLoaderData() as LoansLoaderData;
+  const revalidator = useRevalidator();
 
   const isSpectatedUserReal = async () => {
     if (userID) {
@@ -65,30 +67,6 @@ const LoansPage: React.FC = () => {
   };
 
   const isAdmin = AuthService.isUserAdmin(currentUser);
-
-  const pendingLoans = useMemo(() => {
-    const pendingLoans = loans.filter((loan) => loan.status === "pending");
-    return userID ? pendingLoans.filter((loan) => loan.accountID === userID) : pendingLoans;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loans]);
-
-  const approvedLoans = useMemo(() => {
-    const approvedLoans = loans.filter((loan) => loan.status === "approved");
-    return userID ? approvedLoans.filter((loan) => loan.accountID === userID) : approvedLoans;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loans]);
-
-  const offeredLoans = useMemo(() => {
-    const offeredLoans = loans.filter((loan) => loan.status === "offered");
-    return userID ? offeredLoans.filter((loan) => loan.accountID === userID) : offeredLoans;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loans]);
-
-  const rejectedLoans = useMemo(() => {
-    const rejectedLoans = loans.filter((loan) => loan.status === "rejected");
-    return userID ? rejectedLoans.filter((loan) => loan.accountID === userID) : rejectedLoans;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loans]);
 
   const handleLoanModalSubmit = async (data: any) => {
     const newLoan: Loan = {
@@ -104,9 +82,11 @@ const LoansPage: React.FC = () => {
 
     setIsCreatingNewLoan(true);
     await CRUDLocalStorage.addItemToList<Loan>("loans", newLoan);
+    revalidator.revalidate()
     successAlert("Loan was created!");
     closeLoanModal();
     setIsCreatingNewLoan(false);
+    
   };
 
   const openLoanModal = () => {
@@ -144,20 +124,27 @@ const LoansPage: React.FC = () => {
                   </Grid>
                 )}
               </Grid>
-
-              {isLoading ? (
-                <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
-                  <Skeleton height={"12rem"} width={window.innerWidth / 2} />
-                </Grid>
-              ) : isAdmin && !userID ? (
-                <LoansRow loans={pendingLoans} title="Pending" />
-              ) : (
-                <Box>
-                  <LoansRow loans={approvedLoans} title="Approved" />
-                  <LoansRow loans={offeredLoans} title="Offered" />
-                  <LoansRow loans={rejectedLoans} title="Rejected" />
-                </Box>
-              )}
+              <Suspense
+                  fallback={
+                    <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
+                      <Skeleton height={"12rem"} width={window.innerWidth / 2} />
+                    </Grid>
+                  }
+                >
+                  <Await resolve={data.loans} errorElement={<p>Error loading package location!</p>}>
+                    {(loans) => (
+                      isAdmin && !userID ? (
+                        <LoansRow loans={filterArrayByStatus(loans, "pending", userID)} title="Pending" />
+                      ) : (
+                        <Box>
+                          <LoansRow loans={filterArrayByStatus(loans, "approved", userID)} title="Approved" />
+                          <LoansRow loans={filterArrayByStatus(loans, "offered", userID)} title="Offered" />
+                          <LoansRow loans={filterArrayByStatus(loans, "rejected", userID)} title="Rejected" />
+                        </Box>
+                      )
+                    )}
+                  </Await>
+                </Suspense>
             </Grid>
           </Grid>
         </Container>

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { Suspense, useCallback, useMemo, useState } from "react";
 import { useContext } from "react";
 import { Grid, Box, Container, Skeleton, Button, CircularProgress } from "@mui/material";
 import { AgGridReact } from "@ag-grid-community/react";
@@ -14,6 +14,8 @@ import { successAlert } from "../../../../utils/swalAlerts";
 import EditUserModal from "./EditUser";
 import { colDefs } from "./UserTableColumns";
 import TableContextMenu from "./ContextMenu";
+import { Await, useLoaderData, useRevalidator } from "react-router-dom";
+import { UsersLoaderData } from "../usersLoader";
 
 const getRowColor = (params: any) => {
   const inDebt = params.data.balance < 0;
@@ -33,6 +35,9 @@ const UsersTable: React.FC = () => {
     mouseX: number;
     mouseY: number;
   } | null>(null);
+
+  const data = useLoaderData() as UsersLoaderData;
+  const revalidator = useRevalidator();
 
   const handleContextMenu = (event: React.MouseEvent) => {
     if (isContextMenuDeleting) return;
@@ -55,7 +60,6 @@ const UsersTable: React.FC = () => {
   const handleCloseUserEditModal = () => {
     setIsUpdateUserModalOpen(false);
   };
-
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -104,7 +108,6 @@ const UsersTable: React.FC = () => {
     if (!_.isEqual(updatedUser, currentUser)) {
       await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
 
-
       successAlert(`Updated User!`);
       if (hoveredUser.id === currentUser!.id) {
         setCurrentUser(updatedUser);
@@ -115,65 +118,116 @@ const UsersTable: React.FC = () => {
   };
 
   return (
-      <Container sx={{ mt: 2 }}>
-        <Grid container spacing={5} justifyContent="flex-start">
-          <Box sx={{ flexGrow: 1 }}>
-            <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start">
-              {isLoading ? (
+    <Container sx={{ mt: 2 }}>
+      <Grid container spacing={5} justifyContent="flex-start">
+        <Box sx={{ flexGrow: 1 }}>
+          <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start">
+            <Suspense
+              fallback={
                 <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
                   <Skeleton height={"12rem"} width={window.innerWidth / 2} />
                 </Grid>
-              ) : (
-                <Grid container mt={2}>
-                  <Box sx={{ width: "100%" }}>
-                    <div onContextMenu={handleContextMenu}>
-                      <Box className="ag-user-management" style={{ width: "100%" }} mt={2}>
-                        <AgGridReact
-                          rowData={users}
-                          columnDefs={colDefs}
-                          domLayout="autoHeight"
-                          rowHeight={48}
-                          pagination={true}
-                          paginationPageSize={10}
-                          getRowStyle={getRowColor}
-                          paginationPageSizeSelector={[10]}
-                          defaultColDef={defaultColDef}
-                          rowSelection="multiple"
-                          onSelectionChanged={onSelectionChanged}
-                          onCellMouseOver={onCellHover}
-                        />
-                      </Box>
+              }
+            >
+              <Await resolve={data.users} errorElement={<p>Error loading package location!</p>}>
+                {(users) => (
+                  <Grid container mt={2}>
+                    <Box sx={{ width: "100%" }}>
+                      <div onContextMenu={handleContextMenu}>
+                        <Box className="ag-user-management" style={{ width: "100%" }} mt={2}>
+                          <AgGridReact
+                            rowData={users}
+                            columnDefs={colDefs}
+                            domLayout="autoHeight"
+                            rowHeight={48}
+                            pagination={true}
+                            paginationPageSize={10}
+                            getRowStyle={getRowColor}
+                            paginationPageSizeSelector={[10]}
+                            defaultColDef={defaultColDef}
+                            rowSelection="multiple"
+                            onSelectionChanged={onSelectionChanged}
+                            onCellMouseOver={onCellHover}
+                          />
+                        </Box>
+                      </div>
+                    </Box>
+                    {selectedRows.length > 0 && (
+                      <Button type="submit" disabled={isDeletingRow} onClick={handleDeleteUsersButtonClicked}>
+                        {isDeletingRow ? <CircularProgress /> : "Delete Selected Users"}
+                      </Button>
+                    )}
+                    <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
+                      <TableContextMenu
+                        contextMenuDeleteUser={contextMenuDeleteUser}
+                        contextMenuPos={contextMenuPos}
+                        handleClose={handleClose}
+                        handleContextMenu={handleContextMenu}
+                        hoveredUser={hoveredUser!}
+                        isContextMenuDeleting={isContextMenuDeleting}
+                        setIsUpdateUserModalOpen={setIsUpdateUserModalOpen}
+                      />
                     </div>
-                  </Box>
-                  {selectedRows.length > 0 && (
-                    <Button type="submit" disabled={isDeletingRow} onClick={handleDeleteUsersButtonClicked}>
-                      {isDeletingRow ? <CircularProgress /> : "Delete Selected Users"}
-                    </Button>
-                  )}
-                  <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
-                    <TableContextMenu
-                      contextMenuDeleteUser={contextMenuDeleteUser}
-                      contextMenuPos={contextMenuPos}
-                      handleClose={handleClose}
-                      handleContextMenu={handleContextMenu}
-                      hoveredUser={hoveredUser!}
-                      isContextMenuDeleting={isContextMenuDeleting}
-                      setIsUpdateUserModalOpen={setIsUpdateUserModalOpen}
-                    />
+                  </Grid>
+                )}
+              </Await>
+            </Suspense>
+
+            {/* {isLoading ? (
+              <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
+                <Skeleton height={"12rem"} width={window.innerWidth / 2} />
+              </Grid>
+            ) : (
+              <Grid container mt={2}>
+                <Box sx={{ width: "100%" }}>
+                  <div onContextMenu={handleContextMenu}>
+                    <Box className="ag-user-management" style={{ width: "100%" }} mt={2}>
+                      <AgGridReact
+                        rowData={users}
+                        columnDefs={colDefs}
+                        domLayout="autoHeight"
+                        rowHeight={48}
+                        pagination={true}
+                        paginationPageSize={10}
+                        getRowStyle={getRowColor}
+                        paginationPageSizeSelector={[10]}
+                        defaultColDef={defaultColDef}
+                        rowSelection="multiple"
+                        onSelectionChanged={onSelectionChanged}
+                        onCellMouseOver={onCellHover}
+                      />
+                    </Box>
                   </div>
-                </Grid>
-              )}
-            </Grid>
-          </Box>
-        </Grid>
-        <EditUserModal
-          closeModal={handleCloseUserEditModal}
-          isLoading={isUpdatingProfile}
-          isOpen={isUpdateUserModalOpen}
-          user={hoveredUser!}
-          updateProfile={handleUpdateUser}
-        />
-      </Container>
+                </Box>
+                {selectedRows.length > 0 && (
+                  <Button type="submit" disabled={isDeletingRow} onClick={handleDeleteUsersButtonClicked}>
+                    {isDeletingRow ? <CircularProgress /> : "Delete Selected Users"}
+                  </Button>
+                )}
+                <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
+                  <TableContextMenu
+                    contextMenuDeleteUser={contextMenuDeleteUser}
+                    contextMenuPos={contextMenuPos}
+                    handleClose={handleClose}
+                    handleContextMenu={handleContextMenu}
+                    hoveredUser={hoveredUser!}
+                    isContextMenuDeleting={isContextMenuDeleting}
+                    setIsUpdateUserModalOpen={setIsUpdateUserModalOpen}
+                  />
+                </div>
+              </Grid>
+            )} */}
+          </Grid>
+        </Box>
+      </Grid>
+      <EditUserModal
+        closeModal={handleCloseUserEditModal}
+        isLoading={isUpdatingProfile}
+        isOpen={isUpdateUserModalOpen}
+        user={hoveredUser!}
+        updateProfile={handleUpdateUser}
+      />
+    </Container>
   );
 };
 export default UsersTable;

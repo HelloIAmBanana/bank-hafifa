@@ -1,7 +1,7 @@
 import { RouteObject } from "react-router-dom";
 import ProfileSettingsPage from "../pages/ProfileSettings";
 import { FetchTransactionsProvider } from "../contexts/fetchTransactionsContext";
-import { Home } from "@mui/icons-material";
+import Home from "../pages/Home";
 
 const userRoutes: RouteObject[] = [
     {

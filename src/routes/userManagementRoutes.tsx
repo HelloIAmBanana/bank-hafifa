@@ -7,6 +7,10 @@ import AdminUsersPage from "../pages/adminPages/users";
 import LoansPage from "../pages/Loans";
 import DepositsPage from "../pages/Deposits";
 import { FetchDepositsProvider } from "../contexts/fetchDepositsContext";
+import { CardLoader } from "../pages/Cards/cardsLoader";
+import { loansLoader } from "../pages/Loans/loansLoader";
+import { depositsLoader } from "../pages/Deposits/depositsLoader";
+import { userLoader } from "../pages/adminPages/users/usersLoader";
 
 const userManagementRoutes: RouteObject[] = [
     {
@@ -14,19 +18,23 @@ const userManagementRoutes: RouteObject[] = [
         children:[
           {
             index: true,
-            element: <FetchUsersProvider><AdminUsersPage /></FetchUsersProvider>
+            element: <FetchUsersProvider><AdminUsersPage /></FetchUsersProvider>,
+            loader:userLoader
           },
           {
             element:<FetchCardsProvider><CardsPage /></FetchCardsProvider>,
-            path:"cards/:userID"
+            path:"cards/:userID",
+            loader:CardLoader
           },
           {
             element:<FetchLoansProvider><LoansPage /></FetchLoansProvider>,
-            path:"loans/:userID"
+            path:"loans/:userID",
+            loader:loansLoader
           },
           {
             element:<FetchDepositsProvider><DepositsPage /></FetchDepositsProvider>,
-            path:"deposits/:userID"
+            path:"deposits/:userID",
+            loader:depositsLoader
           },
         ]
       }

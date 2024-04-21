@@ -41,9 +41,17 @@ export async function doesUserExist(userEmail: string) {
   return Boolean(users.find((user) => user.email === userEmail));
 }
 
-export function exportToExcel<T>(fileName:string,data:T[]){
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, capitalizeFirstLetter(fileName));
-    XLSX.writeFile(wb, `${fileName}.xlsx`);
+export function exportToExcel<T>(fileName: string, data: T[]) {
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, capitalizeFirstLetter(fileName));
+  XLSX.writeFile(wb, `${fileName}.xlsx`);
+}
+export function filterArrayByStatus<T extends { status: string; accountID: string }>(
+  array: T[],
+  status: string,
+  userID?: string
+) {
+  const filteredCards = array.filter((item) => item.status === status);
+  return userID ? filteredCards.filter((card) => card.accountID === userID) : filteredCards;
 }

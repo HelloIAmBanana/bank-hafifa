@@ -1,8 +1,8 @@
-import * as React from "react";
+import React, { Suspense, lazy } from "react";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect, useContext } from "react";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import { generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
+import { filterArrayByStatus, generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
 import {
   Button,
   Grid,
@@ -17,11 +17,12 @@ import {
 } from "@mui/material";
 import { UserContext } from "../../UserProvider";
 import { Card } from "../../models/card";
-import CreditCardsRow from "./CreditCardComponents/CreditCardsRow";
-import { useFetchCardsContext } from "../../contexts/fetchCardsContext";
 import AuthService from "../../AuthService";
-import { useNavigate, useParams } from "react-router-dom";
+import { Await, useLoaderData, useNavigate, useParams, useRevalidator } from "react-router-dom";
 import { User } from "../../models/user";
+import { CardsLoaderData } from "./cardsLoader";
+
+const CreditCardsRow = lazy(() => import("./CreditCardComponents/CreditCardsRow")); // Lazy-load component
 
 const calculateExpiredDate = (date: string) => {
   const year = Number(date.slice(0, 4));
@@ -35,7 +36,9 @@ const CardsPage: React.FC = () => {
   const [isCardCreationLoading, setIsCardCreationLoading] = useState(false);
   const [cardProvider, setCardProvider] = useState("Visa");
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
-  const { isLoading, cards } = useFetchCardsContext();
+
+  const data = useLoaderData() as CardsLoaderData;
+  const revalidator = useRevalidator();
 
   const navigate = useNavigate();
   const { userID } = useParams();
@@ -45,21 +48,6 @@ const CardsPage: React.FC = () => {
   };
 
   const isAdmin = AuthService.isUserAdmin(currentUser!);
-
-  const pendingCards = useMemo(() => {
-    const pendingCards = cards.filter((card) => card.status === "pending");
-    return userID ? pendingCards.filter((card) => card.accountID === userID) : pendingCards;
-  }, [cards]);
-
-  const approvedCards = useMemo(() => {
-    const approvedCards = cards.filter((card) => card.status === "approved");
-    return userID ? approvedCards.filter((card) => card.accountID === userID) : approvedCards;
-  }, [cards]);
-
-  const rejectedCards = useMemo(() => {
-    const rejectedCards = cards.filter((card) => card.status === "rejected");
-    return userID ? rejectedCards.filter((card) => card.accountID === userID) : rejectedCards;
-  }, [cards]);
 
   const openCardModal = () => {
     setIsNewCardModalOpen(true);
@@ -91,6 +79,7 @@ const CardsPage: React.FC = () => {
     successAlert("New Card Request Was Created!");
     setIsCardCreationLoading(false);
     closeCardModal();
+    revalidator.revalidate();
   };
 
   const isSpectatedUserReal = async () => {
@@ -132,18 +121,23 @@ const CardsPage: React.FC = () => {
                     )}
                   </Grid>
                 </Grid>
-
-                {isLoading ? (
-                  <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
-                    <Skeleton height={"12rem"} width={window.innerWidth / 2} />
-                  </Grid>
-                ) : (
-                  <Box>
-                    <CreditCardsRow cards={approvedCards} title="Approved" />
-                    <CreditCardsRow cards={pendingCards} title="Pending" />
-                    <CreditCardsRow cards={rejectedCards} title="Rejected" />
-                  </Box>
-                )}
+                <Suspense
+                  fallback={
+                    <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
+                      <Skeleton height={"12rem"} width={window.innerWidth / 2} />
+                    </Grid>
+                  }
+                >
+                  <Await resolve={data.cards} errorElement={<p>Error loading package location!</p>}>
+                    {(cards) => (
+                      <Box>
+                        <CreditCardsRow cards={filterArrayByStatus(cards, "approved", userID)} title="Approved" />
+                        <CreditCardsRow cards={filterArrayByStatus(cards, "pending", userID)} title="Pending" />
+                        <CreditCardsRow cards={filterArrayByStatus(cards, "rejected", userID)} title="Rejected" />
+                      </Box>
+                    )}
+                  </Await>
+                </Suspense>
               </Grid>
             </Box>
           </Grid>
