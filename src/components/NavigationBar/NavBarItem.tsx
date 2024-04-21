@@ -1,7 +1,9 @@
 import { ListItem, ListItemButton, Typography } from "@mui/material";
-import { FunctionComponent } from "react";
+import { FunctionComponent, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import { IconContext } from "react-icons";
+import AuthService from "../../AuthService";
+import { UserContext } from "../../UserProvider";
 
 interface NavBarItemProps {
   label: string;
@@ -11,6 +13,9 @@ interface NavBarItemProps {
 
 const NavBarItem: FunctionComponent<NavBarItemProps> = ({ label, icon, onClick }) => {
   const location = useLocation();
+  const [currentUser] = useContext(UserContext);
+
+  const isAdmin = AuthService.isUserAdmin(currentUser);
 
   return (
     <ListItem
@@ -33,7 +38,7 @@ const NavBarItem: FunctionComponent<NavBarItemProps> = ({ label, icon, onClick }
               location.pathname === "/admin/" + label.toLowerCase().split(" ")[0]
                 ? "#ca0f50d0"
                 : "#999999",
-            size: "2.5rem",
+            size: isAdmin?"1.5rem":"2.5rem",
           }}
         >
           {icon}
@@ -41,8 +46,8 @@ const NavBarItem: FunctionComponent<NavBarItemProps> = ({ label, icon, onClick }
         <Typography
           sx={{
             fontFamily: "Poppins",
-            fontSize: "1.5rem",
-            marginLeft: "64px",
+            fontSize: isAdmin?"1rem":"1.5rem",
+            marginLeft: "32px",
           }}
         >
           {label}

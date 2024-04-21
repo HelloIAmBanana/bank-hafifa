@@ -1,13 +1,12 @@
 import React, { useContext, useState } from "react";
-import { Deposit } from "../../models/deposit";
+import { Deposit } from "../../../models/deposit";
 import { Button, CircularProgress, Grid } from "@mui/material";
-import { successAlert } from "../../utils/swalAlerts";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { User } from "../../models/user";
-import { UserContext } from "../../UserProvider";
-import { useFetchDepositsContext } from "../../contexts/fetchDepositsContext";
-import { Transaction } from "../../models/transactions";
-import { generateUniqueId, getUserFullName } from "../../utils/utils";
+import { successAlert } from "../../../utils/swalAlerts";
+import CRUDLocalStorage from "../../../CRUDLocalStorage";
+import { User } from "../../../models/user";
+import { UserContext } from "../../../UserProvider";
+import { Transaction } from "../../../models/transactions";
+import { generateUniqueId, getUserFullName } from "../../../utils/utils";
 
 interface UserDepositButtonsProps {
   deposit: Deposit;
@@ -18,13 +17,11 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
 
   const [isAcceptingDeposit, setIsAcceptingDeposit] = useState(false);
-  const { fetchDeposits } = useFetchDepositsContext();
 
   const rejectDeposit = async () => {
     setIsRejectingDeposit(true);
     await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     successAlert("Deposit was rejected!");
-    await fetchDeposits();
   };
 
   const acceptDeposit = async () => {
@@ -58,7 +55,6 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
     setCurrentUser(updatedUser);
     await CRUDLocalStorage.updateItemInList<Deposit>("deposits", acceptedDeposit);
     successAlert("Deposit was accepted!");
-    await fetchDeposits();
   };
 
   return (

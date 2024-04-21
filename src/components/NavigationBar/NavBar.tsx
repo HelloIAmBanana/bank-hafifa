@@ -84,6 +84,7 @@ export default function NavBar() {
             [`& .MuiDrawer-paper`]: {
               display: "flex",
               height: "100vh",
+              maxWidth:"240px",
               fontFamily: "Poppins",
               borderTopLeftRadius: 16,
               borderLeftRadius: 16,

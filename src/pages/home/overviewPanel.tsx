@@ -53,7 +53,7 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
                   fontSize: 36,
                 }}
               >
-                {!isButtonLoading ? `$${Math.ceil(currentUser.balance).toLocaleString()}` : `$${Math.ceil(userOldBalance!).toLocaleString()}`}
+                {!isButtonLoading ? `$${Math.ceil(currentUser!.balance).toLocaleString()}` : `$${Math.ceil(userOldBalance!).toLocaleString()}`}
               </Typography>
             )}
           </Paper>

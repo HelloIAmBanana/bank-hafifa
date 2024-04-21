@@ -29,11 +29,8 @@ export function FetchCardsProvider({ children }: React.PropsWithChildren) {
     setIsLoading(true);
     try {
       const fetchedCards = await CRUDLocalStorage.getAsyncData<Card[]>("cards");
-      const currentCards = isAdmin
-        ? fetchedCards
-        : fetchedCards.filter((card) => card.accountID === currentUser!.id);
-
-        setCards(currentCards);
+      const currentCards = isAdmin ? fetchedCards : fetchedCards.filter((card) => card.accountID === currentUser!.id);
+      setCards(currentCards);
     } catch (error) {
       console.error("Error fetching data:", error);
     }

@@ -5,5 +5,5 @@ export type Field = {
   placeholder?: string;
   checked?: boolean;
   options?: { value: string; label: string }[];
-  initValue?: string;
+  initValue?: string|number;
 };

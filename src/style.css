@@ -33,6 +33,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   top: 0;
   width: auto;
 }
+.cell-hover-green {
+  background-color: green !important;
+}
 
 button[type="submit"] {
   position: relative;
@@ -69,6 +72,21 @@ button[type="submit"]:hover {
   --ag-font-family:Poppins;
 }
 
+.ag-user-management{
+  --ag-foreground-color: #000000;
+  --ag-border-color:white;
+  --ag-background-color: white;
+  --ag-header-background-color: #ffffff;
+  --ag-header-column-resize-handle-color: transparent;
+  --ag-font-size: 17px;
+  --ag-font-family:Poppins;
+  --ag-header-font-weight:bold;
+  
+}
+
 .swal2-popup {
   font-family: "Poppins";
+}
+.ag-header-cell-label {
+  font-weight: bold;
 }

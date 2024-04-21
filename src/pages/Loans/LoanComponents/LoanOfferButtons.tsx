@@ -1,13 +1,13 @@
 import { Button, CircularProgress, Grid } from "@mui/material";
 import React, { useContext, useState } from "react";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { Loan } from "../../models/loan";
-import { successAlert } from "../../utils/swalAlerts";
-import { User } from "../../models/user";
-import { UserContext } from "../../UserProvider";
-import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
-import { Transaction } from "../../models/transactions";
-import { generateUniqueId, getUserFullName } from "../../utils/utils";
+import CRUDLocalStorage from "../../../CRUDLocalStorage";
+import { Loan } from "../../../models/loan";
+import { successAlert } from "../../../utils/swalAlerts";
+import { User } from "../../../models/user";
+import { UserContext } from "../../../UserProvider";
+import { useFetchLoanContext } from "../../../contexts/fetchLoansContext";
+import { Transaction } from "../../../models/transactions";
+import { generateUniqueId, getUserFullName } from "../../../utils/utils";
 
 interface LoanOfferButtonsProps {
   loan: Loan;

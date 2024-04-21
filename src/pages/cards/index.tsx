@@ -1,7 +1,7 @@
 import * as React from "react";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useState, useEffect, useContext, useMemo } from "react";
-import { successAlert } from "../../utils/swalAlerts";
+import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
 import {
   Button,
@@ -17,8 +17,11 @@ import {
 } from "@mui/material";
 import { UserContext } from "../../UserProvider";
 import { Card } from "../../models/card";
-import CreditCardsRow from "../../components/CreditCard/CreditCardsRow";
+import CreditCardsRow from "./CreditCardComponents/CreditCardsRow";
 import { useFetchCardsContext } from "../../contexts/fetchCardsContext";
+import AuthService from "../../AuthService";
+import { useNavigate, useParams } from "react-router-dom";
+import { User } from "../../models/user";
 
 const calculateExpiredDate = (date: string) => {
   const year = Number(date.slice(0, 4));
@@ -34,20 +37,28 @@ const CardsPage: React.FC = () => {
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
   const { fetchCards, isLoading, cards } = useFetchCardsContext();
 
+  const navigate = useNavigate();
+  const { userID } = useParams();
+
   const handleCardProviderChange = (event: { target: { value: string } }) => {
     setCardProvider(event.target.value);
   };
 
+  const isAdmin = AuthService.isUserAdmin(currentUser!);
+
   const pendingCards = useMemo(() => {
-    return cards.filter((card) => card.status === "pending");
+    const pendingCards = cards.filter((card) => card.status === "pending");
+    return userID ? pendingCards.filter((card) => card.accountID === userID) : pendingCards;
   }, [cards]);
 
   const approvedCards = useMemo(() => {
-    return cards.filter((card) => card.status === "approved");
+    const approvedCards = cards.filter((card) => card.status === "approved");
+    return userID ? approvedCards.filter((card) => card.accountID === userID) : approvedCards;
   }, [cards]);
 
   const rejectedCards = useMemo(() => {
-    return cards.filter((card) => card.status === "rejected");
+    const rejectedCards = cards.filter((card) => card.status === "rejected");
+    return userID ? rejectedCards.filter((card) => card.accountID === userID) : rejectedCards;
   }, [cards]);
 
   const openCardModal = () => {
@@ -57,12 +68,6 @@ const CardsPage: React.FC = () => {
   const closeCardModal = () => {
     if (isCardCreationLoading) return;
     setIsNewCardModalOpen(false);
-  };
-
-  const cancelCard = async (card: Card) => {
-    await CRUDLocalStorage.deleteItemFromList<Card>("cards", card);
-    successAlert("Card Canceled!");
-    await fetchCards();
   };
 
   const handleCardModalSubmit = async () => {
@@ -89,12 +94,24 @@ const CardsPage: React.FC = () => {
     await fetchCards();
   };
 
+  const isSpectatedUserReal = async () => {
+    if (userID) {
+      const spectatedUser = await CRUDLocalStorage.getItemInList<User>("users", userID);
+      if (!spectatedUser) {
+        errorAlert("ID ISNT REAL");
+        navigate("/admin/users");
+        return;
+      }
+    }
+  };
+
   useEffect(() => {
     fetchCards();
+    isSpectatedUserReal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
-  document.title = "Credit Cards";
+  document.title = isAdmin ? "Manage Cards" : "Credit Cards";
 
   return (
     <Grid container justifyContent="flex-start">
@@ -110,9 +127,11 @@ const CardsPage: React.FC = () => {
                     </Typography>
                   </Grid>
                   <Grid item xs={6} container justifyContent="flex-end">
-                    <Button onClick={openCardModal} type="submit" sx={{ width: "50%", borderRadius: 2 }}>
-                      Request New Card
-                    </Button>
+                    {!isAdmin && !userID && (
+                      <Button onClick={openCardModal} type="submit" sx={{ width: "50%", borderRadius: 2 }}>
+                        Request New Card
+                      </Button>
+                    )}
                   </Grid>
                 </Grid>
 
@@ -122,7 +141,7 @@ const CardsPage: React.FC = () => {
                   </Grid>
                 ) : (
                   <Box>
-                    <CreditCardsRow cards={approvedCards} title="Approved" cancelAction={cancelCard} />
+                    <CreditCardsRow cards={approvedCards} title="Approved" />
                     <CreditCardsRow cards={pendingCards} title="Pending" />
                     <CreditCardsRow cards={rejectedCards} title="Rejected" />
                   </Box>

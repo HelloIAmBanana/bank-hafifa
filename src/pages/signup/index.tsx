@@ -4,7 +4,7 @@ import GenericForm from "../../components/GenericForm/GenericForm";
 import { Box, Button, Input, Typography, Grid, Paper } from "@mui/material";
 import signupImage from "../../imgs/signupPage.svg";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { generateUniqueId } from "../../utils/utils";
+import { doesUserExist, generateUniqueId } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { User } from "../../models/user";
 import { JSONSchemaType } from "ajv";
@@ -103,10 +103,7 @@ const SignUpPage: React.FC = () => {
     }
   };
 
-  async function doesUserExist(userEmail: string) {
-    const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-    return Boolean(users.find((user) => user.email === userEmail));
-  }
+  
 
   const signUp = async (data: any) => {
     const newUser: User = {

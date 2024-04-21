@@ -10,7 +10,6 @@ import CRUDLocalStorage from "./CRUDLocalStorage";
 import { Loan } from "./models/loan";
 import { notificationAlert } from "./utils/swalAlerts";
 import { Notification, NotificationType } from "./models/notification";
-import { Deposit } from "./models/deposit";
 
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
@@ -18,7 +17,7 @@ function exctractPathFromAdminRoute(path: string) {
   return normalPath;
 }
 
-const getNotification = (notification: NotificationType) => {
+const showNotification = (notification: NotificationType) => {
   switch (notification) {
     case "cardApproved":
       return notificationAlert("Your card request was approved by an admin!");
@@ -41,16 +40,20 @@ export const AuthHandlerRoute = () => {
   const [currentUser, setCurrentUser] = useState<User>();
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
 
-  const storeCurrentUserAndNotifications = async () => {
+  const storeCurrentUser = async () => {
     const user = (await AuthService.getCurrentUser()) as User;
-    const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
 
     setCurrentUser(user);
+  };
+
+  const triggerNotifications = async () => {
+    const notifications = await CRUDLocalStorage.getAsyncData<Notification[]>("notifications");
+
     if (!currentUser) return;
     const userNotifications = notifications.filter((notification) => notification.accountID === currentUser.id);
 
     userNotifications.forEach(async (notification) => {
-      getNotification(notification.type);
+      showNotification(notification.type);
 
       await CRUDLocalStorage.deleteItemFromList("notifications", notification);
     });
@@ -77,43 +80,36 @@ export const AuthHandlerRoute = () => {
     setBlockedUsers(blockedList);
   };
 
-  const updateExpiredDeposits = async () => {
-    const currentDate = new Date().toISOString();
-    const deposits = await CRUDLocalStorage.getAsyncData<Deposit[]>("deposits");
-
-    const expiredDeposits = deposits.filter((deposit) => deposit.expireDate < currentDate);
-
-    for (const deposit of expiredDeposits) {
-      if (deposit.status === "Active") {
-        const updatedDeposit: Deposit = {
-          ...deposit,
-          status: "Withdrawable",
-        };
-        await CRUDLocalStorage.updateItemInList<Deposit>("deposits", updatedDeposit);
-      }
-      if (deposit.status === "Offered") {
-        await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
-      }
-    }
-  };
+  useEffect(() => {
+    triggerNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
 
   useEffect(() => {
-    storeCurrentUserAndNotifications();
     blockUnpayingUsers();
-    updateExpiredDeposits();
+    storeCurrentUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, currentUser]);
+  }, [location]);
 
   const currentRoute = location.pathname;
-  const isPublicRoute = ["/", "/signup"].includes(currentRoute);
+
   const isAdminRoute = [
-    "/admin/cards",
+    "/admin/",
     "/admin/loans",
     "/admin/deposits",
     "/admin/users",
     "/settings",
     "/home",
-  ].includes(currentRoute);
+    "/admin/users/cards",
+    "/admin/users/deposits",
+    "/admin/users/loans/:userID",
+    "/admin/users/cards/:userID",
+    "/admin/users/deposits/:userID",
+  ].some((route) => currentRoute.startsWith(route));
+
+  const isPublicRoute = ["/", "/signup"].includes(currentRoute);
+
+  
   const isUserRoute = ["/cards", "/loans", "/deposits", "/users", "/settings", "/home"].includes(currentRoute);
 
   if (!isAuthenticated) {
@@ -125,14 +121,12 @@ export const AuthHandlerRoute = () => {
       {!currentUser ? (
         <LoadingScreen />
       ) : (
-        
         <Box sx={{ display: "flex", backgroundColor: "white" }}>
           {isPublicRoute ? (
             <Navigate to="/home" />
           ) : (
             <>
               <NavBar />
-
               <Grid container direction="column" justifyContent="flex-start" alignItems="center">
                 {blockedUsers.includes(currentUser.id) && (
                   <Modal open={true} sx={{ backgroundColor: "white" }}>
