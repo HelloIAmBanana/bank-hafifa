@@ -49,7 +49,7 @@ const TableContextMenu: React.FC<TableContextMenuProps> = ({
       <MenuItem
         disabled={isContextMenuDeleting}
         onClick={() => {
-          navigate(`/admin/user/loans/${hoveredUser.id}`);
+          navigate(`/admin/users/loans/${hoveredUser.id}`);
         }}
       >
         <Typography fontFamily={"Poppins"}>User Loans</Typography>
@@ -57,7 +57,7 @@ const TableContextMenu: React.FC<TableContextMenuProps> = ({
       <MenuItem
         disabled={isContextMenuDeleting}
         onClick={() => {
-          navigate(`/admin/user/cards/${hoveredUser.id}`)
+          navigate(`/admin/users/cards/${hoveredUser.id}`)
         }}
       >
         <Typography fontFamily={"Poppins"}>User Cards</Typography>
@@ -65,7 +65,7 @@ const TableContextMenu: React.FC<TableContextMenuProps> = ({
       <MenuItem
         disabled={isContextMenuDeleting}
         onClick={() => {
-          navigate(`/admin/user/deposits/${hoveredUser.id}`)
+          navigate(`/admin/users/deposits/${hoveredUser.id}`)
         }}
       >
         <Typography fontFamily={"Poppins"}>User Deposits</Typography>

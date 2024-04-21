@@ -18,7 +18,7 @@ const LoanBox: React.FC<LoansProps> = ({ loan }) => {
   const [currentUser] = useContext(UserContext);
   const location = useLocation();
 
-  const isSpectating = `/admin/user/loans/${loan.accountID}` === location.pathname;
+  const isSpectating = `/admin/users/loans/${loan.accountID}` === location.pathname;
 
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);

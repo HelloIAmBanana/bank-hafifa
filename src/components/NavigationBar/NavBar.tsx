@@ -51,7 +51,7 @@ export default function NavBar() {
       case "Users Management":
         return navigate(`/admin/users`);
       default:
-        return navigate(`/${item.toLowerCase()} `);
+        return navigate(`/${item.toLowerCase()}`);
     }
   };
 
