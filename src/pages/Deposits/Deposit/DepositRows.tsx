@@ -1,4 +1,4 @@
-import { Grid, Typography } from "@mui/material";
+import {  Grid, Typography } from "@mui/material";
 import { Deposit } from "../../../models/deposit";
 import DepositBox from "./DepositBox";
 
@@ -8,11 +8,13 @@ interface DepositRowsProps {
 }
 
 const DepositRows: React.FC<DepositRowsProps> = ({ deposits, title }) => {
+
   return (
     <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
       <Typography variant="h5" fontFamily="Poppins">
         {title}
       </Typography>
+
       <Grid
         sx={{
           mt: 2,

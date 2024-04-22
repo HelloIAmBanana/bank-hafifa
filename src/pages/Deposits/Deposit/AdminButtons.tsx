@@ -3,6 +3,7 @@ import { Deposit } from "../../../models/deposit";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { successAlert } from "../../../utils/swalAlerts";
 import { Button, CircularProgress, Grid } from "@mui/material";
+import { useRevalidator } from "react-router-dom";
 
 
 interface AdminDepositButtonsProps {
@@ -11,11 +12,13 @@ interface AdminDepositButtonsProps {
 
 const AdminDepositButtons: React.FC<AdminDepositButtonsProps> = ({ deposit}) => {
   const [isCancelingDeposit, setIsCancelingDeposit] = useState(false);
+  const revalidator = useRevalidator();
 
   const cancelDeposit = async () => {
     setIsCancelingDeposit(true);
     await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     successAlert("Deposit was canceled!");
+    revalidator.revalidate()
   };
 
   return (

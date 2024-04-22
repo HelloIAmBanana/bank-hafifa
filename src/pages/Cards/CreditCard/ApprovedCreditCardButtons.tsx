@@ -3,6 +3,7 @@ import { Card } from "../../../models/card";
 import { normalAlert, successAlert } from "../../../utils/swalAlerts";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { useState } from "react";
+import { useRevalidator } from "react-router-dom";
 
 interface ApprovedCreditCardButtonsProps {
   card: Card;
@@ -11,6 +12,8 @@ interface ApprovedCreditCardButtonsProps {
 const ApprovedCreditCardButtons: React.FC<ApprovedCreditCardButtonsProps> = ({ card }) => {
   const [isCardBeingCanceled, setIsCardBeingCanceled] = useState(false);
 
+  const revalidator = useRevalidator();
+
   const cancelCardButtonClicked = () => {
     setIsCardBeingCanceled(true);
     cancelCard(card);
@@ -18,9 +21,10 @@ const ApprovedCreditCardButtons: React.FC<ApprovedCreditCardButtonsProps> = ({ c
 
   const cancelCard = async (card: Card) => {
     await CRUDLocalStorage.deleteItemFromList<Card>("cards", card);
+    revalidator.revalidate();
     successAlert("Card Canceled!");
   };
-  
+
   return (
     <Grid container direction="row" justifyContent="space-between" alignItems="center">
       <Grid item>

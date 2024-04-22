@@ -7,6 +7,7 @@ import { User } from "../../../models/user";
 import { UserContext } from "../../../UserProvider";
 import { Transaction } from "../../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../../utils/utils";
+import { useRevalidator } from "react-router-dom";
 
 interface LoanOfferButtonsProps {
   loan: Loan;
@@ -16,11 +17,14 @@ const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = ({ loan }) => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isRejectLoading, setIsRejectLoading] = useState(false);
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
+  
+  const revalidator = useRevalidator();
 
   const rejectLoanOffer = async () => {
     setIsRejectLoading(true);
     await CRUDLocalStorage.deleteItemFromList<Loan>("loans", loan);
     successAlert("Loan Offer Rejected!");
+    revalidator.revalidate()
   };
 
   const acceptLoanOffer = async () => {
@@ -52,7 +56,7 @@ const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = ({ loan }) => {
     await CRUDLocalStorage.updateItemInList<Loan>("loans", updatedLoan);
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
     setCurrentUser(updatedUser);
-    setIsAcceptLoading(false);
+    revalidator.revalidate()
   };
   return (
     <Grid container direction="row" justifyContent="space-between" alignItems="center">

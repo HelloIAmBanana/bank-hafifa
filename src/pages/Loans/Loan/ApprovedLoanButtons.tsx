@@ -6,6 +6,7 @@ import { User } from "../../../models/user";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { Transaction } from "../../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../../utils/utils";
+import { useRevalidator } from "react-router-dom";
 
 interface ApprovedLoansButtonsProps {
   loan: Loan;
@@ -16,6 +17,8 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState(0);
+
+  const revalidator = useRevalidator();
 
   const openLoanApprovalModal = () => {
     setIsLoanApprovalModalOpen(true);
@@ -60,6 +63,7 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
     await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
     await CRUDLocalStorage.updateItemInList<Loan>("loans", updatedLoan);
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
+    revalidator.revalidate()
     setCurrentUser(updatedUser);
 
   };

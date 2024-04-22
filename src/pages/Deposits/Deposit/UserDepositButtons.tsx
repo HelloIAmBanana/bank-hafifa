@@ -7,6 +7,7 @@ import { User } from "../../../models/user";
 import { UserContext } from "../../../UserProvider";
 import { Transaction } from "../../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../../utils/utils";
+import { useRevalidator } from "react-router-dom";
 
 interface UserDepositButtonsProps {
   deposit: Deposit;
@@ -15,13 +16,17 @@ interface UserDepositButtonsProps {
 const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
   const [isRejectingDeposit, setIsRejectingDeposit] = useState(false);
   const [currentUser, setCurrentUser] = useContext(UserContext);
-
   const [isAcceptingDeposit, setIsAcceptingDeposit] = useState(false);
+
+  const revalidator = useRevalidator();
+
 
   const rejectDeposit = async () => {
     setIsRejectingDeposit(true);
     await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     successAlert("Deposit was rejected!");
+    revalidator.revalidate()
+
   };
 
   const acceptDeposit = async () => {
@@ -55,6 +60,7 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
     setCurrentUser(updatedUser);
     await CRUDLocalStorage.updateItemInList<Deposit>("deposits", acceptedDeposit);
     successAlert("Deposit was accepted!");
+    revalidator.revalidate()
   };
 
   return (

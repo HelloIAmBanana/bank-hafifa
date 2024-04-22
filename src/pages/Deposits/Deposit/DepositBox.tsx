@@ -1,4 +1,4 @@
-import { Grid, Paper, Typography } from "@mui/material";
+import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
 import thunderIcon from "../../../imgs/icons/Thunder.svg";
 import React, { useContext, useMemo } from "react";
 import { Deposit } from "../../../models/deposit";
@@ -8,7 +8,8 @@ import AuthService from "../../../AuthService";
 import { UserContext } from "../../../UserProvider";
 import { formatIsoStringToDate } from "../../../utils/utils";
 import WithdrawDepositButton from "./WithdrawDepositButton";
-import { useLocation } from "react-router-dom";
+import { useLocation, useRevalidator } from "react-router-dom";
+import { PacmanLoader } from "react-spinners";
 
 interface DepositBoxProps {
   deposit: Deposit;
@@ -16,6 +17,7 @@ interface DepositBoxProps {
 
 const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
   const [currentUser] = useContext(UserContext);
+
   const location = useLocation();
 
   const isSpectating = `/admin/users/deposits/${deposit.accountID}` === location.pathname;
@@ -23,6 +25,7 @@ const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);
   }, [currentUser]);
+
 
   return (
     <>
@@ -40,45 +43,47 @@ const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
             }}
             elevation={16}
           >
-            <Grid
-              container
-              justifyContent="space-between"
-              spacing={{ xs: 3, md: 3 }}
-              columns={{ xs: 12, sm: 12, md: 12 }}
-            >
-              <Grid container direction="row" justifyContent="space-between" alignItems="flex-start" mt={3} ml={2}>
-                <Grid item xs={9} key={1} sx={{ ml: 2, mt: 2 }}>
+            {
+              <Grid
+                container
+                justifyContent="space-between"
+                spacing={{ xs: 3, md: 3 }}
+                columns={{ xs: 12, sm: 12, md: 12 }}
+              >
+                <Grid container direction="row" justifyContent="space-between" alignItems="flex-start" mt={3} ml={2}>
+                  <Grid item xs={9} key={1} sx={{ ml: 2, mt: 2 }}>
+                    <Typography sx={{ color: "white", fontFamily: "Poppins" }}>
+                      {isAdmin ? `Status: ${deposit.status}` : " "}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4} key={1} sx={{ mr: -5, mt: 2 }}>
+                    <img width="30rem" height="30rem" src={`${thunderIcon}`} alt="Thunder" />
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} />
+                <Grid item xs={12} key={3} sx={{ mt: -3 }}>
+                  <center>
+                    <Typography color="white" fontFamily="CreditCard" fontSize={18}>
+                      ${deposit.depositAmount}
+                    </Typography>
+                    <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>
+                      ${Math.ceil(deposit.depositAmount + deposit.depositAmount * (deposit.interest / 100))}
+                    </Typography>
+                  </center>
+                </Grid>
+                <Grid item xs={12} key={4} sx={{ ml: 1 }}>
                   <Typography sx={{ color: "white", fontFamily: "Poppins" }}>
-                    {isAdmin ? `Status: ${deposit.status}` : " "}
+                    {isAdmin ? deposit.depositOwner : " "}
                   </Typography>
                 </Grid>
-                <Grid item xs={4} key={1} sx={{ mr: -5, mt: 2 }}>
-                  <img width="30rem" height="30rem" src={`${thunderIcon}`} alt="Thunder" />
-                </Grid>
-              </Grid>
-              <Grid item xs={12} />
-              <Grid item xs={12} key={3} sx={{ mt: -3 }}>
-                <center>
-                  <Typography color="white" fontFamily="CreditCard" fontSize={18}>
-                    ${deposit.depositAmount}
-                  </Typography>
-                  <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>
-                    ${Math.ceil(deposit.depositAmount + deposit.depositAmount * (deposit.interest / 100))}
-                  </Typography>
-                </center>
-              </Grid>
-              <Grid item xs={12} key={4} sx={{ ml: 1 }}>
-                <Typography sx={{ color: "white", fontFamily: "Poppins" }}>
-                  {isAdmin ? deposit.depositOwner : " "}
-                </Typography>
-              </Grid>
 
-              <Grid item xs={12} key={5} sx={{ mt: -2, ml: 1 }}>
-                <Typography sx={{ color: "white", fontFamily: "Poppins" }}>
-                  {formatIsoStringToDate(deposit.expireDate, "dd/MM/yyyy HH:mm")}
-                </Typography>
+                <Grid item xs={12} key={5} sx={{ mt: -2, ml: 1 }}>
+                  <Typography sx={{ color: "white", fontFamily: "Poppins" }}>
+                    {formatIsoStringToDate(deposit.expireDate, "dd/MM/yyyy HH:mm")}
+                  </Typography>
+                </Grid>
               </Grid>
-            </Grid>
+            }
           </Paper>
         </Grid>
       </Grid>

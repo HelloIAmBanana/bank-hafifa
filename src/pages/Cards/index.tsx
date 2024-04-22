@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useMemo } from "react";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useState, useEffect, useContext } from "react";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
@@ -20,9 +20,9 @@ import { Card } from "../../models/card";
 import AuthService from "../../AuthService";
 import { Await, useLoaderData, useNavigate, useParams, useRevalidator } from "react-router-dom";
 import { User } from "../../models/user";
-import { CardsLoaderData } from "./cardsLoader";
+import { GenericLoaderData } from "../../utils/genericLoader";
 
-const CreditCardsRow = lazy(() => import("./CreditCardComponents/CreditCardsRow")); // Lazy-load component
+const CreditCardsRow = lazy(() => import("./CreditCard/CreditCardsRow"));
 
 const calculateExpiredDate = (date: string) => {
   const year = Number(date.slice(0, 4));
@@ -37,8 +37,11 @@ const CardsPage: React.FC = () => {
   const [cardProvider, setCardProvider] = useState("Visa");
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
 
-  const data = useLoaderData() as CardsLoaderData;
+  const data = useLoaderData() as GenericLoaderData<Card>;
   const revalidator = useRevalidator();
+  const loadingState = revalidator.state;
+
+  const isLoading = Boolean(loadingState === "loading");
 
   const navigate = useNavigate();
   const { userID } = useParams();
@@ -128,14 +131,28 @@ const CardsPage: React.FC = () => {
                     </Grid>
                   }
                 >
-                  <Await resolve={data.cards} errorElement={<p>Error loading package location!</p>}>
-                    {(cards) => (
-                      <Box>
-                        <CreditCardsRow cards={filterArrayByStatus(cards, "approved", userID)} title="Approved" />
-                        <CreditCardsRow cards={filterArrayByStatus(cards, "pending", userID)} title="Pending" />
-                        <CreditCardsRow cards={filterArrayByStatus(cards, "rejected", userID)} title="Rejected" />
-                      </Box>
-                    )}
+                  <Await resolve={data.items} errorElement={<p>Error loading package location!</p>}>
+                    {(cards) =>
+                      isLoading ? (
+                        <Box>
+                          <Skeleton sx={{ transform: "translate(0,0)" }}>
+                            <CreditCardsRow cards={filterArrayByStatus(cards, "approved", userID)} title="Approved" />
+                          </Skeleton>
+                          <Skeleton sx={{ transform: "translate(0,0)" }}>
+                            <CreditCardsRow cards={filterArrayByStatus(cards, "pending", userID)} title="Pending" />
+                          </Skeleton>
+                          <Skeleton sx={{ transform: "translate(0,0)" }}>
+                            <CreditCardsRow cards={filterArrayByStatus(cards, "rejected", userID)} title="Rejected" />
+                          </Skeleton>
+                        </Box>
+                      ) : (
+                        <Box>
+                          <CreditCardsRow cards={filterArrayByStatus(cards, "approved", userID)} title="Approved" />
+                          <CreditCardsRow cards={filterArrayByStatus(cards, "pending", userID)} title="Pending" />
+                          <CreditCardsRow cards={filterArrayByStatus(cards, "rejected", userID)} title="Rejected" />
+                        </Box>
+                      )
+                    }
                   </Await>
                 </Suspense>
               </Grid>

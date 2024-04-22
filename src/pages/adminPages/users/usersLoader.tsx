@@ -6,7 +6,7 @@ export type UsersLoaderData = {
   users: Promise<User[]>;
 };
 
-export const userLoader: LoaderFunction = () => {
+export const usersLoader: LoaderFunction = () => {
   const users = (async () => {
 
     const fetchedUsers = await CRUDLocalStorage.getAsyncData<User[]>("users");

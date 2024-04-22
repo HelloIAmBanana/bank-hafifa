@@ -8,7 +8,7 @@ import { formatIsoStringToDate } from "../../../utils/utils";
 import { useContext, useMemo } from "react";
 import AuthService from "../../../AuthService";
 import { UserContext } from "../../../UserProvider";
-import { useLocation } from "react-router-dom";
+import { useLocation, useRevalidator } from "react-router-dom";
 
 interface LoansProps {
   loan: Loan;
@@ -19,7 +19,7 @@ const LoanBox: React.FC<LoansProps> = ({ loan }) => {
   const location = useLocation();
 
   const isSpectating = `/admin/users/loans/${loan.accountID}` === location.pathname;
-
+  
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);
   }, [currentUser]);

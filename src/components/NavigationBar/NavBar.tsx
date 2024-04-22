@@ -1,7 +1,7 @@
 import { Box, Drawer, Toolbar, List, Typography, Avatar } from "@mui/material";
 import { useContext, useMemo } from "react";
 import { getUserFullName } from "../../utils/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useRevalidator } from "react-router-dom";
 import { UserContext } from "../../UserProvider";
 import NavBarItem from "./NavBarItem";
 import { GiPayMoney, GiSwipeCard, GiHouse, GiPiggyBank, GiGears, GiExitDoor, GiSmart } from "react-icons/gi";
@@ -33,6 +33,7 @@ const getNavBarIcon = (item: string) => {
 export default function NavBar() {
   const navigate = useNavigate();
   const [currentUser] = useContext(UserContext);
+
 
   function logUserOut() {
     sessionStorage.clear();

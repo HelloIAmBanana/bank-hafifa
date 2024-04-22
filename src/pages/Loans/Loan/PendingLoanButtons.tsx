@@ -6,6 +6,7 @@ import { successAlert } from "../../../utils/swalAlerts";
 import GenericForm from "../../../components/GenericForm/GenericForm";
 import { JSONSchemaType } from "ajv";
 import { createNewNotification } from "../../../utils/utils";
+import { useRevalidator } from "react-router-dom";
 
 
 interface PendingLoanButtonsProps {
@@ -54,6 +55,8 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
   const [isRejectLoading, setIsRejectLoading] = useState(false);
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
+  
+  const revalidator = useRevalidator();
 
   const rejectLoan = async () => {
     setIsRejectLoading(true);
@@ -66,6 +69,7 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
     await createNewNotification(loan.accountID,"loanDeclined");
 
     await CRUDLocalStorage.updateItemInList<Loan>("loans", newLoan);
+    revalidator.revalidate()
     successAlert("Loan Rejected!");
   };
 
@@ -85,6 +89,7 @@ const PendingLoanButtons: React.FC<PendingLoanButtonsProps> = ({ loan }) => {
     await createNewNotification(loan.accountID,"loanApproved");
 
     await CRUDLocalStorage.updateItemInList<Loan>("loans", newLoan);
+    revalidator.revalidate()
     successAlert("Loan Offered!");
   };
 

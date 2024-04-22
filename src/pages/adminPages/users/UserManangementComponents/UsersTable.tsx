@@ -5,7 +5,6 @@ import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 import { CellMouseOverEvent, ColDef, IRowNode, RowNode, SelectionChangedEvent } from "@ag-grid-community/core";
-import { useFetchUsersContext } from "../../../../contexts/fetchUserContext";
 import { UserContext } from "../../../../UserProvider";
 import CRUDLocalStorage from "../../../../CRUDLocalStorage";
 import { User } from "../../../../models/user";
@@ -24,7 +23,6 @@ const getRowColor = (params: any) => {
 
 const UsersTable: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
-  const { isLoading, users } = useFetchUsersContext();
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
   const [hoveredUser, setHoveredUser] = useState<User>(currentUser!);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
@@ -86,6 +84,7 @@ const UsersTable: React.FC = () => {
     await CRUDLocalStorage.deleteItemFromList<User>("users", user);
     successAlert(`Deleted User`);
     setIsContextMenuDeleting(false);
+    revalidator.revalidate();
   };
 
   const handleDeleteUsersButtonClicked = async () => {
@@ -97,6 +96,7 @@ const UsersTable: React.FC = () => {
     });
     setIsDeletingRow(false);
     successAlert(`Deleted Users`);
+    revalidator.revalidate();
   };
 
   const handleUpdateUser = async (data: any) => {
@@ -112,6 +112,7 @@ const UsersTable: React.FC = () => {
       if (hoveredUser.id === currentUser!.id) {
         setCurrentUser(updatedUser);
       }
+      revalidator.revalidate();
     }
     setIsUpdatingProfile(false);
     setIsUpdateUserModalOpen(false);
@@ -172,51 +173,6 @@ const UsersTable: React.FC = () => {
                 )}
               </Await>
             </Suspense>
-
-            {/* {isLoading ? (
-              <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
-                <Skeleton height={"12rem"} width={window.innerWidth / 2} />
-              </Grid>
-            ) : (
-              <Grid container mt={2}>
-                <Box sx={{ width: "100%" }}>
-                  <div onContextMenu={handleContextMenu}>
-                    <Box className="ag-user-management" style={{ width: "100%" }} mt={2}>
-                      <AgGridReact
-                        rowData={users}
-                        columnDefs={colDefs}
-                        domLayout="autoHeight"
-                        rowHeight={48}
-                        pagination={true}
-                        paginationPageSize={10}
-                        getRowStyle={getRowColor}
-                        paginationPageSizeSelector={[10]}
-                        defaultColDef={defaultColDef}
-                        rowSelection="multiple"
-                        onSelectionChanged={onSelectionChanged}
-                        onCellMouseOver={onCellHover}
-                      />
-                    </Box>
-                  </div>
-                </Box>
-                {selectedRows.length > 0 && (
-                  <Button type="submit" disabled={isDeletingRow} onClick={handleDeleteUsersButtonClicked}>
-                    {isDeletingRow ? <CircularProgress /> : "Delete Selected Users"}
-                  </Button>
-                )}
-                <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
-                  <TableContextMenu
-                    contextMenuDeleteUser={contextMenuDeleteUser}
-                    contextMenuPos={contextMenuPos}
-                    handleClose={handleClose}
-                    handleContextMenu={handleContextMenu}
-                    hoveredUser={hoveredUser!}
-                    isContextMenuDeleting={isContextMenuDeleting}
-                    setIsUpdateUserModalOpen={setIsUpdateUserModalOpen}
-                  />
-                </div>
-              </Grid>
-            )} */}
           </Grid>
         </Box>
       </Grid>

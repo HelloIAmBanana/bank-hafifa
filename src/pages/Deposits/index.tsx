@@ -1,6 +1,6 @@
 import { Suspense, useContext, useEffect, useState } from "react";
 import { Box, Button, Container, Grid, Modal, Skeleton, Typography } from "@mui/material";
-import DepositRows from "./DepositComponents/DepositRows";
+import DepositRows from "./Deposit/DepositRows";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { Deposit } from "../../models/deposit";
 import { Await, useLoaderData, useNavigate, useParams, useRevalidator } from "react-router-dom";
@@ -11,7 +11,7 @@ import { createNewNotification, filterArrayByStatus, generateUniqueId, getUserFu
 import AuthService from "../../AuthService";
 import { UserContext } from "../../UserProvider";
 import { JSONSchemaType } from "ajv";
-import { DepositsLoaderData } from "./depositsLoader";
+import { GenericLoaderData } from "../../utils/genericLoader";
 
 const schema: JSONSchemaType<Deposit> = {
   type: "object",
@@ -68,8 +68,11 @@ const DepositsPage: React.FC = () => {
   const { userID } = useParams();
   const isAdmin = AuthService.isUserAdmin(currentUser);
 
-  const data = useLoaderData() as DepositsLoaderData;
+  const data = useLoaderData() as GenericLoaderData<Deposit>;
   const revalidator = useRevalidator();
+  const loadingState = revalidator.state;
+
+  const isLoading = Boolean(loadingState === "loading");
 
   const closeDepositModal = () => {
     if (isCreatingNewDeposit) return;
@@ -144,7 +147,7 @@ const DepositsPage: React.FC = () => {
   useEffect(() => {
     updateExpiredDeposits();
     isSpectatedUserReal();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -173,21 +176,45 @@ const DepositsPage: React.FC = () => {
                     </Grid>
                   }
                 >
-                  <Await resolve={data.deposits} errorElement={<p>Error loading package location!</p>}>
-                    {(deposits) => (
-                      <Box>
-                        <DepositRows deposits={filterArrayByStatus(deposits, "Offered", userID)} title="Offered" />
-                        {(!isAdmin || userID) && (
-                          <DepositRows deposits={filterArrayByStatus(deposits, "Active", userID)} title="Active" />
-                        )}
-                        {(!isAdmin || userID) && (
-                          <DepositRows
-                            deposits={filterArrayByStatus(deposits, "Withdrawable", userID)}
-                            title="Withdrawable"
-                          />
-                        )}
-                      </Box>
-                    )}
+                  <Await resolve={data.items} errorElement={<p>Error loading package location!</p>}>
+                    {(deposits) =>
+                      isLoading ? (
+                        <Box>
+                          <Skeleton sx={{ transform: "translate(0,0)" }}>
+                            <DepositRows deposits={filterArrayByStatus(deposits, "Offered", userID)} title="Offered" />
+                          </Skeleton>
+                          {(!isAdmin || userID) && (
+                            <Box>
+                              <Skeleton sx={{ transform: "translate(0,0)" }}>
+                                <DepositRows
+                                  deposits={filterArrayByStatus(deposits, "Active", userID)}
+                                  title="Active"
+                                />
+                              </Skeleton>
+                              <Skeleton sx={{ transform: "translate(0,0)" }}>
+                                <DepositRows
+                                  deposits={filterArrayByStatus(deposits, "Withdrawable", userID)}
+                                  title="Withdrawable"
+                                />
+                              </Skeleton>
+                            </Box>
+                          )}
+                        </Box>
+                      ) : (
+                        <Box>
+                          <DepositRows deposits={filterArrayByStatus(deposits, "Offered", userID)} title="Offered" />
+                          {(!isAdmin || userID) && (
+                            <Box>
+                              <DepositRows deposits={filterArrayByStatus(deposits, "Active", userID)} title="Active" />
+                              <DepositRows
+                                deposits={filterArrayByStatus(deposits, "Withdrawable", userID)}
+                                title="Withdrawable"
+                              />
+                            </Box>
+                          )}
+                        </Box>
+                      )
+                    }
                   </Await>
                 </Suspense>
               </Grid>

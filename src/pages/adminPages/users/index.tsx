@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Grid, Box, Container, Typography, Button, Modal } from "@mui/material";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
-import { useFetchUsersContext } from "../../../contexts/fetchUserContext";
 import UsersTable from "./UserManangementComponents/UsersTable";
 import GenericForm from "../../../components/GenericForm/GenericForm";
 import { JSONSchemaType } from "ajv";
@@ -11,6 +10,8 @@ import { doesUserExist, exportToExcel, generateUniqueId } from "../../../utils/u
 import { errorAlert, successAlert } from "../../../utils/swalAlerts";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { userFields } from "./UserManangementComponents/UserFields";
+import { useLoaderData } from "react-router-dom";
+import { UsersLoaderData } from "./usersLoader";
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -44,9 +45,10 @@ const schema: JSONSchemaType<User> = {
   },
 };
 const AdminUsersPage: React.FC = () => {
-  const { users } = useFetchUsersContext();
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isUserCreationModalOpen, setIsUserCreationModalOpen] = useState(false);
+
+  const data = useLoaderData() as UsersLoaderData;
 
   const closeUserCreationModal = () => {
     if (isCreatingUser) return;
@@ -80,8 +82,8 @@ const AdminUsersPage: React.FC = () => {
     setIsUserCreationModalOpen(true);
   };
 
-  const onExportButtonClick=()=>{
-    exportToExcel<User>("users", users)
+  const onExportButtonClick=async()=>{
+    exportToExcel<User>("users", await data.users)
   }
 
   document.title = "Users Management";

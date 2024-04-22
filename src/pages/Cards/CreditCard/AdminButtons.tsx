@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createNewNotification } from "../../../utils/utils";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { successAlert } from "../../../utils/swalAlerts";
+import { useRevalidator } from "react-router-dom";
 
 interface AdminCreditCardButtonsProps {
   card: Card;
@@ -15,6 +16,8 @@ const AdminCreditCardButtons: React.FC<AdminCreditCardButtonsProps> = ({ card })
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejectCardModalOpen, setIsRejectCardModalOpen] = useState(false);
 
+  const revalidator = useRevalidator();
+
   const rejectCard = async (card: Card, rejectionReason: string) => {
     const newCard: Card = {
       ...card,
@@ -25,6 +28,7 @@ const AdminCreditCardButtons: React.FC<AdminCreditCardButtonsProps> = ({ card })
     await createNewNotification(card.accountID, "cardDeclined");
 
     await CRUDLocalStorage.updateItemInList<Card>("cards", newCard);
+    revalidator.revalidate();
     successAlert("Card rejected!");
   };
 
@@ -36,6 +40,7 @@ const AdminCreditCardButtons: React.FC<AdminCreditCardButtonsProps> = ({ card })
 
     await createNewNotification(card.accountID, "cardApproved");
     await CRUDLocalStorage.updateItemInList<Card>("cards", newCard);
+    revalidator.revalidate();
     successAlert("Card approved!");
   };
 

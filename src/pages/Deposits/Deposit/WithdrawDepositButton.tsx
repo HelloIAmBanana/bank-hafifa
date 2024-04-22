@@ -7,6 +7,7 @@ import { User } from "../../../models/user";
 import { UserContext } from "../../../UserProvider";
 import { Transaction } from "../../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../../utils/utils";
+import { useRevalidator } from "react-router-dom";
 
 interface WithdrawDepositButtonProps {
   deposit: Deposit;
@@ -15,6 +16,9 @@ interface WithdrawDepositButtonProps {
 const WithdrawDepositButton: React.FC<WithdrawDepositButtonProps> = ({ deposit }) => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+
+  const revalidator = useRevalidator();
+
 
   const withdrawDeposit = async () => {
     setIsWithdrawing(true);
@@ -43,6 +47,7 @@ const WithdrawDepositButton: React.FC<WithdrawDepositButtonProps> = ({ deposit }
     await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     setCurrentUser(updatedUser);
     setIsWithdrawing(false);
+    revalidator.revalidate()
     successAlert("Withdrew Deposit!");
   };
 
