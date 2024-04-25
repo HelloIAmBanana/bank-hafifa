@@ -1,7 +1,7 @@
 import { RouteObject } from "react-router-dom";
 import ProfileSettingsPage from "../pages/ProfileSettings";
-import { FetchTransactionsProvider } from "../contexts/fetchTransactionsContext";
 import Home from "../pages/Home";
+import { transactionsLoader } from "../pages/Home/transactionsLoader";
 
 const userRoutes: RouteObject[] = [
   {
@@ -11,10 +11,10 @@ const userRoutes: RouteObject[] = [
   {
     path: "home",
     element: (
-      <FetchTransactionsProvider>
         <Home />
-      </FetchTransactionsProvider>
     ),
+    loader: transactionsLoader
+
   },
 ];
 

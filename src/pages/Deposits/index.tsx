@@ -176,7 +176,7 @@ const DepositsPage: React.FC = () => {
                     </Grid>
                   }
                 >
-                  <Await resolve={data.items} errorElement={<p>Error loading package location!</p>}>
+                  <Await resolve={data.items} errorElement={<p>Error loading deposits!</p>}>
                     {(deposits) =>
                       isLoading ? (
                         <Box>

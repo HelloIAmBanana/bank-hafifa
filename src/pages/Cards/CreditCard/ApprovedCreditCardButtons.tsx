@@ -14,12 +14,8 @@ const ApprovedCreditCardButtons: React.FC<ApprovedCreditCardButtonsProps> = ({ c
 
   const revalidator = useRevalidator();
 
-  const cancelCardButtonClicked = () => {
-    setIsCardBeingCanceled(true);
-    cancelCard(card);
-  };
-
   const cancelCard = async (card: Card) => {
+    setIsCardBeingCanceled(true)
     await CRUDLocalStorage.deleteItemFromList<Card>("cards", card);
     revalidator.revalidate();
     successAlert("Card Canceled!");
@@ -44,7 +40,7 @@ const ApprovedCreditCardButtons: React.FC<ApprovedCreditCardButtonsProps> = ({ c
               backgroundColor: "darkred",
             },
           }}
-          onClick={() => cancelCardButtonClicked()}
+          onClick={() => cancelCard(card)}
         >
           {isCardBeingCanceled ? (
             <CircularProgress size={18} thickness={20} sx={{ fontSize: 30, color: "white" }} />

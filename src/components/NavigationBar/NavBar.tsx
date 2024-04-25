@@ -33,6 +33,7 @@ const getNavBarIcon = (item: string) => {
 export default function NavBar() {
   const navigate = useNavigate();
   const [currentUser] = useContext(UserContext);
+  const revalidator = useRevalidator();
 
 
   function logUserOut() {
@@ -116,6 +117,7 @@ export default function NavBar() {
                 <NavBarItem label={text} icon={getNavBarIcon(text)} onClick={() => getRoutePath(text)} />
               ))}
               <NavBarItem label={"Logout"} icon={<GiExitDoor />} onClick={logUserOut} />
+              <NavBarItem label= "Reload" icon={<GiPayMoney/>} onClick={()=>revalidator.revalidate()}/>
             </List>
           </Box>
         </Drawer>

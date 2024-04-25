@@ -1,4 +1,4 @@
-import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
+import { Grid, Paper, Typography } from "@mui/material";
 import thunderIcon from "../../../imgs/icons/Thunder.svg";
 import React, { useContext, useMemo } from "react";
 import { Deposit } from "../../../models/deposit";
@@ -8,8 +8,7 @@ import AuthService from "../../../AuthService";
 import { UserContext } from "../../../UserProvider";
 import { formatIsoStringToDate } from "../../../utils/utils";
 import WithdrawDepositButton from "./WithdrawDepositButton";
-import { useLocation, useRevalidator } from "react-router-dom";
-import { PacmanLoader } from "react-spinners";
+import { useLocation } from "react-router-dom";
 
 interface DepositBoxProps {
   deposit: Deposit;
@@ -25,7 +24,6 @@ const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);
   }, [currentUser]);
-
 
   return (
     <>
@@ -87,10 +85,19 @@ const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
           </Paper>
         </Grid>
       </Grid>
-
-      {!isSpectating && deposit.status === "Offered" && isAdmin && <AdminDepositButtons deposit={deposit} />}
+      {!isSpectating &&
+        (isAdmin ? (
+          deposit.status === "Offered" && <AdminDepositButtons deposit={deposit} />
+        ) : deposit.status === "Offered" ? (
+          <UserDepositButtons deposit={deposit} />
+        ) : deposit.status === "Withdrawable" ? (
+          <WithdrawDepositButton deposit={deposit} />
+        ) : (
+          <></>
+        ))}
+      {/* {!isSpectating && deposit.status === "Offered" && isAdmin && <AdminDepositButtons deposit={deposit} />}
       {!isSpectating && deposit.status === "Offered" && !isAdmin && <UserDepositButtons deposit={deposit} />}
-      {!isSpectating && deposit.status === "Withdrawable" && !isAdmin && <WithdrawDepositButton deposit={deposit} />}
+      {!isSpectating && deposit.status === "Withdrawable" && !isAdmin && <WithdrawDepositButton deposit={deposit} />} */}
     </>
   );
 };

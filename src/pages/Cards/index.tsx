@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useMemo } from "react";
+import React, { Suspense} from "react";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { useState, useEffect, useContext } from "react";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
@@ -21,8 +21,8 @@ import AuthService from "../../AuthService";
 import { Await, useLoaderData, useNavigate, useParams, useRevalidator } from "react-router-dom";
 import { User } from "../../models/user";
 import { GenericLoaderData } from "../../utils/genericLoader";
+import CreditCardsRow from "./CreditCard/CreditCardsRow";
 
-const CreditCardsRow = lazy(() => import("./CreditCard/CreditCardsRow"));
 
 const calculateExpiredDate = (date: string) => {
   const year = Number(date.slice(0, 4));
@@ -131,7 +131,7 @@ const CardsPage: React.FC = () => {
                     </Grid>
                   }
                 >
-                  <Await resolve={data.items} errorElement={<p>Error loading package location!</p>}>
+                  <Await resolve={data.items} errorElement={<p>Error loading cards!</p>}>
                     {(cards) =>
                       isLoading ? (
                         <Box>
