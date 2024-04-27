@@ -6,13 +6,9 @@ export type UsersLoaderData = {
   users: Promise<User[]>;
 };
 
-export const usersLoader: LoaderFunction = () => {
-  const users = (async () => {
+export const usersLoader: LoaderFunction = async () => {
+  const users = CRUDLocalStorage.getAsyncData<User[]>("users");
 
-    const fetchedUsers = await CRUDLocalStorage.getAsyncData<User[]>("users");
-    return fetchedUsers;
-
-  })();
   return defer({
     users,
   } satisfies UsersLoaderData);

@@ -10,11 +10,8 @@ const userRoutes: RouteObject[] = [
   },
   {
     path: "home",
-    element: (
-        <Home />
-    ),
-    loader: transactionsLoader
-
+    element: <Home />,
+    loader: transactionsLoader,
   },
 ];
 

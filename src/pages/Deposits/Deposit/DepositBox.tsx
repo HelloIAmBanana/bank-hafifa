@@ -19,7 +19,7 @@ const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
 
   const location = useLocation();
 
-  const isSpectating = `/admin/users/deposits/${deposit.accountID}` === location.pathname;
+  const isSpectating = `/admin/users/${deposit.accountID}/deposits` === location.pathname;
 
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);

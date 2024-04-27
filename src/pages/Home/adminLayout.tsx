@@ -9,7 +9,7 @@ interface AdminHomePageLayoutProps {
 
 const AdminHomePageLayout: React.FC<AdminHomePageLayoutProps> = ({ currentUser }) => {
   const navigate = useNavigate();
-  
+
   return (
     <Grid container direction="column" justifyContent="center" alignItems="center" minHeight="100vh" mt={-10}>
       <Grid container direction="column" justifyContent="center" alignItems="center" ml={1}>
@@ -29,13 +29,13 @@ const AdminHomePageLayout: React.FC<AdminHomePageLayoutProps> = ({ currentUser }
           </Button>
         </Grid>
         <Grid item>
-          <Button type="submit" onClick={() => navigate("/admin/users")}>
-            User Control
+          <Button type="submit" onClick={() => navigate("/admin/deposits")}>
+            Deposit Control
           </Button>
         </Grid>
         <Grid item>
-          <Button type="submit" onClick={() => navigate("/admin/deposits")}>
-            Deposit Control
+          <Button type="submit" onClick={() => navigate("/admin/users")}>
+            User Control
           </Button>
         </Grid>
       </Grid>

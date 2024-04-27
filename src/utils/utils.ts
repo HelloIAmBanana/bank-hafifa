@@ -38,7 +38,7 @@ export async function createNewNotification(accountID: string, type: Notificatio
 
 export async function doesUserExist(userEmail: string) {
   const users = await CRUDLocalStorage.getAsyncData<User[]>("users");
-  return Boolean(users.find((user) => user.email === userEmail));
+  return users.find((user) => user.email === userEmail);
 }
 
 export function exportToExcel<T>(fileName: string, data: T[]) {
@@ -47,11 +47,12 @@ export function exportToExcel<T>(fileName: string, data: T[]) {
   XLSX.utils.book_append_sheet(wb, ws, capitalizeFirstLetter(fileName));
   XLSX.writeFile(wb, `${fileName}.xlsx`);
 }
+
 export function filterArrayByStatus<T extends { status: string; accountID: string }>(
   array: T[],
   status: string,
   userID?: string
 ) {
-  const filteredCards = array.filter((item) => item.status === status);
-  return userID ? filteredCards.filter((card) => card.accountID === userID) : filteredCards;
+  const filteredItems = array.filter((item) => item.status === status);
+  return userID ? filteredItems.filter((item) => item.accountID === userID) : filteredItems;
 }

@@ -32,7 +32,7 @@ const CreditCard: React.FC<CardProps> = ({ card }) => {
   const [currentUser] = useContext(UserContext);
   const location = useLocation();
 
-  const isSpectating = `/admin/users/cards/${card.accountID}` === location.pathname;
+  const isSpectating = `/admin/users/${card.accountID}/cards` === location.pathname;
 
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);

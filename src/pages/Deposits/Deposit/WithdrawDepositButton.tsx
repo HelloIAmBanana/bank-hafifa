@@ -19,7 +19,6 @@ const WithdrawDepositButton: React.FC<WithdrawDepositButtonProps> = ({ deposit }
 
   const revalidator = useRevalidator();
 
-
   const withdrawDeposit = async () => {
     setIsWithdrawing(true);
     const currentDate = new Date().toISOString();
@@ -47,7 +46,7 @@ const WithdrawDepositButton: React.FC<WithdrawDepositButtonProps> = ({ deposit }
     await CRUDLocalStorage.deleteItemFromList<Deposit>("deposits", deposit);
     setCurrentUser(updatedUser);
     setIsWithdrawing(false);
-    revalidator.revalidate()
+    revalidator.revalidate();
     successAlert("Withdrew Deposit!");
   };
 
@@ -61,8 +60,8 @@ const WithdrawDepositButton: React.FC<WithdrawDepositButtonProps> = ({ deposit }
             fontSize: 18,
             borderRadius: 2,
             mb: 3,
-            height:"43.5px",
-            width:"118px",
+            height: "43.5px",
+            width: "118px",
             color: "white",
             "&:hover": {
               backgroundColor: "darkgreen",

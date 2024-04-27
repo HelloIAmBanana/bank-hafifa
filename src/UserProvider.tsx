@@ -16,7 +16,6 @@ const UserProvider = ({ children }: React.PropsWithChildren) => {
   };
 
   useEffect(() => {
-
     storeCurrentUser();
   }, []);
 

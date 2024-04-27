@@ -9,8 +9,8 @@ interface EditUserModalProps {
   user: User;
   isOpen: boolean;
   isLoading: boolean;
-  updateProfile: (data:any) => Promise<void>;
-  closeModal:()=>void;
+  updateProfile: (data: any) => Promise<void>;
+  closeModal: () => void;
 }
 
 const schema: JSONSchemaType<User> = {
@@ -39,43 +39,43 @@ const schema: JSONSchemaType<User> = {
       birthDate: "Enter Birthdate",
       gender: "Please Select Gender",
       accountType: "Please Select Account Type",
-      role:"Please Select Account Role",
+      role: "Please Select Account Role",
     },
   },
 };
-const EditUserModal: React.FC<EditUserModalProps> = ({ user,isLoading,isOpen,updateProfile,closeModal}) => {
+const EditUserModal: React.FC<EditUserModalProps> = ({ user, isLoading, isOpen, updateProfile, closeModal }) => {
   return (
     <Modal
       open={isOpen}
       onClose={closeModal}
       sx={{
         display: "flex",
-        alignItems: "center",
         justifyContent: "center",
+        mt: 2,
       }}
     >
       <Box
         sx={{
-          width: 360,
           bgcolor: "white",
           borderRadius: 5,
-          paddingLeft:5,
-          paddingRight:5,
+          paddingLeft: 5,
+          paddingRight: 5,
+          overflowY: "auto",
         }}
       >
         <center>
-        <Typography variant="h6" gutterBottom sx={{ fontFamily: "Poppins", color: "black", fontWeight:"bold" }}>
-          Edit User
-        </Typography>
-        <Grid item mx="auto">
-          <GenericForm
-            fields={userFields(user)}
-            onSubmit={updateProfile}
-            schema={schema}
-            isLoading={isLoading}
-            submitButtonLabel={"Save User"}
-          />
-        </Grid>
+          <Typography variant="h6" gutterBottom sx={{ fontFamily: "Poppins", color: "black", fontWeight: "bold" }}>
+            Edit User
+          </Typography>
+          <Grid item mx="auto">
+            <GenericForm
+              fields={userFields(user)}
+              onSubmit={updateProfile}
+              schema={schema}
+              isLoading={isLoading}
+              submitButtonLabel={"Save User"}
+            />
+          </Grid>
         </center>
       </Box>
     </Modal>

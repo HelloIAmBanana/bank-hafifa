@@ -37,6 +37,10 @@ const UsersTable: React.FC = () => {
   const data = useLoaderData() as UsersLoaderData;
   const revalidator = useRevalidator();
 
+  const loadingState = revalidator.state;
+
+  const isLoading = Boolean(loadingState === "loading");
+
   const handleContextMenu = (event: React.MouseEvent) => {
     if (isContextMenuDeleting) return;
     event.preventDefault();
@@ -130,59 +134,78 @@ const UsersTable: React.FC = () => {
                 </Grid>
               }
             >
-              <Await resolve={data.users} errorElement={<p>Error loading package location!</p>}>
-                {(users) => (
-                  <Grid container mt={2}>
-                    <Box sx={{ width: "100%" }}>
-                      <div onContextMenu={handleContextMenu}>
-                        <Box className="ag-user-management" style={{ width: "100%" }} mt={2}>
-                          <AgGridReact
-                            rowData={users}
-                            columnDefs={colDefs}
-                            domLayout="autoHeight"
-                            rowHeight={48}
-                            pagination={true}
-                            paginationPageSize={10}
-                            getRowStyle={getRowColor}
-                            paginationPageSizeSelector={[10]}
-                            defaultColDef={defaultColDef}
-                            rowSelection="multiple"
-                            onSelectionChanged={onSelectionChanged}
-                            onCellMouseOver={onCellHover}
-                          />
-                        </Box>
+              <Await resolve={data.users} errorElement={<p>Error loading users!</p>}>
+                {(users) =>
+                  isLoading ? (
+                    <Skeleton  width={window.innerWidth / 2}>
+                            <AgGridReact
+                              rowData={users}
+                              columnDefs={colDefs}
+                              domLayout="autoHeight"
+                              rowHeight={48}
+                              pagination={true}
+                              paginationPageSize={10}
+                              getRowStyle={getRowColor}
+                              paginationPageSizeSelector={[10]}
+                              defaultColDef={defaultColDef}
+                              rowSelection="multiple"
+                              onSelectionChanged={onSelectionChanged}
+                              onCellMouseOver={onCellHover}
+                            />
+                    </Skeleton>
+                  ) : (
+                    <Grid container mt={2}>
+                      <Box sx={{ width: "100%" }}>
+                        <div onContextMenu={handleContextMenu}>
+                          <Box className="ag-user-management" style={{ width: "100%" }} mt={2}>
+                            <AgGridReact
+                              rowData={users}
+                              columnDefs={colDefs}
+                              domLayout="autoHeight"
+                              rowHeight={48}
+                              pagination={true}
+                              paginationPageSize={10}
+                              getRowStyle={getRowColor}
+                              paginationPageSizeSelector={[10]}
+                              defaultColDef={defaultColDef}
+                              rowSelection="multiple"
+                              onSelectionChanged={onSelectionChanged}
+                              onCellMouseOver={onCellHover}
+                            />
+                          </Box>
+                        </div>
+                      </Box>
+                      {selectedRows.length > 0 && (
+                        <Button type="submit" disabled={isDeletingRow} onClick={handleDeleteUsersButtonClicked}>
+                          {isDeletingRow ? <CircularProgress /> : "Delete Selected Users"}
+                        </Button>
+                      )}
+                      <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
+                        <TableContextMenu
+                          contextMenuDeleteUser={contextMenuDeleteUser}
+                          contextMenuPos={contextMenuPos}
+                          handleClose={handleClose}
+                          handleContextMenu={handleContextMenu}
+                          hoveredUser={hoveredUser!}
+                          isContextMenuDeleting={isContextMenuDeleting}
+                          setIsUpdateUserModalOpen={setIsUpdateUserModalOpen}
+                        />
                       </div>
-                    </Box>
-                    {selectedRows.length > 0 && (
-                      <Button type="submit" disabled={isDeletingRow} onClick={handleDeleteUsersButtonClicked}>
-                        {isDeletingRow ? <CircularProgress /> : "Delete Selected Users"}
-                      </Button>
-                    )}
-                    <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
-                      <TableContextMenu
-                        contextMenuDeleteUser={contextMenuDeleteUser}
-                        contextMenuPos={contextMenuPos}
-                        handleClose={handleClose}
-                        handleContextMenu={handleContextMenu}
-                        hoveredUser={hoveredUser!}
-                        isContextMenuDeleting={isContextMenuDeleting}
-                        setIsUpdateUserModalOpen={setIsUpdateUserModalOpen}
-                      />
-                    </div>
-                  </Grid>
-                )}
+                    </Grid>
+                  )
+                }
               </Await>
             </Suspense>
+            <EditUserModal
+              closeModal={handleCloseUserEditModal}
+              isLoading={isUpdatingProfile}
+              isOpen={isUpdateUserModalOpen}
+              user={hoveredUser!}
+              updateProfile={handleUpdateUser}
+            />
           </Grid>
         </Box>
       </Grid>
-      <EditUserModal
-        closeModal={handleCloseUserEditModal}
-        isLoading={isUpdatingProfile}
-        isOpen={isUpdateUserModalOpen}
-        user={hoveredUser!}
-        updateProfile={handleUpdateUser}
-      />
     </Container>
   );
 };
