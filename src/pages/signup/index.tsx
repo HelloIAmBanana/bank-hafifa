@@ -8,57 +8,7 @@ import { doesUserExist, generateUniqueId } from "../../utils/utils";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { User } from "../../models/user";
 import { JSONSchemaType } from "ajv";
-
-const fields = [
-  {
-    id: "firstName",
-    label: "First Name",
-    type: "text",
-    placeholder: "Enter your first name",
-  },
-  {
-    id: "lastName",
-    label: "Last Name",
-    type: "text",
-    placeholder: "Enter your last name",
-  },
-  {
-    id: "email",
-    label: "Email",
-    type: "text",
-    placeholder: "Enter your email",
-  },
-  {
-    id: "password",
-    label: "Password",
-    type: "password",
-    placeholder: "Password",
-  },
-  {
-    id: "birthDate",
-    label: "Date Of Birth",
-    type: "date",
-    placeholder: "Enter your birthday",
-  },
-  {
-    id: "gender",
-    label: "Gender",
-    type: "select",
-    options: [
-      { value: "Male", label: "Male" },
-      { value: "Female", label: "Female" },
-    ],
-  },
-  {
-    id: "accountType",
-    label: "Account Type",
-    type: "select",
-    options: [
-      { value: "Personal", label: "Personal" },
-      { value: "Business", label: "Business" },
-    ],
-  },
-];
+import signupFormFields from "./signupFormFields";
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -71,7 +21,7 @@ const schema: JSONSchemaType<User> = {
     birthDate: { type: "string", minLength: 1 },
     avatarUrl: { type: "string" },
     gender: { type: "string", enum: ["Male", "Female"], minLength: 1 },
-    accountType: { type: "string", enum: ["Business", "Personal"] },
+    accountType: { type: "string", enum: ["Business", "Personal"],minLength: 1 },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
   },
@@ -103,8 +53,6 @@ const SignUpPage: React.FC = () => {
     }
   };
 
-  
-
   const signUp = async (data: any) => {
     const newUser: User = {
       ...data,
@@ -116,7 +64,7 @@ const SignUpPage: React.FC = () => {
     };
       setIsLoading(true);
 
-      const isDuplicatedUser = await doesUserExist(newUser.email);
+      const isDuplicatedUser = Boolean(await doesUserExist(newUser.email));
 
       if (isDuplicatedUser) {
         errorAlert("User already exists!");
@@ -145,7 +93,7 @@ const SignUpPage: React.FC = () => {
         }}
       />
       <Grid item xs={2} md={6} component={Paper} elevation={20} borderRadius={3}>
-        <Box sx={{ mt: 1 }}>
+        <Box sx={{ mt: 4 }}>
           <Grid container spacing={1}>
             <Grid item mx="auto" textAlign="center">
               <Grid item margin={"auto"}>
@@ -201,7 +149,6 @@ const SignUpPage: React.FC = () => {
                   }}
                 />
               </Button>
-
               <Typography
                 sx={{
                   fontFamily: "Poppins",
@@ -213,7 +160,7 @@ const SignUpPage: React.FC = () => {
                 Upload profile image
               </Typography>
               <GenericForm
-                fields={fields}
+                fields={signupFormFields}
                 onSubmit={signUp}
                 submitButtonLabel="Sign Up"
                 schema={schema}

@@ -1,12 +1,11 @@
 import { Box, Drawer, Toolbar, List, Typography, Avatar } from "@mui/material";
-import { useContext, useMemo } from "react";
-import { getUserFullName } from "../../utils/utils";
+import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../../UserProvider";
-import NavBarItem from "./NavBarItem";
 import { GiPayMoney, GiSwipeCard, GiHouse, GiPiggyBank, GiGears, GiExitDoor, GiSmart } from "react-icons/gi";
-
+import NavBarItem from "./NavBarItem";
 import AuthService from "../../AuthService";
+import userStore from "../../UserStore";
+import { getUserFullName } from "../../utils/utils";
 
 const getNavBarIcon = (item: string) => {
   switch (item) {
@@ -30,9 +29,8 @@ const getNavBarIcon = (item: string) => {
   }
 };
 
-export default function NavBar() {
+const NavBar = observer(() => {
   const navigate = useNavigate();
-  const [currentUser] = useContext(UserContext);
 
   function logUserOut() {
     sessionStorage.clear();
@@ -51,74 +49,63 @@ export default function NavBar() {
       case "Users Management":
         return navigate(`/admin/users`);
       default:
-        return navigate(`/${item.toLowerCase()} `);
+        return navigate(`/${item.toLowerCase()}`);
     }
   };
 
-  const userName = useMemo(() => {
-    return getUserFullName(currentUser!);
-  }, [currentUser]);
+  const userName = getUserFullName(userStore.currentUser!);
 
-  const avatarIMG = useMemo(() => {
-    return currentUser!.avatarUrl;
-  }, [currentUser]);
+  const avatarIMG = userStore.currentUser!.avatarUrl;
 
-  const userRoutes = useMemo(() => {
-    const isAdmin = AuthService.isUserAdmin(currentUser);
-    if (isAdmin) {
-      return ["Home", "Loans Management", "Cards Management", "Deposits Management", "Users Management", "Settings"];
-    }
-    return ["Home", "Loans", "Cards", "Deposits", "Settings"];
-  }, [currentUser]);
-
+  const userRoutes = AuthService.isUserAdmin(userStore.currentUser)
+    ? ["Home", "Loans Management", "Cards Management", "Deposits Management", "Users Management", "Settings"]
+    : ["Home", "Loans", "Cards", "Deposits", "Settings"];
 
   return (
     <Box sx={{ display: "flex" }}>
-      {!userName ? (
-        <Box />
-      ) : (
-        <Drawer
-          variant="permanent"
-          sx={{
+      <Drawer
+        variant="permanent"
+        sx={{
+          borderRight: "2px solid #ca0f50d0",
+          [`& .MuiDrawer-paper`]: {
+            display: "flex",
+            height: "100vh",
+            maxWidth: "240px",
+            fontFamily: "Poppins",
+            borderTopLeftRadius: 16,
+            borderLeftRadius: 16,
+            position: "relative",
             borderRight: "2px solid #ca0f50d0",
-            [`& .MuiDrawer-paper`]: {
-              display: "flex",
-              height: "100vh",
-              maxWidth:"240px",
-              fontFamily: "Poppins",
-              borderTopLeftRadius: 16,
-              borderLeftRadius: 16,
-              position: "relative",
-              borderRight: "2px solid #ca0f50d0",
-            },
-          }}
-        >
-          <Box sx={{ marginTop: "15px", marginLeft: 1 }}>
-            <Avatar src={avatarIMG} sx={{ backgroundColor: "#f50057", width: 35, height: 35 }}>
-              {userName.split(" ")[0][0]}
-              {userName.split(" ")[1][0]}
-            </Avatar>
-            <Typography
-              component="div"
-              sx={{ fontFamily: "Poppins", fontSize: "15px", fontWeight: "bold" }}
-              marginLeft={6}
-              marginTop={-3.5}
-              marginRight={1}
-            >
-              {`Welcome, ${userName}`}
-            </Typography>
-          </Box>
-          <Toolbar />
-          <Box sx={{ overflow: "auto" }}>
-            <List>
-              {userRoutes.map((text) => (
-                <NavBarItem label={text} icon={getNavBarIcon(text)} onClick={() => getRoutePath(text)} />
-              ))}
-              <NavBarItem label={"Logout"} icon={<GiExitDoor />} onClick={logUserOut} />
-            </List>
-          </Box>
-        </Drawer>
-      )}
+          },
+        }}
+      >
+        <Box sx={{ marginTop: "15px", marginLeft: 1 }}>
+          <Avatar src={avatarIMG} sx={{ backgroundColor: "#f50057", width: 35, height: 35 }}>
+            {userName.split(" ")[0][0]}
+            {userName.split(" ")[1][0]}
+          </Avatar>
+          <Typography
+            component="div"
+            sx={{ fontFamily: "Poppins", fontSize: "15px", fontWeight: "bold" }}
+            marginLeft={6}
+            marginTop={-3.5}
+            marginRight={1}
+          >
+            {`Welcome, ${userName}`}
+          </Typography>
+        </Box>
+        <Toolbar />
+        <Box sx={{ overflow: "auto" }}>
+          <List>
+            {userRoutes.map((text) => (
+              <NavBarItem key={text} label={text} icon={getNavBarIcon(text)} onClick={() => getRoutePath(text)} />
+            ))}
+            <NavBarItem label="Logout" icon={<GiExitDoor />} onClick={logUserOut} />
+          </List>
+        </Box>
+      </Drawer>
     </Box>
   );
-}
+});
+
+export default NavBar;

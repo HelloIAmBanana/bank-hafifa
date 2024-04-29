@@ -1,11 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Box, CircularProgress, MenuItem, FormControl, FormHelperText, Button, Typography } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  MenuItem,
+  FormControl,
+  FormHelperText,
+  Button,
+  Typography,
+  InputAdornment,
+  IconButton,
+  Alert,
+} from "@mui/material";
 import fieldsRegistry from "./fieldsRegistry";
 import { Field } from "../../models/field";
 import Ajv, { Schema } from "ajv";
 import ajvErrors from "ajv-errors";
-
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvErrors(ajv);
 
@@ -20,6 +31,8 @@ interface GenericFormProps {
 const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButtonLabel, schema, isLoading }) => {
   const validate = ajv.compile(schema);
 
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -33,7 +46,9 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
   const onClick = () => {
     clearErrors();
   };
-
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
   const formatFormData = (data: Record<string, any>) => {
     const formattedData = data;
     for (const key in formattedData) {
@@ -94,6 +109,7 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
                       <FieldComponent
                         {...field}
                         {...register(field.id)}
+                        type={field.type === "password" ? (isPasswordVisible ? "text" : "password") : field.type}
                         sx={{
                           width: "442",
                           height: "46px",
@@ -104,6 +120,23 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
                           fontFamily: "Poppins",
                           padding: "20px",
                         }}
+                        endAdornment={
+                          field.type === "password" && (
+                            <InputAdornment position="end">
+                              <IconButton onClick={togglePasswordVisibility}>
+                                {isPasswordVisible ? (
+                                  <Visibility
+                                    sx={{
+                                      color: "Highlight",
+                                    }}
+                                  />
+                                ) : (
+                                  <VisibilityOff />
+                                )}
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }
                         defaultValue={field?.initValue}
                       >
                         {field.options?.map((option) => (
@@ -112,7 +145,13 @@ const GenericForm: React.FC<GenericFormProps> = ({ fields, onSubmit, submitButto
                           </MenuItem>
                         ))}
                       </FieldComponent>
-                      <FormHelperText>{customErrors[field.id]?.message}</FormHelperText>
+                      <FormHelperText>
+                        {customErrors[field.id]?.message && (
+                          <Alert severity="error" sx={{ fontFamily: "Poppins" }}>
+                            {customErrors[field.id]?.message}
+                          </Alert>
+                        )}
+                      </FormHelperText>
                     </FormControl>
                   </Box>
                 </Box>
