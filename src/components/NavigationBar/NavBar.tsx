@@ -5,7 +5,6 @@ import { useNavigate} from "react-router-dom";
 import { UserContext } from "../../UserProvider";
 import NavBarItem from "./NavBarItem";
 import { GiPayMoney, GiSwipeCard, GiHouse, GiPiggyBank, GiGears, GiExitDoor, GiSmart } from "react-icons/gi";
-
 import AuthService from "../../AuthService";
 
 const getNavBarIcon = (item: string) => {
@@ -33,7 +32,6 @@ const getNavBarIcon = (item: string) => {
 export default function NavBar() {
   const navigate = useNavigate();
   const [currentUser] = useContext(UserContext);
-
 
   function logUserOut() {
     sessionStorage.clear();
