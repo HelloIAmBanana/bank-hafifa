@@ -1,13 +1,13 @@
-import React, { useState, useContext, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { User } from "../../models/user";
 import { successAlert } from "../../utils/swalAlerts";
 import { Grid } from "@mui/material";
-import { UserContext } from "../../UserProvider";
+import { observer } from "mobx-react-lite";
+import userStore from "../../UserStore";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import * as _ from "lodash";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { JSONSchemaType } from "ajv";
-
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -36,10 +36,9 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-
-const ProfileSettingsPage: React.FC = () => {
-  const [currentUser, setCurrentUser] = useContext(UserContext);
+const ProfileSettingsPage: React.FC =  observer(() => {
   const [isFormLoading, setIsFormLoading] = useState(false);
+  const user = userStore.currentUser!;
 
   const fields = useMemo(() => {
     return [
@@ -47,25 +46,25 @@ const ProfileSettingsPage: React.FC = () => {
         id: "firstName",
         label: "First Name",
         type: "text",
-        initValue: `${currentUser?.firstName}`,
+        initValue: `${user.firstName}`,
       },
       {
         id: "lastName",
         label: "Last Name",
         type: "text",
-        initValue: `${currentUser?.lastName}`,
+        initValue: `${user.lastName}`,
       },
       {
         id: "birthDate",
         label: "Date Of Birth",
         type: "date",
-        initValue: `${currentUser?.birthDate}`,
+        initValue: `${user.birthDate}`,
       },
       {
         id: "gender",
         label: "Gender",
         type: "select",
-        initValue: `${currentUser?.gender}`,
+        initValue: `${user.gender}`,
         options: [
           { value: "Male", label: "Male" },
           { value: "Female", label: "Female" },
@@ -77,36 +76,39 @@ const ProfileSettingsPage: React.FC = () => {
         type: "file",
       },
     ];
-  }, [currentUser]);
-
+  }, [user]);
 
   const handleSubmitProfileInfo = async (data: any) => {
     setIsFormLoading(true);
-      const updatedUser: User = {
-        ...currentUser!,
-        ...data,
-      };
-      if (!_.isEqual(updatedUser, currentUser)) {
-        await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-        setCurrentUser(updatedUser);
-        successAlert(`Updated User!`);
-      }
+    const updatedUser: User = {
+      ...user!,
+      ...data,
+    };
+    if (!_.isEqual(updatedUser, user)) {
+      await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
+      userStore.currentUser = updatedUser;
+      successAlert(`Updated User!`);
+    }
     setIsFormLoading(false);
   };
 
   document.title = "Account Settings";
 
+  useEffect(() => {
+    userStore.storeCurrentUser();
+  }, []);
+
   return (
-      <Grid container direction="column" justifyContent="flex-start" alignItems="center" marginTop={5} mr={15}>
-          <GenericForm
-            fields={fields}
-            onSubmit={handleSubmitProfileInfo}
-            submitButtonLabel="Update"
-            schema={schema}
-            isLoading={isFormLoading}
-          />
-      </Grid>
+    <Grid container direction="column" justifyContent="flex-start" alignItems="center" marginTop={5} mr={15}>
+      <GenericForm
+        fields={fields}
+        onSubmit={handleSubmitProfileInfo}
+        submitButtonLabel="Update"
+        schema={schema}
+        isLoading={isFormLoading}
+      />
+    </Grid>
   );
-};
+});
 
 export default ProfileSettingsPage;
