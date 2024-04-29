@@ -1,11 +1,12 @@
 import { Grid, Paper, Typography } from "@mui/material";
 import thunderIcon from "../../../imgs/icons/Thunder.svg";
-import React, { useContext, useMemo } from "react";
+import React from "react";
 import { Deposit } from "../../../models/deposit";
 import AdminDepositButtons from "./AdminButtons";
 import UserDepositButtons from "./UserDepositButtons";
 import AuthService from "../../../AuthService";
-import { UserContext } from "../../../UserProvider";
+import { observer } from "mobx-react-lite";
+import userStore from "../../../UserStore";
 import { formatIsoStringToDate } from "../../../utils/utils";
 import WithdrawDepositButton from "./WithdrawDepositButton";
 import { useLocation } from "react-router-dom";
@@ -14,16 +15,14 @@ interface DepositBoxProps {
   deposit: Deposit;
 }
 
-const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
-  const [currentUser] = useContext(UserContext);
+const DepositBox: React.FC<DepositBoxProps> = observer(({ deposit }) => {
+  let currentUser = userStore.currentUser;
 
   const location = useLocation();
 
   const isSpectating = `/admin/users/${deposit.accountID}/deposits` === location.pathname;
 
-  const isAdmin = useMemo(() => {
-    return AuthService.isUserAdmin(currentUser);
-  }, [currentUser]);
+  const isAdmin = AuthService.isUserAdmin(currentUser);
 
   return (
     <>
@@ -100,5 +99,5 @@ const DepositBox: React.FC<DepositBoxProps> = ({ deposit }) => {
       {!isSpectating && deposit.status === "Withdrawable" && !isAdmin && <WithdrawDepositButton deposit={deposit} />} */}
     </>
   );
-};
+});
 export default DepositBox;

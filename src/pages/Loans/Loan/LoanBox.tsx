@@ -5,24 +5,21 @@ import LoanOfferButtons from "./LoanOfferButtons";
 import PendingLoanButtons from "./PendingLoanButtons";
 import ApprovedLoansButtons from "./ApprovedLoanButtons";
 import { formatIsoStringToDate } from "../../../utils/utils";
-import { useContext, useMemo } from "react";
 import AuthService from "../../../AuthService";
-import { UserContext } from "../../../UserProvider";
 import { useLocation} from "react-router-dom";
+import { observer } from "mobx-react-lite";
+import userStore from "../../../UserStore";
 
 interface LoansProps {
   loan: Loan;
 }
 
-const LoanBox: React.FC<LoansProps> = ({ loan }) => {
-  const [currentUser] = useContext(UserContext);
+const LoanBox: React.FC<LoansProps> = observer(({ loan }) => {
   const location = useLocation();
 
   const isSpectating = `/admin/users/${loan.accountID}/loans` === location.pathname;
   
-  const isAdmin = useMemo(() => {
-    return AuthService.isUserAdmin(currentUser);
-  }, [currentUser]);
+  const isAdmin = AuthService.isUserAdmin(userStore.currentUser)
 
   return (
     <Grid container direction="column" justifyContent="center" alignItems="center">
@@ -90,6 +87,6 @@ const LoanBox: React.FC<LoansProps> = ({ loan }) => {
       </Grid>
     </Grid>
   );
-};
+});
 
 export default LoanBox;

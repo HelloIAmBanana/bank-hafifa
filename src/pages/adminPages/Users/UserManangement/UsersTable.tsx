@@ -1,11 +1,11 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
-import { useContext } from "react";
 import { Grid, Box, Container, Skeleton, Button, CircularProgress } from "@mui/material";
 import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 import { CellMouseOverEvent, ColDef, IRowNode, RowNode, SelectionChangedEvent } from "@ag-grid-community/core";
-import { UserContext } from "../../../../UserProvider";
+import { observer } from "mobx-react-lite";
+import userStore from "../../../../UserStore";
 import CRUDLocalStorage from "../../../../CRUDLocalStorage";
 import { User } from "../../../../models/user";
 import _ from "lodash";
@@ -21,8 +21,8 @@ const getRowColor = (params: any) => {
   return inDebt ? { background: "red" } : { background: "white" };
 };
 
-const UsersTable: React.FC = () => {
-  const [currentUser, setCurrentUser] = useContext(UserContext);
+const UsersTable: React.FC = observer(() => {
+  let currentUser = userStore.currentUser;
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
   const [hoveredUser, setHoveredUser] = useState<User>(currentUser!);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
@@ -114,7 +114,7 @@ const UsersTable: React.FC = () => {
 
       successAlert(`Updated User!`);
       if (hoveredUser.id === currentUser!.id) {
-        setCurrentUser(updatedUser);
+        userStore.currentUser = updatedUser;
       }
       revalidator.revalidate();
     }
@@ -208,5 +208,5 @@ const UsersTable: React.FC = () => {
       </Grid>
     </Container>
   );
-};
+});
 export default UsersTable;

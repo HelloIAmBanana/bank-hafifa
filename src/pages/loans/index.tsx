@@ -1,16 +1,16 @@
-import { Suspense, useContext, useEffect, useState } from "react";
-import { UserContext } from "../../UserProvider";
+import { Suspense, useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
+import userStore from "../../UserStore";
 import { Box, Button, Container, Grid, Modal, Skeleton, Typography } from "@mui/material";
 import { filterArrayByStatus, generateUniqueId, getUserFullName } from "../../utils/utils";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { Loan } from "../../models/loan";
-import { errorAlert, successAlert } from "../../utils/swalAlerts";
+import { successAlert } from "../../utils/swalAlerts";
 import { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import LoansRow from "./Loan/LoansRow";
 import AuthService from "../../AuthService";
-import { Await, useLoaderData, useNavigate, useParams, useRevalidator } from "react-router-dom";
-import { User } from "../../models/user";
+import { Await, useLoaderData, useParams, useRevalidator } from "react-router-dom";
 import { GenericLoaderData } from "../../utils/genericLoader";
 
 const schema: JSONSchemaType<Loan> = {
@@ -43,12 +43,11 @@ const fields = [
   },
 ];
 
-const LoansPage: React.FC = () => {
-  const [currentUser] = useContext(UserContext);
+const LoansPage: React.FC = observer(() => {
+  let user = userStore.currentUser;
   const [isNewLoanModalOpen, setIsNewLoanModalOpen] = useState(false);
   const [isCreatingNewLoan, setIsCreatingNewLoan] = useState(false);
 
-  const navigate = useNavigate();
   const { userID } = useParams();
 
   const data = useLoaderData() as GenericLoaderData<Loan>;
@@ -58,28 +57,17 @@ const LoansPage: React.FC = () => {
 
   const isLoading = Boolean(loadingState === "loading");
 
-  const isSpectatedUserReal = async () => {
-    if (userID) {
-      const spectatedUser = await CRUDLocalStorage.getItemInList<User>("users", userID);
-      if (!spectatedUser) {
-        errorAlert("ID ISNT REAL");
-        navigate("/admin/users");
-        return;
-      }
-    }
-  };
-
-  const isAdmin = AuthService.isUserAdmin(currentUser);
+  const isAdmin = AuthService.isUserAdmin(user);
 
   const handleLoanModalSubmit = async (data: any) => {
     const newLoan: Loan = {
       loanAmount: data.loanAmount,
       interest: 0,
       expireDate: "",
-      accountID: currentUser!.id,
+      accountID: user!.id,
       id: generateUniqueId(),
       status: "pending",
-      loanOwner: getUserFullName(currentUser!),
+      loanOwner: getUserFullName(user!),
       paidBack: 0,
     };
 
@@ -99,12 +87,13 @@ const LoansPage: React.FC = () => {
     if (isCreatingNewLoan) return;
     setIsNewLoanModalOpen(false);
   };
-  document.title = isAdmin ? "Manage Loans" : "Loans";
 
   useEffect(() => {
-    isSpectatedUserReal();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    AuthService.isSpectatedUserReal(userID);
+    // eslint-disable-next-line
   }, []);
+
+  document.title = isAdmin ? "Manage Loans" : "Loans";
 
   return (
     <Grid container justifyContent="flex-start" sx={{ overflowX: "hidden" }}>
@@ -199,6 +188,6 @@ const LoansPage: React.FC = () => {
       </Modal>
     </Grid>
   );
-};
+});
 
 export default LoansPage;

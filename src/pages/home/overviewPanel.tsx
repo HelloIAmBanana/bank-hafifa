@@ -1,6 +1,6 @@
 import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
-import { useContext } from "react";
-import { UserContext } from "../../UserProvider";
+import { observer } from "mobx-react-lite";
+import userStore from "../../UserStore";
 
 interface OverviewGridPanel {
   isTableLoading: boolean;
@@ -9,13 +9,13 @@ interface OverviewGridPanel {
   openPaymentModal: () => void;
 }
 
-const OverviewPanel: React.FC<OverviewGridPanel> = ({
+const OverviewPanel: React.FC<OverviewGridPanel> = observer(({
   isTableLoading,
   userOldBalance,
   isButtonLoading,
   openPaymentModal,
 }) => {
-  const [currentUser] = useContext(UserContext);
+  let currentUser = userStore.currentUser!;
 
   return (
     <Paper
@@ -100,6 +100,6 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
       </Grid>
     </Paper>
   );
-};
+});
 
 export default OverviewPanel;

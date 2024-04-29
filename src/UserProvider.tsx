@@ -1,8 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, ReactNode } from "react";
 import { observer } from "mobx-react-lite";
 import userStore from "./UserStore";
 
-const UserProvider: React.FC = observer(({ children }: React.PropsWithChildren) => {
+interface UserProviderProps {
+  children: ReactNode;
+}
+
+const UserProvider: React.FC<UserProviderProps> = observer(({ children }) => {
   useEffect(() => {
     userStore.storeCurrentUser();
   }, []);

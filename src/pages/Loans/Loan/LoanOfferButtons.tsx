@@ -1,10 +1,11 @@
 import { Button, CircularProgress, Grid } from "@mui/material";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { Loan } from "../../../models/loan";
 import { successAlert } from "../../../utils/swalAlerts";
 import { User } from "../../../models/user";
-import { UserContext } from "../../../UserProvider";
+import { observer } from "mobx-react-lite";
+import userStore from "../../../UserStore";
 import { Transaction } from "../../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../../utils/utils";
 import { useRevalidator } from "react-router-dom";
@@ -13,25 +14,24 @@ interface LoanOfferButtonsProps {
   loan: Loan;
 }
 
-const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = ({ loan }) => {
-  const [currentUser, setCurrentUser] = useContext(UserContext);
+const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = observer(({ loan }) => {
   const [isRejectLoading, setIsRejectLoading] = useState(false);
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
-  
+
   const revalidator = useRevalidator();
 
   const rejectLoanOffer = async () => {
     setIsRejectLoading(true);
     await CRUDLocalStorage.deleteItemFromList<Loan>("loans", loan);
     successAlert("Loan Offer Rejected!");
-    revalidator.revalidate()
+    revalidator.revalidate();
   };
 
   const acceptLoanOffer = async () => {
     setIsAcceptLoading(true);
-    const updatedBalance = currentUser!.balance + loan.loanAmount;
+    const updatedBalance = userStore.currentUser!.balance + loan.loanAmount;
     const updatedUser: User = {
-      ...currentUser!,
+      ...userStore.currentUser!,
       balance: updatedBalance,
     };
     const updatedLoan: Loan = {
@@ -46,17 +46,19 @@ const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = ({ loan }) => {
       date: date,
       amount: loan.loanAmount,
       reason: "Took a loan",
-      receiverID: currentUser!.id,
+      receiverID: userStore.currentUser!.id,
       senderName: "Bank",
-      receiverName: getUserFullName(currentUser!),
+      receiverName: getUserFullName(userStore.currentUser!),
       id: generateUniqueId(),
     };
 
     await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
     await CRUDLocalStorage.updateItemInList<Loan>("loans", updatedLoan);
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-    setCurrentUser(updatedUser);
-    revalidator.revalidate()
+    userStore.currentUser = updatedUser;
+    revalidator.revalidate();
+    successAlert("Loan Offer Accepted!");
+
   };
   return (
     <Grid container direction="row" justifyContent="space-between" alignItems="center">
@@ -102,6 +104,6 @@ const LoanOfferButtons: React.FC<LoanOfferButtonsProps> = ({ loan }) => {
       </Grid>
     </Grid>
   );
-};
+});
 
 export default LoanOfferButtons;

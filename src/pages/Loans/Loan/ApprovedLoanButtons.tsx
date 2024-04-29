@@ -1,24 +1,24 @@
-import React, { ChangeEvent, useContext, useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { Loan } from "../../../models/loan";
 import { Box, Button, CircularProgress, Grid, Modal, TextField, Typography } from "@mui/material";
-import { UserContext } from "../../../UserProvider";
 import { User } from "../../../models/user";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { Transaction } from "../../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../../utils/utils";
 import { useRevalidator } from "react-router-dom";
+import { observer } from "mobx-react-lite";
+import userStore from "../../../UserStore";
 
 interface ApprovedLoansButtonsProps {
   loan: Loan;
 }
 
-const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => {
+const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = observer(({ loan }) => {
   const [isDepositing, setIsDepositing] = useState(false);
-  const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isLoanApprovalModalOpen, setIsLoanApprovalModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState(0);
-
   const revalidator = useRevalidator();
+  let currentUser = userStore.currentUser!;
 
   const openLoanApprovalModal = () => {
     setIsLoanApprovalModalOpen(true);
@@ -63,15 +63,12 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
     await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
     await CRUDLocalStorage.updateItemInList<Loan>("loans", updatedLoan);
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-    revalidator.revalidate()
-    setCurrentUser(updatedUser);
-
+    revalidator.revalidate();
+    currentUser = updatedUser;
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const neededAmount = Math.ceil(
-      loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack
-    );
+    const neededAmount = Math.ceil(loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack);
     const value = +e.target.value;
     if (value > neededAmount) return;
     setDepositAmount(value);
@@ -138,6 +135,6 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = ({ loan }) => 
       </Modal>
     </Grid>
   );
-};
+});
 
 export default ApprovedLoansButtons;

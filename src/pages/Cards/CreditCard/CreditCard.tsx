@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React from "react";
 import Visa from "../../../imgs/icons/Visa.svg";
 import AmericanExpress from "../../../imgs/icons/AmericanExpress.svg";
 import Mastercard from "../../../imgs/icons/Mastercard.svg";
@@ -7,7 +7,8 @@ import thunderIcon from "../../../imgs/icons/Thunder.svg";
 import { Grid, Paper, Typography } from "@mui/material";
 import { Card } from "../../../models/card";
 import { formatIsoStringToDate } from "../../../utils/utils";
-import { UserContext } from "../../../UserProvider";
+import { observer } from "mobx-react-lite";
+import userStore from "../../../UserStore";
 import AuthService from "../../../AuthService";
 import { useLocation } from "react-router-dom";
 import AdminCreditCardButtons from "./AdminButtons";
@@ -28,15 +29,13 @@ const getCardProviderImage = (type: string) => {
   }
 };
 
-const CreditCard: React.FC<CardProps> = ({ card }) => {
-  const [currentUser] = useContext(UserContext);
+const CreditCard: React.FC<CardProps> = observer(({ card }) => {
+  let currentUser = userStore.currentUser;
   const location = useLocation();
 
   const isSpectating = `/admin/users/${card.accountID}/cards` === location.pathname;
 
-  const isAdmin = useMemo(() => {
-    return AuthService.isUserAdmin(currentUser);
-  }, [currentUser]);
+  const isAdmin = AuthService.isUserAdmin(currentUser);
 
   return (
     <Grid container direction="column" justifyContent="center" alignItems="center">
@@ -89,6 +88,6 @@ const CreditCard: React.FC<CardProps> = ({ card }) => {
       {!isSpectating && !isAdmin && card.status === "approved" && <ApprovedCreditCardButtons card={card} />}
     </Grid>
   );
-};
+});
 
 export default CreditCard;

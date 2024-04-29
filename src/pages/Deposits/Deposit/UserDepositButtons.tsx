@@ -1,24 +1,26 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Deposit } from "../../../models/deposit";
 import { Button, CircularProgress, Grid } from "@mui/material";
 import { successAlert } from "../../../utils/swalAlerts";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
 import { User } from "../../../models/user";
-import { UserContext } from "../../../UserProvider";
 import { Transaction } from "../../../models/transactions";
 import { generateUniqueId, getUserFullName } from "../../../utils/utils";
 import { useRevalidator } from "react-router-dom";
+import { observer } from "mobx-react-lite";
+import userStore from "../../../UserStore";
 
 interface UserDepositButtonsProps {
   deposit: Deposit;
 }
 
-const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
+const UserDepositButtons: React.FC<UserDepositButtonsProps> = observer(({ deposit }) => {
   const [isRejectingDeposit, setIsRejectingDeposit] = useState(false);
-  const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isAcceptingDeposit, setIsAcceptingDeposit] = useState(false);
 
   const revalidator = useRevalidator();
+
+  let currentUser = userStore.currentUser;
 
 
   const rejectDeposit = async () => {
@@ -57,7 +59,7 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
 
     await CRUDLocalStorage.addItemToList<Transaction>("transactions", newTransaction);
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-    setCurrentUser(updatedUser);
+    userStore.currentUser =updatedUser;
     await CRUDLocalStorage.updateItemInList<Deposit>("deposits", acceptedDeposit);
     successAlert("Deposit was accepted!");
     revalidator.revalidate()
@@ -109,6 +111,6 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = ({ deposit }) => {
       </Grid>
     </Grid>
   );
-};
+});
 
 export default UserDepositButtons;

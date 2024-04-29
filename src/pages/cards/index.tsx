@@ -1,6 +1,6 @@
 import React, { Suspense} from "react";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { filterArrayByStatus, generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
 import {
@@ -15,14 +15,14 @@ import {
   Select,
   CircularProgress,
 } from "@mui/material";
-import { UserContext } from "../../UserProvider";
 import { Card } from "../../models/card";
 import AuthService from "../../AuthService";
 import { Await, useLoaderData, useNavigate, useParams, useRevalidator } from "react-router-dom";
 import { User } from "../../models/user";
 import { GenericLoaderData } from "../../utils/genericLoader";
 import CreditCardsRow from "./CreditCard/CreditCardsRow";
-
+import { observer } from "mobx-react-lite";
+import userStore from "../../UserStore";
 
 const calculateExpiredDate = (date: string) => {
   const year = Number(date.slice(0, 4));
@@ -31,8 +31,8 @@ const calculateExpiredDate = (date: string) => {
   return expiredDate;
 };
 
-const CardsPage: React.FC = () => {
-  const [currentUser] = useContext(UserContext);
+const CardsPage: React.FC = observer(() => {
+  let currentUser = userStore.currentUser;
   const [isCardCreationLoading, setIsCardCreationLoading] = useState(false);
   const [cardProvider, setCardProvider] = useState("Visa");
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
@@ -202,6 +202,6 @@ const CardsPage: React.FC = () => {
       </Modal>
     </Grid>
   );
-};
+});
 
 export default CardsPage;

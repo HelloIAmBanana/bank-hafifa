@@ -4,8 +4,7 @@ import { User } from "../../models/user";
 import { Transaction } from "../../models/transactions";
 import { createNewNotification, generateUniqueId, getUserFullName } from "../../utils/utils";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { Suspense, useContext, useMemo, useState } from "react";
-import { UserContext } from "../../UserProvider";
+import { Suspense, useState } from "react";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { JSONSchemaType } from "ajv";
 import GenericForm from "../../components/GenericForm/GenericForm";
@@ -14,6 +13,8 @@ import TransactionsTable from "./UserTransactionsTable";
 import { Await, useLoaderData, useRevalidator } from "react-router-dom";
 import { TransactionsLoaderData } from "./transactionsLoader";
 import AdminHomePageLayout from "./adminLayout";
+import { observer } from "mobx-react-lite";
+import userStore from "../../UserStore";
 
 const fields = [
   {
@@ -55,8 +56,7 @@ const schema: JSONSchemaType<Transaction> = {
   },
 };
 
-const Home: React.FC = () => {
-  const [currentUser, setCurrentUser] = useContext(UserContext);
+const Home: React.FC = observer(() => {
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
   const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
@@ -67,9 +67,9 @@ const Home: React.FC = () => {
 
   const isLoading = Boolean(loadingState === "loading");
 
-  const isAdmin = useMemo(() => {
-    return AuthService.isUserAdmin(currentUser);
-  }, [currentUser]);
+  const isAdmin = AuthService.isUserAdmin(userStore.currentUser);
+
+  let currentUser = userStore.currentUser!;
 
   const updateBalance = async (user: User, amount: number) => {
     const updatedBalance = user.balance + amount;
@@ -80,7 +80,7 @@ const Home: React.FC = () => {
 
     await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
     if (user.id === currentUser!.id) {
-      setCurrentUser(updatedUser);
+      currentUser = updatedUser;
     }
   };
 
@@ -257,5 +257,6 @@ const Home: React.FC = () => {
       </Modal>
     </Box>
   );
-};
+});
+
 export default Home;

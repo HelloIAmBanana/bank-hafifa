@@ -1,15 +1,16 @@
-import { Suspense, useContext, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Box, Button, Container, Grid, Modal, Skeleton, Typography } from "@mui/material";
 import DepositRows from "./Deposit/DepositRows";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { Deposit } from "../../models/deposit";
-import { Await, useLoaderData, useNavigate, useParams, useRevalidator } from "react-router-dom";
+import { Await, useLoaderData, useParams, useRevalidator } from "react-router-dom";
 import { User } from "../../models/user";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { createNewNotification, filterArrayByStatus, generateUniqueId, getUserFullName } from "../../utils/utils";
 import AuthService from "../../AuthService";
-import { UserContext } from "../../UserProvider";
+import { observer } from "mobx-react-lite";
+import userStore from "../../UserStore";
 import { JSONSchemaType } from "ajv";
 import { GenericLoaderData } from "../../utils/genericLoader";
 
@@ -59,14 +60,13 @@ const fields = [
   },
 ];
 
-const DepositsPage: React.FC = () => {
+const DepositsPage: React.FC = observer(() => {
   const [isCreatingNewDeposit, setIsCreatingNewDeposit] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const [currentUser] = useContext(UserContext);
+  let user = userStore.currentUser;
 
-  const navigate = useNavigate();
   const { userID } = useParams();
-  const isAdmin = AuthService.isUserAdmin(currentUser);
+  const isAdmin = AuthService.isUserAdmin(user);
 
   const data = useLoaderData() as GenericLoaderData<Deposit>;
   const revalidator = useRevalidator();
@@ -90,7 +90,6 @@ const DepositsPage: React.FC = () => {
 
     if (!depositOwner) {
       setIsCreatingNewDeposit(false);
-
       errorAlert("Entered ID is WRONG");
       closeDepositModal();
       return;
@@ -111,16 +110,7 @@ const DepositsPage: React.FC = () => {
     revalidator.revalidate();
   };
 
-  const isSpectatedUserReal = async () => {
-    if (userID) {
-      const spectatedUser = await CRUDLocalStorage.getItemInList<User>("users", userID);
-      if (!spectatedUser) {
-        errorAlert("ID ISNT REAL");
-        navigate("/admin/users");
-        return;
-      }
-    }
-  };
+
 
   const updateExpiredDeposits = async () => {
     const currentDate = new Date().toISOString();
@@ -146,7 +136,7 @@ const DepositsPage: React.FC = () => {
 
   useEffect(() => {
     updateExpiredDeposits();
-    isSpectatedUserReal();
+    AuthService.isSpectatedUserReal(userID);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -252,6 +242,6 @@ const DepositsPage: React.FC = () => {
       </Modal>
     </Grid>
   );
-};
+});
 
 export default DepositsPage;
