@@ -1,5 +1,4 @@
 import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
-import { Fragment } from "react/jsx-runtime";
 import { useContext } from "react";
 import { UserContext } from "../../UserProvider";
 
@@ -19,7 +18,13 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
   const [currentUser] = useContext(UserContext);
 
   return (
-    <Fragment>
+    <Paper
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+      elevation={0}
+    >
       <Typography variant="h4" fontFamily={"Poppins"} fontWeight={"bold"}>
         Overview
       </Typography>
@@ -42,7 +47,7 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
             </Typography>
             {isTableLoading ? (
               <center>
-                <Skeleton height={"44.4531px"}/>
+                <Skeleton height={"44.4531px"} />
               </center>
             ) : (
               <Typography
@@ -53,7 +58,9 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
                   fontSize: 36,
                 }}
               >
-                {!isButtonLoading ? `$${Math.ceil(currentUser!.balance).toLocaleString()}` : `$${Math.ceil(userOldBalance!).toLocaleString()}`}
+                {!isButtonLoading
+                  ? `$${Math.ceil(currentUser!.balance).toLocaleString()}`
+                  : `$${Math.ceil(userOldBalance!).toLocaleString()}`}
               </Typography>
             )}
           </Paper>
@@ -91,7 +98,7 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
           </Paper>
         </Grid>
       </Grid>
-    </Fragment>
+    </Paper>
   );
 };
 

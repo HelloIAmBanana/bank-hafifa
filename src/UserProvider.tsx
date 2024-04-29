@@ -1,26 +1,13 @@
-import React, { createContext, useEffect, useState } from "react";
-import AuthService from "./AuthService";
-import { User } from "./models/user"; 
+import React, { useEffect } from "react";
+import { observer } from "mobx-react-lite";
+import userStore from "./UserStore";
 
-export const UserContext = createContext<[User | undefined, React.Dispatch<React.SetStateAction<User | undefined>>]>([
-  null!,
-  () => null!,
-]);
-
-const UserProvider = ({ children }: React.PropsWithChildren) => {
-  const [currentUser, setCurrentUser] = useState<User>();
-
-  const storeCurrentUser = async () => {
-    const user = (await AuthService.getCurrentUser()) as User;
-    setCurrentUser(user);
-  };
-
+const UserProvider: React.FC = observer(({ children }: React.PropsWithChildren) => {
   useEffect(() => {
-
-    storeCurrentUser();
+    userStore.storeCurrentUser();
   }, []);
 
-  return <UserContext.Provider value={[currentUser, setCurrentUser]}>{children}</UserContext.Provider>;
-};
+  return <>{children}</>;
+});
 
 export default UserProvider;

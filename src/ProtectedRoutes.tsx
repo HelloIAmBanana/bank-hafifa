@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import AuthService from "./AuthService";
 import UserProvider from "./UserProvider";
 import NavBar from "./components/NavigationBar/NavBar";
-import { Box, Grid, Modal, Typography } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { User } from "./models/user";
 import { useEffect, useState } from "react";
 import LoadingScreen from "./components/Loader";
@@ -10,6 +10,7 @@ import CRUDLocalStorage from "./CRUDLocalStorage";
 import { Loan } from "./models/loan";
 import { notificationAlert } from "./utils/swalAlerts";
 import { Notification, NotificationType } from "./models/notification";
+import BlockModal from "./components/BlockModal";
 
 function exctractPathFromAdminRoute(path: string) {
   if (!path.includes("/admin/")) return path;
@@ -100,16 +101,13 @@ export const AuthHandlerRoute = () => {
     "/admin/users",
     "/settings",
     "/home",
-    "/admin/users/cards",
-    "/admin/users/deposits",
-    "/admin/users/loans/:userID",
-    "/admin/users/cards/:userID",
-    "/admin/users/deposits/:userID",
+    "/admin/users/:userID/cards",
+    "/admin/users/:userID/deposits",
+    "/admin/users/:userID/loans",
   ].some((route) => currentRoute.startsWith(route));
 
-  const isPublicRoute = ["/", "/signup"].includes(currentRoute);
+  const isPublicRoute = ["/", "/signup","/forgot-password"].includes(currentRoute);
 
-  
   const isUserRoute = ["/cards", "/loans", "/deposits", "/users", "/settings", "/home"].includes(currentRoute);
 
   if (!isAuthenticated) {
@@ -128,25 +126,7 @@ export const AuthHandlerRoute = () => {
             <>
               <NavBar />
               <Grid container direction="column" justifyContent="flex-start" alignItems="center">
-                {blockedUsers.includes(currentUser.id) && (
-                  <Modal open={true} sx={{ backgroundColor: "white" }}>
-                    <Grid
-                      container
-                      direction="column"
-                      justifyContent="center"
-                      alignItems="center"
-                      minHeight="100vh"
-                      mr={5}
-                    >
-                      <Typography fontFamily="Poppins" variant="h2">
-                        Your account was blocky blocky!
-                      </Typography>
-                      <Typography fontFamily="Poppins" variant="h4">
-                        Please don't contact us.
-                      </Typography>
-                    </Grid>
-                  </Modal>
-                )}
+                {blockedUsers.includes(currentUser.id) && <BlockModal />}
                 {currentUser.role === "admin" ? (
                   isAdminRoute ? (
                     <Outlet />
