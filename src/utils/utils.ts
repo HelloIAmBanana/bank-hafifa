@@ -60,7 +60,7 @@ export function filterArrayByStatus<T extends { status: string; accountID: strin
 export function convertCurrency(userCurrency: string, moneyAmount: number, convertFromSystemCurrency?: boolean) {
   const currencies = localStorage.getItem("currencies");
   const currencyObject = JSON.parse(currencies!);
-  const conversionRate = currencyObject[`${userCurrency}`];
+  const conversionRate = currencyObject[userCurrency];
   return convertFromSystemCurrency ? moneyAmount * conversionRate : moneyAmount / conversionRate;
 }
 

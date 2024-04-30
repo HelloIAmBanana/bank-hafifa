@@ -2,7 +2,7 @@ import { Box, Typography, Container, Grid, Paper, Modal, Skeleton } from "@mui/m
 import AuthService from "../../AuthService";
 import { User } from "../../models/user";
 import { Transaction } from "../../models/transactions";
-import { createNewNotification, generateUniqueId, getUserFullName } from "../../utils/utils";
+import { convertCurrency, createNewNotification, generateUniqueId, getUserFullName } from "../../utils/utils";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { Suspense, useState } from "react";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
@@ -107,6 +107,7 @@ const Home: React.FC = observer(() => {
       senderName: getUserFullName(currentUser!),
       receiverName: designatedUserName,
       date: currentDateTime,
+      amount: convertCurrency(currentUser.currency,data.amount)
     };
 
     await createNewNotification(data.receiverID, "newTransaction");

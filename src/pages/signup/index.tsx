@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, NavigateFunction, useNavigate } from "react-router-dom";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { Box, Button, Input, Typography, Grid, Paper } from "@mui/material";
 import signupImage from "../../imgs/signupPage.svg";
@@ -10,7 +10,7 @@ import { JSONSchemaType } from "ajv";
 import signupFormFields from "./signupFormFields";
 import { getUserFullName } from "../../utils/utils";
 import emailjs from "emailjs-com";
-import verifyEmail from "./verifyEmail";
+import openVerifyEmailModal from "./openVerifyEmailModal";
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -43,8 +43,8 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-function sendVerificationEmail(user: User) {
-  emailjs.send(
+async function sendVerificationEmail(user: User,navigate: NavigateFunction) {
+  return emailjs.send(
     "MoleculeBankEmailService",
     "VerifyEmailTemplate",
     {
@@ -53,8 +53,14 @@ function sendVerificationEmail(user: User) {
       email: user.email,
     },
     "mV0Sbuwnyfajg2kGj"
-  );
-}
+  ).then(
+    async () => {
+      await openVerifyEmailModal(user, navigate);
+    },
+    (error) => {
+      console.log('FAILED...', error.text);
+    },);
+  };
 
 const SignUpPage: React.FC = () => {
   const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
@@ -81,17 +87,15 @@ const SignUpPage: React.FC = () => {
     };
     setIsLoading(true);
 
-    const isDuplicatedUser = Boolean(await doesUserExist(newUser.email));
+    // const isDuplicatedUser = Boolean(await doesUserExist(newUser.email));
 
-    if (isDuplicatedUser) {
-      errorAlert("User already exists!");
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(false);
+    // if (isDuplicatedUser) {
+    //   errorAlert("User already exists!");
+    //   setIsLoading(false);
+    //   return;
+    // }
 
-    sendVerificationEmail(newUser);
-    await verifyEmail(newUser, navigate);
+    await sendVerificationEmail(newUser,navigate);
   };
 
   document.title = "Sign Up";

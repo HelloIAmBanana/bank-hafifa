@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import loginImage from "../../imgs/loginPage.svg";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { User } from "../../models/user";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { validateLogin } from "./login";
 import { Typography, Box, Grid, Paper} from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
@@ -35,25 +35,7 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-const fields = [
-  {
-    id: "email",
-    label: "Email",
-    type: "email",
-    placeholder: "Enter your email",
-  },
-  {
-    id: "password",
-    label: "Password",
-    type: "password",
-    placeholder: "Enter your password",
-  },
-  {
-    id: "rememberMe",
-    label: "Remember Me",
-    type: "checkbox",
-  },
-];
+
 
 function successfulSignIn(userID: string, rememberMe: boolean) {
   if (rememberMe) {
@@ -66,6 +48,10 @@ function successfulSignIn(userID: string, rememberMe: boolean) {
 
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const { state } = location;
+
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   const login = async (data: Record<string, any>) => {
@@ -83,6 +69,28 @@ const SignInPage: React.FC = () => {
   };
 
   document.title = "Sign In";
+
+  const fields = [
+    {
+      id: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "Enter your email",
+      initValue: state.email?state.email:""
+    },
+    {
+      id: "password",
+      label: "Password",
+      type: "password",
+      placeholder: "Enter your password",
+
+    },
+    {
+      id: "rememberMe",
+      label: "Remember Me",
+      type: "checkbox",
+    },
+  ];
 
   return (
     

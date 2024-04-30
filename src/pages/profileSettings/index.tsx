@@ -67,17 +67,16 @@ const currencyList = () => {
   const currencies = localStorage.getItem("currencies")!;
   const currencyObject = JSON.parse(currencies!);
 
-  const currenciesArray = Object.keys(currencyObject).map((key) => ({
+  return Object.keys(currencyObject).map((key) => ({
     value: key,
     label: (
       <span>
         <img
-          style={{ marginRight: 10, marginLeft: 10, marginTop: -4}}
+          style={{ marginRight: 10, marginLeft: 10, marginTop: -4 }}
           width="30rem"
           height="30rem"
           src={`${getCurrencyIcon(key)}`}
           alt="Currency Icon"
-          
         />
         <Typography sx={{ fontFamily: "Poppins", fontSize: "15px", fontWeight: "bold" }} marginLeft={10} marginTop={-4}>
           {key}
@@ -85,8 +84,6 @@ const currencyList = () => {
       </span>
     ),
   }));
-
-  return currenciesArray;
 };
 
 const ProfileSettingsPage: React.FC = observer(() => {

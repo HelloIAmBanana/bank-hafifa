@@ -5,7 +5,7 @@ import { NavigateFunction } from "react-router-dom";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { successAlert } from "../../utils/swalAlerts";
 
-export default async function verifyEmail(user: User,navigate: NavigateFunction) {
+export default async function openVerifyEmailModal(user: User,navigate: NavigateFunction) {
   withReactContent(Swal)
     .fire({
       title: `A verification code was sent to ${user.email}`,
@@ -26,13 +26,13 @@ export default async function verifyEmail(user: User,navigate: NavigateFunction)
           Swal.showValidationMessage("INVALID CODE");
         }
       },
-      allowOutsideClick: () => !Swal.isLoading(),
+      allowOutsideClick: false,
     })
     .then(async (result) => {
       if (result) {
-        await CRUDLocalStorage.addItemToList<User>("testUsers", user);
+        await CRUDLocalStorage.addItemToList<User>("users", user);
         successAlert("Account Created! Navigating to Signin Page...");
-        navigate('/')
+        navigate('/', {state: { email: user.email, password: user.password  }})
       }
     });
 }

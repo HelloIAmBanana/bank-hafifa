@@ -49,7 +49,7 @@ const UserDepositButtons: React.FC<UserDepositButtonsProps> = observer(({ deposi
     const newTransaction: Transaction = {
       senderID: currentUser!.id,
       date: date,
-      amount: -deposit.depositAmount,
+      amount: deposit.depositAmount,
       reason: "Created a deposit",
       receiverID: "!bank!",
       senderName: getUserFullName(currentUser!),

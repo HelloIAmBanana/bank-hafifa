@@ -52,7 +52,7 @@ const ApprovedLoansButtons: React.FC<ApprovedLoansButtonsProps> = observer(({ lo
     const newTransaction: Transaction = {
       senderID: currentUser.id,
       date: date,
-      amount: -amountToDeduct,
+      amount: amountToDeduct,
       reason: "Repaid a loan",
       receiverID: "!bank!",
       senderName: getUserFullName(currentUser),

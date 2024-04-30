@@ -69,7 +69,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, use
         flex:1,
         cellRenderer: (params: any): string => {
           if (params.data.senderID === user.id) {
-            return `${formatMoney(user.currency,params.data.amount)}`;
+            return `-${formatMoney(user.currency,params.data.amount)}`;
           } else {
             return `+${formatMoney(user.currency,params.data.amount)}`;
           }
