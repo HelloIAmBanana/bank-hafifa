@@ -4,7 +4,7 @@ import GenericForm from "../../components/GenericForm/GenericForm";
 import { User } from "../../models/user";
 import { useNavigate, NavLink } from "react-router-dom";
 import { validateLogin } from "./login";
-import { Typography, Box, Grid, Paper } from "@mui/material";
+import { Typography, Box, Grid, Paper} from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { JSONSchemaType } from "ajv";
 
@@ -65,6 +65,7 @@ function successfulSignIn(userID: string, rememberMe: boolean) {
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [inputValue, setInputValue] = useState('')
 
   const login = async (data: Record<string, any>) => {
     setIsSigningIn(true);
@@ -83,6 +84,7 @@ const SignInPage: React.FC = () => {
   document.title = "Sign In";
 
   return (
+    
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
       <Grid container component="main" sx={{ height: "95vh" }}>
         <Grid

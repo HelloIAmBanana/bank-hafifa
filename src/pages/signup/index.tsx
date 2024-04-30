@@ -9,6 +9,9 @@ import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { User } from "../../models/user";
 import { JSONSchemaType } from "ajv";
 import signupFormFields from "./signupFormFields";
+import { getUserFullName } from "../../utils/utils";
+import emailjs from "emailjs-com";
+import verifyEmail from "./verifyEmail";
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -40,6 +43,19 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
+function sendVerificationEmail(user:User){
+  emailjs.send(
+      "MoleculeBankEmailService",
+      "VerifyEmailTemplate",
+      {
+        to_name: getUserFullName(user),
+        verifyCode: user.id.slice(1),
+        email: user.email,
+      },
+      "mV0Sbuwnyfajg2kGj"
+    );
+}
+
 const SignUpPage: React.FC = () => {
   const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +68,8 @@ const SignUpPage: React.FC = () => {
       setAvatarImgURL(imageUrl);
     }
   };
+
+
 
   const signUp = async (data: any) => {
     const newUser: User = {
@@ -71,10 +89,10 @@ const SignUpPage: React.FC = () => {
         setIsLoading(false);
         return;
       }
+      setIsLoading(false);
 
-      await CRUDLocalStorage.addItemToList<User>("users", newUser);
-      successAlert("Account Created! Navigating to Signin Page...");
-      navigate("/");
+      sendVerificationEmail(newUser)
+      await verifyEmail(newUser,navigate);
   };
 
   document.title = "Sign Up";

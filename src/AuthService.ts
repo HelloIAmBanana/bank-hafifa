@@ -39,7 +39,6 @@ export default class AuthService {
       if (!spectatedUser) {
         errorAlert("ID ISNT REAL");
         redirect("/admin/users");
-        return;
       }
     }
   }
