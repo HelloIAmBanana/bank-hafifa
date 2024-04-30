@@ -4,7 +4,7 @@ import GenericForm from "../../components/GenericForm/GenericForm";
 import { User } from "../../models/user";
 import { useNavigate, NavLink } from "react-router-dom";
 import { validateLogin } from "./login";
-import { Typography, Box, Grid, Paper } from "@mui/material";
+import { Typography, Box, Grid, Paper} from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { JSONSchemaType } from "ajv";
 
@@ -44,7 +44,7 @@ const fields = [
     id: "password",
     label: "Password",
     type: "password",
-    placeholder: "Password",
+    placeholder: "Enter your password",
   },
   {
     id: "rememberMe",
@@ -53,37 +53,38 @@ const fields = [
   },
 ];
 
-function storeCurrentAuthToken(userID: string, rememberMe: boolean) {
+function successfulSignIn(userID: string, rememberMe: boolean) {
   if (rememberMe) {
     localStorage.setItem("rememberedAuthToken", userID);
   } else {
     sessionStorage.setItem("currentAuthToken", userID);
   }
+  successAlert("Signing in!");
 }
 
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [inputValue, setInputValue] = useState('')
 
   const login = async (data: Record<string, any>) => {
-      setIsLoading(true);
+    setIsSigningIn(true);
+    const validUser = await validateLogin(data.email, data.password);
 
-      const validUser = await validateLogin(data.email,data.password);
+    if (!validUser) {
+      errorAlert("Wrong Credentials!");
+      setIsSigningIn(false);
+      return;
+    }
 
-      if (!validUser) {
-        errorAlert("Wrong Credentials!");
-        setIsLoading(false);
-        return;
-      }
-      
-      storeCurrentAuthToken(validUser.id, data.rememberMe);
-      successAlert("Signing in!");
-      navigate("/home");
+    successfulSignIn(validUser.id, data.rememberMe);
+    navigate("/home");
   };
 
   document.title = "Sign In";
 
   return (
+    
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
       <Grid container component="main" sx={{ height: "95vh" }}>
         <Grid
@@ -127,18 +128,11 @@ const SignInPage: React.FC = () => {
                 onSubmit={login}
                 submitButtonLabel="Sign In"
                 schema={schema}
-                isLoading={isLoading}
+                isLoading={isSigningIn}
               />
             </Grid>
-            <Grid container justifyContent="flex-start">
-              <Grid
-                item
-                sx={{
-                  marginLeft: "auto",
-                  fontFamily: "Poppins",
-                  textDecoration: "none",
-                }}
-              >
+            <Grid container direction="row" justifyContent="space-between" alignItems="center">
+              <Grid item>
                 <NavLink
                   to="/signup"
                   style={{
@@ -150,6 +144,21 @@ const SignInPage: React.FC = () => {
                   }}
                 >
                   First time? Join us here!
+                </NavLink>
+              </Grid>
+              <Grid item>
+                <NavLink
+                  to="/forgot-password"
+                  style={{
+                    padding: "20px",
+                    textDecoration: "none",
+                    fontFamily: "Poppins",
+                    color: "#181818",
+                    fontSize: "18px",
+                    marginTop: "25px",
+                  }}
+                >
+                  Forgot Your Password?
                 </NavLink>
               </Grid>
             </Grid>

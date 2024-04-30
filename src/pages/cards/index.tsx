@@ -1,8 +1,8 @@
-import * as React from "react";
+import React, { Suspense} from "react";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
-import { generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
+import { filterArrayByStatus, generateUniqueId, generateUniqueNumber, getUserFullName } from "../../utils/utils";
 import {
   Button,
   Grid,
@@ -15,13 +15,14 @@ import {
   Select,
   CircularProgress,
 } from "@mui/material";
-import { UserContext } from "../../UserProvider";
 import { Card } from "../../models/card";
-import CreditCardsRow from "./CreditCardComponents/CreditCardsRow";
-import { useFetchCardsContext } from "../../contexts/fetchCardsContext";
 import AuthService from "../../AuthService";
-import { useNavigate, useParams } from "react-router-dom";
+import { Await, useLoaderData, useNavigate, useParams, useRevalidator } from "react-router-dom";
 import { User } from "../../models/user";
+import { GenericLoaderData } from "../../utils/genericLoader";
+import CreditCardsRow from "./CreditCard/CreditCardsRow";
+import { observer } from "mobx-react-lite";
+import userStore from "../../UserStore";
 
 const calculateExpiredDate = (date: string) => {
   const year = Number(date.slice(0, 4));
@@ -30,12 +31,17 @@ const calculateExpiredDate = (date: string) => {
   return expiredDate;
 };
 
-const CardsPage: React.FC = () => {
-  const [currentUser] = useContext(UserContext);
+const CardsPage: React.FC = observer(() => {
+  let currentUser = userStore.currentUser;
   const [isCardCreationLoading, setIsCardCreationLoading] = useState(false);
   const [cardProvider, setCardProvider] = useState("Visa");
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
-  const { fetchCards, isLoading, cards } = useFetchCardsContext();
+
+  const data = useLoaderData() as GenericLoaderData<Card>;
+  const revalidator = useRevalidator();
+  const loadingState = revalidator.state;
+
+  const isLoading = Boolean(loadingState === "loading");
 
   const navigate = useNavigate();
   const { userID } = useParams();
@@ -45,21 +51,6 @@ const CardsPage: React.FC = () => {
   };
 
   const isAdmin = AuthService.isUserAdmin(currentUser!);
-
-  const pendingCards = useMemo(() => {
-    const pendingCards = cards.filter((card) => card.status === "pending");
-    return userID ? pendingCards.filter((card) => card.accountID === userID) : pendingCards;
-  }, [cards]);
-
-  const approvedCards = useMemo(() => {
-    const approvedCards = cards.filter((card) => card.status === "approved");
-    return userID ? approvedCards.filter((card) => card.accountID === userID) : approvedCards;
-  }, [cards]);
-
-  const rejectedCards = useMemo(() => {
-    const rejectedCards = cards.filter((card) => card.status === "rejected");
-    return userID ? rejectedCards.filter((card) => card.accountID === userID) : rejectedCards;
-  }, [cards]);
 
   const openCardModal = () => {
     setIsNewCardModalOpen(true);
@@ -91,7 +82,7 @@ const CardsPage: React.FC = () => {
     successAlert("New Card Request Was Created!");
     setIsCardCreationLoading(false);
     closeCardModal();
-    await fetchCards();
+    revalidator.revalidate();
   };
 
   const isSpectatedUserReal = async () => {
@@ -106,7 +97,6 @@ const CardsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchCards();
     isSpectatedUserReal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
@@ -134,18 +124,37 @@ const CardsPage: React.FC = () => {
                     )}
                   </Grid>
                 </Grid>
-
-                {isLoading ? (
-                  <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
-                    <Skeleton height={"12rem"} width={window.innerWidth / 2} />
-                  </Grid>
-                ) : (
-                  <Box>
-                    <CreditCardsRow cards={approvedCards} title="Approved" />
-                    <CreditCardsRow cards={pendingCards} title="Pending" />
-                    <CreditCardsRow cards={rejectedCards} title="Rejected" />
-                  </Box>
-                )}
+                <Suspense
+                  fallback={
+                    <Grid item xs={2} sm={4} md={8} xl={12} mt={2}>
+                      <Skeleton height={"12rem"} width={window.innerWidth / 2} />
+                    </Grid>
+                  }
+                >
+                  <Await resolve={data.items} errorElement={<p>Error loading cards!</p>}>
+                    {(cards) =>
+                      isLoading ? (
+                        <Box>
+                          <Skeleton sx={{ transform: "translate(0,0)" }}>
+                            <CreditCardsRow cards={filterArrayByStatus(cards, "approved", userID)} title="Approved" />
+                          </Skeleton>
+                          <Skeleton sx={{ transform: "translate(0,0)" }}>
+                            <CreditCardsRow cards={filterArrayByStatus(cards, "pending", userID)} title="Pending" />
+                          </Skeleton>
+                          <Skeleton sx={{ transform: "translate(0,0)" }}>
+                            <CreditCardsRow cards={filterArrayByStatus(cards, "rejected", userID)} title="Rejected" />
+                          </Skeleton>
+                        </Box>
+                      ) : (
+                        <Box>
+                          <CreditCardsRow cards={filterArrayByStatus(cards, "approved", userID)} title="Approved" />
+                          <CreditCardsRow cards={filterArrayByStatus(cards, "pending", userID)} title="Pending" />
+                          <CreditCardsRow cards={filterArrayByStatus(cards, "rejected", userID)} title="Rejected" />
+                        </Box>
+                      )
+                    }
+                  </Await>
+                </Suspense>
               </Grid>
             </Box>
           </Grid>
@@ -193,6 +202,6 @@ const CardsPage: React.FC = () => {
       </Modal>
     </Grid>
   );
-};
+});
 
 export default CardsPage;
