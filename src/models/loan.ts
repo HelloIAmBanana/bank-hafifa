@@ -4,7 +4,7 @@ export type Loan = {
   paidBack: number;
   interest: number;
   accountID: string;
-  loanOwner:string;
-  status: "approved" | "offered" | "pending"|"rejected";
+  loanOwner: string;
+  status: "approved" | "offered" | "pending" | "rejected";
   expireDate: string;
 };
