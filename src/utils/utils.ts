@@ -56,3 +56,19 @@ export function filterArrayByStatus<T extends { status: string; accountID: strin
   const filteredItems = array.filter((item) => item.status === status);
   return userID ? filteredItems.filter((item) => item.accountID === userID) : filteredItems;
 }
+
+export function convertCurrency(userCurrency: string, moneyAmount: number, convertFromSystemCurrency?: boolean) {
+  const currencies = localStorage.getItem("currencies");
+  const currencyObject = JSON.parse(currencies!);
+  const conversionRate = currencyObject[`${userCurrency}`];
+  return convertFromSystemCurrency ? moneyAmount * conversionRate : moneyAmount / conversionRate;
+}
+
+export function formatMoney(userCurrency: string, moneyAmount: number) {
+  const formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: `${userCurrency}`,
+    maximumSignificantDigits:6
+  });
+  return formatter.format(convertCurrency(userCurrency, moneyAmount, true));
+}

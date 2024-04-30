@@ -7,7 +7,7 @@ import { Await, useLoaderData, useParams, useRevalidator } from "react-router-do
 import { User } from "../../models/user";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import GenericForm from "../../components/GenericForm/GenericForm";
-import { createNewNotification, filterArrayByStatus, generateUniqueId, getUserFullName } from "../../utils/utils";
+import { convertCurrency, createNewNotification, filterArrayByStatus, generateUniqueId, getUserFullName } from "../../utils/utils";
 import AuthService from "../../AuthService";
 import { observer } from "mobx-react-lite";
 import userStore from "../../UserStore";
@@ -97,6 +97,7 @@ const DepositsPage: React.FC = observer(() => {
 
     const newDeposit: Deposit = {
       ...data,
+      depositAmount: convertCurrency(depositOwner.currency,data.depositAmount),
       id: generateUniqueId(),
       status: "Offered",
       depositOwner: getUserFullName(depositOwner),

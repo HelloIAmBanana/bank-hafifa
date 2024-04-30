@@ -27,6 +27,8 @@ const schema: JSONSchemaType<User> = {
     accountType: { type: "string", enum: ["Business", "Personal"], minLength: 1 },
     role: { type: "string", enum: ["admin", "customer"], minLength: 1 },
     balance: { type: "number" },
+    currency: { type: "string" },
+
   },
   required: ["birthDate", "email", "firstName", "lastName", "password", "gender", "accountType", "role", "balance"],
   additionalProperties: true,

@@ -3,9 +3,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { Box, Button, Input, Typography, Grid, Paper } from "@mui/material";
 import signupImage from "../../imgs/signupPage.svg";
-import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { doesUserExist, generateUniqueId } from "../../utils/utils";
-import { errorAlert, successAlert } from "../../utils/swalAlerts";
+import { errorAlert } from "../../utils/swalAlerts";
 import { User } from "../../models/user";
 import { JSONSchemaType } from "ajv";
 import signupFormFields from "./signupFormFields";
@@ -24,9 +23,10 @@ const schema: JSONSchemaType<User> = {
     birthDate: { type: "string", minLength: 1 },
     avatarUrl: { type: "string" },
     gender: { type: "string", enum: ["Male", "Female"], minLength: 1 },
-    accountType: { type: "string", enum: ["Business", "Personal"],minLength: 1 },
+    accountType: { type: "string", enum: ["Business", "Personal"], minLength: 1 },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
+    currency: { type: "string" },
   },
   required: ["birthDate", "email", "firstName", "lastName", "password", "gender", "accountType"],
   additionalProperties: true,
@@ -43,17 +43,17 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-function sendVerificationEmail(user:User){
+function sendVerificationEmail(user: User) {
   emailjs.send(
-      "MoleculeBankEmailService",
-      "VerifyEmailTemplate",
-      {
-        to_name: getUserFullName(user),
-        verifyCode: user.id.slice(1),
-        email: user.email,
-      },
-      "mV0Sbuwnyfajg2kGj"
-    );
+    "MoleculeBankEmailService",
+    "VerifyEmailTemplate",
+    {
+      to_name: getUserFullName(user),
+      verifyCode: user.id.slice(1),
+      email: user.email,
+    },
+    "mV0Sbuwnyfajg2kGj"
+  );
 }
 
 const SignUpPage: React.FC = () => {
@@ -69,8 +69,6 @@ const SignUpPage: React.FC = () => {
     }
   };
 
-
-
   const signUp = async (data: any) => {
     const newUser: User = {
       ...data,
@@ -79,20 +77,21 @@ const SignUpPage: React.FC = () => {
       email: data.email.toLowerCase(),
       avatarUrl: avatarImgURL,
       balance: 0,
+      currency: "USD",
     };
-      setIsLoading(true);
+    setIsLoading(true);
 
-      const isDuplicatedUser = Boolean(await doesUserExist(newUser.email));
+    const isDuplicatedUser = Boolean(await doesUserExist(newUser.email));
 
-      if (isDuplicatedUser) {
-        errorAlert("User already exists!");
-        setIsLoading(false);
-        return;
-      }
+    if (isDuplicatedUser) {
+      errorAlert("User already exists!");
       setIsLoading(false);
+      return;
+    }
+    setIsLoading(false);
 
-      sendVerificationEmail(newUser)
-      await verifyEmail(newUser,navigate);
+    sendVerificationEmail(newUser);
+    await verifyEmail(newUser, navigate);
   };
 
   document.title = "Sign Up";

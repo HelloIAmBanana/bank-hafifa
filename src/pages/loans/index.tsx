@@ -2,7 +2,7 @@ import { Suspense, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import userStore from "../../UserStore";
 import { Box, Button, Container, Grid, Modal, Skeleton, Typography } from "@mui/material";
-import { filterArrayByStatus, generateUniqueId, getUserFullName } from "../../utils/utils";
+import { convertCurrency, filterArrayByStatus, generateUniqueId, getUserFullName } from "../../utils/utils";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { Loan } from "../../models/loan";
 import { successAlert } from "../../utils/swalAlerts";
@@ -61,7 +61,7 @@ const LoansPage: React.FC = observer(() => {
 
   const handleLoanModalSubmit = async (data: any) => {
     const newLoan: Loan = {
-      loanAmount: data.loanAmount,
+      loanAmount: convertCurrency(user!.currency,data.loanAmount),
       interest: 0,
       expireDate: "",
       accountID: user!.id,

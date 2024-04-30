@@ -1,6 +1,7 @@
 import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import userStore from "../../UserStore";
+import { formatMoney } from "../../utils/utils";
 
 interface OverviewGridPanel {
   isTableLoading: boolean;
@@ -59,8 +60,8 @@ const OverviewPanel: React.FC<OverviewGridPanel> = observer(({
                 }}
               >
                 {!isButtonLoading
-                  ? `$${Math.ceil(currentUser!.balance).toLocaleString()}`
-                  : `$${Math.ceil(userOldBalance!).toLocaleString()}`}
+                  ? `${formatMoney(currentUser.currency,currentUser!.balance)}`
+                  : `${formatMoney(currentUser.currency,userOldBalance!)}`}
               </Typography>
             )}
           </Paper>
@@ -93,7 +94,7 @@ const OverviewPanel: React.FC<OverviewGridPanel> = observer(({
                 fontSize: 36,
               }}
             >
-              $123,456
+              {formatMoney(currentUser.currency,123456)}
             </Typography>
           </Paper>
         </Grid>

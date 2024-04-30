@@ -7,7 +7,7 @@ import UserDepositButtons from "./UserDepositButtons";
 import AuthService from "../../../AuthService";
 import { observer } from "mobx-react-lite";
 import userStore from "../../../UserStore";
-import { formatIsoStringToDate } from "../../../utils/utils";
+import { formatIsoStringToDate, formatMoney } from "../../../utils/utils";
 import WithdrawDepositButton from "./WithdrawDepositButton";
 import { useLocation } from "react-router-dom";
 
@@ -61,10 +61,10 @@ const DepositBox: React.FC<DepositBoxProps> = observer(({ deposit }) => {
                 <Grid item xs={12} key={3} sx={{ mt: -3 }}>
                   <center>
                     <Typography color="white" fontFamily="CreditCard" fontSize={18}>
-                      ${deposit.depositAmount}
+                      {formatMoney(currentUser!.currency,deposit.depositAmount)}
                     </Typography>
                     <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>
-                      ${Math.ceil(deposit.depositAmount + deposit.depositAmount * (deposit.interest / 100))}
+                      {formatMoney(currentUser!.currency,deposit.depositAmount + deposit.depositAmount * (deposit.interest / 100))}
                     </Typography>
                   </center>
                 </Grid>

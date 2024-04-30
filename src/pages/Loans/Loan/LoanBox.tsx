@@ -4,7 +4,7 @@ import thunderIcon from "../../../imgs/icons/Thunder.svg"
 import LoanOfferButtons from "./LoanOfferButtons";
 import PendingLoanButtons from "./PendingLoanButtons";
 import ApprovedLoansButtons from "./ApprovedLoanButtons";
-import { formatIsoStringToDate } from "../../../utils/utils";
+import { formatIsoStringToDate, formatMoney } from "../../../utils/utils";
 import AuthService from "../../../AuthService";
 import { useLocation} from "react-router-dom";
 import { observer } from "mobx-react-lite";
@@ -15,11 +15,12 @@ interface LoansProps {
 }
 
 const LoanBox: React.FC<LoansProps> = observer(({ loan }) => {
+  let currentUser= userStore.currentUser;
   const location = useLocation();
 
   const isSpectating = `/admin/users/${loan.accountID}/loans` === location.pathname;
   
-  const isAdmin = AuthService.isUserAdmin(userStore.currentUser)
+  const isAdmin = AuthService.isUserAdmin(currentUser)
 
   return (
     <Grid container direction="column" justifyContent="center" alignItems="center">
@@ -41,7 +42,7 @@ const LoanBox: React.FC<LoansProps> = observer(({ loan }) => {
               <Grid item xs={4} sm={4} md={6} sx={{ ml: 2, mt: 2 }}>
                 {loan.status === "approved" && (
                   <Typography sx={{ color: "white", fontFamily: "Poppins", opacity: 0.65 }}>
-                    Left to pay: ${Math.ceil(loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack)}
+                    Left to pay: {formatMoney(currentUser!.currency,loan.loanAmount + loan.loanAmount * (loan.interest / 100) - loan.paidBack)}
                   </Typography>
                 )}
               </Grid>
@@ -54,7 +55,7 @@ const LoanBox: React.FC<LoansProps> = observer(({ loan }) => {
             <Grid item xs={12} sm={12} md={12} sx={{ mt: -3 }}>
               <center>
                 <Typography color="white" fontFamily="CreditCard" fontSize={18}>
-                  ${loan.loanAmount}
+                  {formatMoney(currentUser!.currency,loan.loanAmount)}
                 </Typography>
               </center>
             </Grid>

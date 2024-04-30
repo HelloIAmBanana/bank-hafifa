@@ -212,7 +212,7 @@ const Home: React.FC = observer(() => {
                         <Skeleton sx={{ transform: "translate(0,0)", height: "387px", width: "1120px" }} />
                       ) : (
                         <Box>
-                          <TransactionsTable transactions={transactions} userID={currentUser!.id} />
+                          <TransactionsTable transactions={transactions} user={currentUser} />
                         </Box>
                       )
                     }

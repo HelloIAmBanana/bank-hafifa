@@ -1,13 +1,39 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { User } from "../../models/user";
 import { successAlert } from "../../utils/swalAlerts";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import userStore from "../../UserStore";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import * as _ from "lodash";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { JSONSchemaType } from "ajv";
+import USD from "../../imgs/icons/currencies/USD.svg";
+import ILS from "../../imgs/icons/currencies/ILS.svg";
+import BTC from "../../imgs/icons/currencies/BTC.svg";
+import EUR from "../../imgs/icons/currencies/EUR.svg";
+import AED from "../../imgs/icons/currencies/AED.svg";
+import JPY from "../../imgs/icons/currencies/JPY.svg";
+import GBP from "../../imgs/icons/currencies/GBP.svg";
+
+const getCurrencyIcon = (currency: string) => {
+  switch (currency) {
+    case "GBP":
+      return GBP;
+    case "ILS":
+      return ILS;
+    case "BTC":
+      return BTC;
+    case "EUR":
+      return EUR;
+    case "AED":
+      return AED;
+    case "JPY":
+      return JPY;
+    default:
+      return USD;
+  }
+};
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -23,6 +49,7 @@ const schema: JSONSchemaType<User> = {
     accountType: { type: "string", enum: ["Business", "Personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
+    currency: { type: "string" },
   },
   required: [],
   additionalProperties: true,
@@ -36,7 +63,33 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-const ProfileSettingsPage: React.FC =  observer(() => {
+const currencyList = () => {
+  const currencies = localStorage.getItem("currencies")!;
+  const currencyObject = JSON.parse(currencies!);
+
+  const currenciesArray = Object.keys(currencyObject).map((key) => ({
+    value: key,
+    label: (
+      <span>
+        <img
+          style={{ marginRight: 10, marginLeft: 10, marginTop: -4}}
+          width="30rem"
+          height="30rem"
+          src={`${getCurrencyIcon(key)}`}
+          alt="Currency Icon"
+          
+        />
+        <Typography sx={{ fontFamily: "Poppins", fontSize: "15px", fontWeight: "bold" }} marginLeft={10} marginTop={-4}>
+          {key}
+        </Typography>
+      </span>
+    ),
+  }));
+
+  return currenciesArray;
+};
+
+const ProfileSettingsPage: React.FC = observer(() => {
   const [isFormLoading, setIsFormLoading] = useState(false);
   const user = userStore.currentUser!;
 
@@ -71,13 +124,20 @@ const ProfileSettingsPage: React.FC =  observer(() => {
         ],
       },
       {
+        id: "currency",
+        label: "Currency",
+        type: "select",
+        initValue: `${user.currency}`,
+        options: currencyList(),
+      },
+      {
         id: "avatarUrl",
         label: "Profile Picture",
         type: "file",
       },
     ];
   }, [user]);
-
+  currencyList();
   const handleSubmitProfileInfo = async (data: any) => {
     setIsFormLoading(true);
     const updatedUser: User = {

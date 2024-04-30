@@ -1,7 +1,7 @@
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { User } from "../../models/user";
-import { NavigateFunction, redirect } from "react-router-dom";
+import { NavigateFunction } from "react-router-dom";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { successAlert } from "../../utils/swalAlerts";
 

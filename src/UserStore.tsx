@@ -17,6 +17,7 @@ class UserStore {
   }
 
   async fetchCurrentUser() {
+    this.storeCurrencies();
     this.currentUser = (await AuthService.getCurrentUser()) as User;
     this.triggerNotifications();
     this.blockUnpayingUsers();
@@ -27,6 +28,12 @@ class UserStore {
     if (user) {
       this.currentUser = user;
     }
+  }
+
+  async storeCurrencies() {
+    const response = await fetch("https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=BTC,USD,EUR,ILS,AED,JPY,GBP");
+    const currencies = await response.json();
+    localStorage.setItem("currencies", JSON.stringify(currencies));
   }
 
   async triggerNotifications() {

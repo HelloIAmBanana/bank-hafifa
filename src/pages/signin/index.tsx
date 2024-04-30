@@ -22,6 +22,8 @@ const schema: JSONSchemaType<User> = {
     accountType: { type: "string", enum: ["Business", "Personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
+    currency: { type: "string" },
+
   },
   required: ["email", "password"],
   additionalProperties: true,
@@ -65,7 +67,6 @@ function successfulSignIn(userID: string, rememberMe: boolean) {
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [inputValue, setInputValue] = useState('')
 
   const login = async (data: Record<string, any>) => {
     setIsSigningIn(true);
