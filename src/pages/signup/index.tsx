@@ -59,6 +59,8 @@ async function sendVerificationEmail(user: User,navigate: NavigateFunction) {
     },
     (error) => {
       console.log('FAILED...', error.text);
+      errorAlert("Failed to send email");
+
     },);
   };
 
