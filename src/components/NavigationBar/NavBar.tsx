@@ -60,7 +60,11 @@ export default function NavBar() {
   }, [currentUser]);
 
   const avatarIMG = useMemo(() => {
-    return currentUser!.avatarUrl;
+    const imageURL = currentUser!.avatarUrl;
+    if(imageURL===""){
+      return `https://api.multiavatar.com/${userName}.svg`
+    }
+    return imageURL
   }, [currentUser]);
 
   const userRoutes = useMemo(() => {

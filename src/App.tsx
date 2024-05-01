@@ -14,7 +14,7 @@ import { FetchDepositsProvider } from "./contexts/fetchDepositsContext";
 import { FetchTransactionsProvider } from "./contexts/fetchTransactionsContext";
 import { FetchCardsProvider } from "./contexts/fetchCardsContext";
 import { FetchUsersProvider } from "./contexts/fetchUserContext";
-import AdminUsersPage from "./pages/adminPages/users";
+import AdminUsersPage from "./pages/adminPages/Users";
 
 function App() {
   return (
