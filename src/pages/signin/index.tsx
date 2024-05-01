@@ -4,7 +4,7 @@ import GenericForm from "../../components/GenericForm/GenericForm";
 import { User } from "../../models/user";
 import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { validateLogin } from "./login";
-import { Typography, Box, Grid, Paper} from "@mui/material";
+import { Typography, Box, Grid, Paper } from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { JSONSchemaType } from "ajv";
 
@@ -23,7 +23,6 @@ const schema: JSONSchemaType<User> = {
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
     currency: { type: "string" },
-
   },
   required: ["email", "password"],
   additionalProperties: true,
@@ -34,8 +33,6 @@ const schema: JSONSchemaType<User> = {
     },
   },
 };
-
-
 
 function successfulSignIn(userID: string, rememberMe: boolean) {
   if (rememberMe) {
@@ -51,7 +48,6 @@ const SignInPage: React.FC = () => {
   const location = useLocation();
 
   const { state } = location;
-
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   const login = async (data: Record<string, any>) => {
@@ -76,14 +72,14 @@ const SignInPage: React.FC = () => {
       label: "Email",
       type: "email",
       placeholder: "Enter your email",
-      initValue: state.email?state.email:""
+      initValue: state ? state.email : "",
     },
     {
       id: "password",
       label: "Password",
       type: "password",
       placeholder: "Enter your password",
-
+      initValue: state ? state.password : "",
     },
     {
       id: "rememberMe",
@@ -93,7 +89,6 @@ const SignInPage: React.FC = () => {
   ];
 
   return (
-    
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
       <Grid container component="main" sx={{ height: "95vh" }}>
         <Grid

@@ -87,13 +87,13 @@ const SignUpPage: React.FC = () => {
     };
     setIsLoading(true);
 
-    // const isDuplicatedUser = Boolean(await doesUserExist(newUser.email));
+    const isDuplicatedUser = Boolean(await doesUserExist(newUser.email));
 
-    // if (isDuplicatedUser) {
-    //   errorAlert("User already exists!");
-    //   setIsLoading(false);
-    //   return;
-    // }
+    if (isDuplicatedUser) {
+      errorAlert("User already exists!");
+      setIsLoading(false);
+      return;
+    }
 
     await sendVerificationEmail(newUser,navigate);
   };
