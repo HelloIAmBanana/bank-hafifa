@@ -13,8 +13,9 @@ import TransactionsTable from "./UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
 import { useFetchTransactionsContext } from "../../contexts/fetchTransactionsContext";
 import NewsBox from "./NewsBox";
-import getArticles from "./GetArticles";
+import getArticles from "./getArticle";
 import OverviewPanel from "./OverviewPanel";
+import { Article } from "../../models/article";
 
 const fields = [
   {
@@ -60,7 +61,7 @@ const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isArticlesLoading, setIsArticlesLoading] = useState(true);
-  const [articles, setArticles] = useState<any[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const { fetchTransactions, isLoading, transactions } = useFetchTransactionsContext();
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
   const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
@@ -72,7 +73,7 @@ const Home: React.FC = () => {
 
   const storeArticles = async () => {
     setIsArticlesLoading(true);
-    const articles = await getArticles(2);
+    const articles = await getArticles();
     setArticles(articles);
     setIsArticlesLoading(false);
   };
@@ -258,7 +259,7 @@ const Home: React.FC = () => {
               <Grid
                 sx={{
                   overflowX: "auto",
-                  width: window.screen.width-800,
+                  width: window.screen.width - 800,
                   display: "flex",
                   flexDirection: "row",
                 }}
@@ -268,11 +269,7 @@ const Home: React.FC = () => {
                 ) : (
                   articles.map((article, index) => (
                     <Grid item key={index} ml={5}>
-                      <NewsBox
-                        articleDescription={article.description}
-                        articleLink={article.url}
-                        articleTitle={article.title}
-                      />
+                      <NewsBox article={article} />
                     </Grid>
                   ))
                 )}

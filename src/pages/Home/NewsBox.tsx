@@ -1,13 +1,12 @@
 import { Button, Card, CardActions, CardContent, CardMedia, Typography } from "@mui/material";
 import { NavLink } from "react-router-dom";
+import { Article } from "../../models/article";
 
 interface NewsBoxProps {
-  articleLink: string;
-  articleTitle: string;
-  articleDescription: string;
+  article: Article;
 }
 
-const NewsBox: React.FC<NewsBoxProps> = ({ articleDescription, articleLink, articleTitle }) => {
+const NewsBox: React.FC<NewsBoxProps> = ({ article }) => {
 
   return (
     <Card sx={{ maxWidth: 345, mb: 5, borderRadius: 5,width:345 }} elevation={12}>
@@ -15,21 +14,21 @@ const NewsBox: React.FC<NewsBoxProps> = ({ articleDescription, articleLink, arti
         component="img"
         alt="article image"
         height="140"
-        image="https://media-cldnry.s-nbcnews.com/image/upload/t_nbcnews-fp-1200-630,f_auto,q_auto:best/newscms/2019_06/2746941/190208-stock-money-fanned-out-ew-317p.jpg"
+        image={article.imageURL}
       />
       <CardContent>
         <Typography gutterBottom variant="h5" component="div" fontFamily={"Poppins"} fontSize={16}>
-          {articleTitle}
+          {article.title}
         </Typography>
         <Typography variant="body2" color="text.secondary" fontFamily={"Poppins"}>
-          {articleDescription}
+          {article.description}
         </Typography>
       </CardContent>
 
       <CardActions>
         <Button size="small" color="primary">
           <NavLink
-            to={articleLink}
+            to={article.url}
             style={{
               textDecoration: "none",
               fontFamily: "Poppins",
