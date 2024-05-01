@@ -5,15 +5,15 @@ import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 import { CellMouseOverEvent, ColDef, IRowNode, RowNode, SelectionChangedEvent } from "@ag-grid-community/core";
-import { useFetchUsersContext } from "../../../../contexts/fetchUserContext";
-import { UserContext } from "../../../../UserProvider";
-import CRUDLocalStorage from "../../../../CRUDLocalStorage";
-import { User } from "../../../../models/user";
+import { useFetchUsersContext } from "../../../contexts/fetchUserContext";
+import { UserContext } from "../../../UserProvider";
+import CRUDLocalStorage from "../../../CRUDLocalStorage";
+import { User } from "../../../models/user";
 import _ from "lodash";
-import { successAlert } from "../../../../utils/swalAlerts";
-import EditUserModal from "./EditUser";
+import { successAlert } from "../../../utils/swalAlerts";
 import { colDefs } from "./UserTableColumns";
 import TableContextMenu from "./ContextMenu";
+import EditUserModal from "./EditUser";
 
 const getRowColor = (params: any) => {
   const inDebt = params.data.balance < 0;

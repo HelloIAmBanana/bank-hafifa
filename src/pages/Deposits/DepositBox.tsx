@@ -1,12 +1,12 @@
 import { Grid, Paper, Typography } from "@mui/material";
-import thunderIcon from "../../../imgs/icons/Thunder.svg";
+import thunderIcon from "../../imgs/icons/Thunder.svg";
 import React, { useContext, useMemo } from "react";
-import { Deposit } from "../../../models/deposit";
+import { Deposit } from "../../models/deposit";
 import AdminDepositButtons from "./AdminButtons";
 import UserDepositButtons from "./UserDepositButtons";
-import AuthService from "../../../AuthService";
-import { UserContext } from "../../../UserProvider";
-import { formatIsoStringToDate } from "../../../utils/utils";
+import AuthService from "../../AuthService";
+import { UserContext } from "../../UserProvider";
+import { formatIsoStringToDate } from "../../utils/utils";
 import WithdrawDepositButton from "./WithdrawDepositButton";
 import { useLocation } from "react-router-dom";
 

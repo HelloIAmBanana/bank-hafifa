@@ -1,10 +1,10 @@
 import { Box, Button, CircularProgress, Grid, Modal, TextField } from "@mui/material";
-import { Card } from "../../../models/card";
+import { Card } from "../../models/card";
 import { useState } from "react";
-import { createNewNotification } from "../../../utils/utils";
-import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import { successAlert } from "../../../utils/swalAlerts";
-import { useFetchCardsContext } from "../../../contexts/fetchCardsContext";
+import { createNewNotification } from "../../utils/utils";
+import CRUDLocalStorage from "../../CRUDLocalStorage";
+import { successAlert } from "../../utils/swalAlerts";
+import { useFetchCardsContext } from "../../contexts/fetchCardsContext";
 
 interface AdminCreditCardButtonsProps {
   card: Card;

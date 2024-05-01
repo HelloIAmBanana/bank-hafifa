@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { UserContext } from "../../UserProvider";
 import { Card } from "../../models/card";
-import CreditCardsRow from "./CreditCardComponents/CreditCardsRow";
+import CreditCardsRow from "./CreditCardsRow";
 import { useFetchCardsContext } from "../../contexts/fetchCardsContext";
 import AuthService from "../../AuthService";
 import { useNavigate, useParams } from "react-router-dom";

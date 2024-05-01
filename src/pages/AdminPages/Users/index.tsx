@@ -3,14 +3,14 @@ import { Grid, Box, Container, Typography, Button, Modal } from "@mui/material";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 import { useFetchUsersContext } from "../../../contexts/fetchUserContext";
-import UsersTable from "./UserManangementComponents/UsersTable";
+import UsersTable from "./UsersTable";
 import GenericForm from "../../../components/GenericForm/GenericForm";
 import { JSONSchemaType } from "ajv";
 import { User } from "../../../models/user";
 import { doesUserExist, exportToExcel, generateUniqueId } from "../../../utils/utils";
 import { errorAlert, successAlert } from "../../../utils/swalAlerts";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import { userFields } from "./UserManangementComponents/UserFields";
+import { userFields } from "./userFields";
 
 const schema: JSONSchemaType<User> = {
   type: "object",
