@@ -1,6 +1,6 @@
 import { Grid, Paper, Typography } from "@mui/material";
 import { Loan } from "../../models/loan";
-import thunderIcon from "../../../imgs/icons/Thunder.svg"
+import thunderIcon from "../../imgs/icons/Thunder.svg"
 import LoanOfferButtons from "./LoanOfferButtons";
 import PendingLoanButtons from "./PendingLoanButtons";
 import ApprovedLoansButtons from "./ApprovedLoanButtons";

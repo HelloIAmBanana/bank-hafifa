@@ -1,5 +1,5 @@
 import { Grid, Paper, Typography } from "@mui/material";
-import thunderIcon from "../../../imgs/icons/Thunder.svg";
+import thunderIcon from "../../imgs/icons/Thunder.svg";
 import React, { useContext, useMemo } from "react";
 import { Deposit } from "../../models/deposit";
 import AdminDepositButtons from "./AdminButtons";
