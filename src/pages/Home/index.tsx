@@ -9,12 +9,12 @@ import { UserContext } from "../../UserProvider";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { JSONSchemaType } from "ajv";
 import GenericForm from "../../components/GenericForm/GenericForm";
-import OverviewPanel from "./OverviewPanel";
 import TransactionsTable from "./UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
 import { useFetchTransactionsContext } from "../../contexts/fetchTransactionsContext";
-import NewsBox from "./Home/NewsBox";
+import NewsBox from "./NewsBox";
 import getArticles from "./GetArticles";
+import OverviewPanel from "./OverviewPanel";
 
 const fields = [
   {
