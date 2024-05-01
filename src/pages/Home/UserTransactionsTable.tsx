@@ -7,8 +7,8 @@ import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-mod
 import { Box, Typography } from "@mui/material";
 import transactionIcon from "../../../imgs/icons/Transaction.png";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
-import { formatIsoStringToDate } from "../../../utils/utils";
-import { Transaction } from "../../../models/transactions";
+import { formatIsoStringToDate } from "../../utils/utils";
+import { Transaction } from "../../models/transactions";
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 

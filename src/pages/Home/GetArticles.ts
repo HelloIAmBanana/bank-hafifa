@@ -1,4 +1,4 @@
-import { Article } from "../../../models/article";
+import { Article } from "../../models/article";
 
 export default async function getArticles(pagesAmount: number) {
   const articlesArray = [];

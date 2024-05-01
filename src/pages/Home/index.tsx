@@ -14,7 +14,7 @@ import TransactionsTable from "./UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
 import { useFetchTransactionsContext } from "../../contexts/fetchTransactionsContext";
 import NewsBox from "./Home/NewsBox";
-import getArticles from "./Home/GetArticles";
+import getArticles from "./GetArticles";
 
 const fields = [
   {

@@ -1,7 +1,7 @@
 import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
 import { Fragment } from "react/jsx-runtime";
 import { useContext } from "react";
-import { UserContext } from "../../../UserProvider";
+import { UserContext } from "../../UserProvider";
 
 interface OverviewGridPanel {
   isTableLoading: boolean;
