@@ -43,26 +43,23 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-async function sendVerificationEmail(user: User,navigate: NavigateFunction) {
-  return emailjs.send(
-    "MoleculeBankEmailService",
-    "VerifyEmailTemplate",
-    {
-      to_name: getUserFullName(user),
-      verifyCode: user.id.slice(1),
-      email: user.email,
-    },
-    "mV0Sbuwnyfajg2kGj"
-  ).then(
-    async () => {
-      await openVerifyEmailModal(user, navigate);
-    },
-    (error) => {
-      console.log('FAILED...', error.text);
-      errorAlert("Failed to send email");
-
-    },);
-  };
+async function sendVerificationEmail(user: User, navigate: NavigateFunction) {
+  try {
+    await emailjs.send(
+      "MoleculeBankEmailService",
+      "VerifyEmailTemplate",
+      {
+        to_name: getUserFullName(user),
+        verifyCode: user.id.slice(1),
+        email: user.email,
+      },
+      "mV0Sbuwnyfajg2kGj"
+    );
+    await openVerifyEmailModal(user, navigate);
+  } catch {
+    errorAlert("Failed to send email");
+  }
+}
 
 const SignUpPage: React.FC = () => {
   const [avatarImgURL, setAvatarImgURL] = useState<string | undefined>(undefined);
@@ -97,7 +94,7 @@ const SignUpPage: React.FC = () => {
       return;
     }
 
-    await sendVerificationEmail(newUser,navigate);
+    await sendVerificationEmail(newUser, navigate);
   };
 
   document.title = "Sign Up";
