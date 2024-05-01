@@ -9,10 +9,12 @@ import { UserContext } from "../../UserProvider";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { JSONSchemaType } from "ajv";
 import GenericForm from "../../components/GenericForm/GenericForm";
-import OverviewPanel from "./overviewPanel";
-import TransactionsTable from "./UserTransactionsTable";
+import OverviewPanel from "./Home/overviewPanel";
+import TransactionsTable from "./Home/UserTransactionsTable";
 import { useNavigate } from "react-router-dom";
 import { useFetchTransactionsContext } from "../../contexts/fetchTransactionsContext";
+import NewsBox from "./Home/NewsBox";
+import getArticles from "./Home/GetArticles";
 
 const fields = [
   {
@@ -57,6 +59,8 @@ const schema: JSONSchemaType<Transaction> = {
 const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useContext(UserContext);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
+  const [isArticlesLoading, setIsArticlesLoading] = useState(true);
+  const [articles, setArticles] = useState<any[]>([]);
   const { fetchTransactions, isLoading, transactions } = useFetchTransactionsContext();
   const [isPaymentModalOpen, setPaymentModal] = useState(false);
   const [userOldBalance, setUserOldBalance] = useState<number | undefined>();
@@ -65,6 +69,13 @@ const Home: React.FC = () => {
   const isAdmin = useMemo(() => {
     return AuthService.isUserAdmin(currentUser);
   }, [currentUser]);
+
+  const storeArticles = async () => {
+    setIsArticlesLoading(true);
+    const articles = await getArticles();
+    setArticles(articles);
+    setIsArticlesLoading(false);
+  };
 
   const updateBalance = async (user: User, amount: number) => {
     const updatedBalance = user.balance + amount;
@@ -109,7 +120,6 @@ const Home: React.FC = () => {
   };
 
   const handleSubmitTransaction = async (data: any) => {
-
     setUserOldBalance(currentUser!.balance);
 
     const amount = data.amount;
@@ -143,11 +153,11 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     fetchTransactions();
+    storeArticles();
     // eslint-disable-next-line
   }, [currentUser]);
 
   document.title = "Home";
-console.log("HOMEEEEEEEEEEEEE")
   return (
     <Box sx={{ display: "flex" }}>
       <Container sx={{ mt: 3 }}>
@@ -170,7 +180,9 @@ console.log("HOMEEEEEEEEEEEEE")
                 </Button>
               </Grid>
               <Grid item>
-                <Button type="submit" onClick={() => navigate("/admin/users")}>User Control</Button>
+                <Button type="submit" onClick={() => navigate("/admin/users")}>
+                  User Control
+                </Button>
               </Grid>
               <Grid item>
                 <Button type="submit" onClick={() => navigate("/admin/deposits")}>
@@ -182,7 +194,7 @@ console.log("HOMEEEEEEEEEEEEE")
         ) : (
           <Grid container spacing={20}>
             {/* Overview Panel */}
-            <Grid item xs={12} md={9} lg={8}>
+            <Grid item xs={8} md={8} lg={8}>
               <Paper
                 sx={{
                   display: "flex",
@@ -199,7 +211,7 @@ console.log("HOMEEEEEEEEEEEEE")
               </Paper>
             </Grid>
             {/* Quick Transaction */}
-            <Grid item xs={4} md={4} lg={4} order={{ xs: 3, md: 3, lg: 2 }}>
+            <Grid item xs={4} md={4} lg={4} order={{ xs: 4, md: 4, lg: 2 }}>
               <Typography variant="h5" gutterBottom sx={{ fontFamily: "Poppins", fontWeight: "bold" }}>
                 Quick Transaction
               </Typography>
@@ -240,6 +252,31 @@ console.log("HOMEEEEEEEEEEEEE")
                   <TransactionsTable transactions={transactions} userID={currentUser!.id} />
                 )}
               </Paper>
+            </Grid>
+            {/* Articles */}
+            <Grid item xs={12} md={12} lg={9} order={{ xs: 3, md: 3, lg: 4 }} mt={-20}>
+              <Grid
+                sx={{
+                  overflowX: "auto",
+                  width: window.screen.width-800,
+                  display: "flex",
+                  flexDirection: "row",
+                }}
+              >
+                {isArticlesLoading ? (
+                  <Skeleton height={350} width={750} />
+                ) : (
+                  articles.map((article, index) => (
+                    <Grid item key={index} ml={5}>
+                      <NewsBox
+                        articleDescription={article.description}
+                        articleLink={article.url}
+                        articleTitle={article.title}
+                      />
+                    </Grid>
+                  ))
+                )}
+              </Grid>
             </Grid>
           </Grid>
         )}
