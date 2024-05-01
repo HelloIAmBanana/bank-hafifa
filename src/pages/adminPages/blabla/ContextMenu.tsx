@@ -1,5 +1,5 @@
 import { CircularProgress, Menu, MenuItem, Typography } from "@mui/material";
-import { User } from "../../../../models/user";
+import { User } from "../../../models/user";
 import { useNavigate } from "react-router-dom";
 
 interface TableContextMenuProps {
