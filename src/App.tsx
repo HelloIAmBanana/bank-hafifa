@@ -7,7 +7,7 @@ import LoansPage from "./pages/Loans";
 import DepositsPage from "./pages/Deposits";
 import Home from "./pages/Home";
 import CardsPage from "./pages/Cards";
-import AdminUsersPage from "./pages/DASFAFDS/Users";
+import AdminUsersPage from "./pages/AdminPages/Users";
 import "./style.css";
 import "./App.css";
 import { FetchLoansProvider } from "./contexts/fetchLoansContext";
