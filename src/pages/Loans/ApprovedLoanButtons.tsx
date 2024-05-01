@@ -1,12 +1,12 @@
 import React, { ChangeEvent, useContext, useState } from "react";
-import { Loan } from "../../../models/loan";
+import { Loan } from "../../models/loan";
 import { Box, Button, CircularProgress, Grid, Modal, TextField, Typography } from "@mui/material";
-import { UserContext } from "../../../UserProvider";
-import { User } from "../../../models/user";
-import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import { useFetchLoanContext } from "../../../contexts/fetchLoansContext";
-import { Transaction } from "../../../models/transactions";
-import { generateUniqueId, getUserFullName } from "../../../utils/utils";
+import { UserContext } from "../../UserProvider";
+import { User } from "../../models/user";
+import CRUDLocalStorage from "../../CRUDLocalStorage";
+import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
+import { Transaction } from "../../models/transactions";
+import { generateUniqueId, getUserFullName } from "../../utils/utils";
 
 interface ApprovedLoansButtonsProps {
   loan: Loan;

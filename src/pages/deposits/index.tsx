@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Box, Button, Container, Grid, Modal, Skeleton, Typography } from "@mui/material";
-import DepositRows from "./DepositComponents/DepositRows";
+import DepositRows from "./DepositRows";
 import { useFetchDepositsContext } from "../../contexts/fetchDepositsContext";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import { Deposit } from "../../models/deposit";

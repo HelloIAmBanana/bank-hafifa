@@ -1,8 +1,8 @@
 import { Button, CircularProgress, Grid } from "@mui/material";
-import { Card } from "../../../models/card";
-import { normalAlert, successAlert } from "../../../utils/swalAlerts";
-import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import { useFetchCardsContext } from "../../../contexts/fetchCardsContext";
+import { Card } from "../../models/card";
+import { normalAlert, successAlert } from "../../utils/swalAlerts";
+import CRUDLocalStorage from "../../CRUDLocalStorage";
+import { useFetchCardsContext } from "../../contexts/fetchCardsContext";
 import { useState } from "react";
 
 interface ApprovedCreditCardButtonsProps {

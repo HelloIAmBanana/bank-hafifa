@@ -7,6 +7,7 @@ import LoansPage from "./pages/Loans";
 import DepositsPage from "./pages/Deposits";
 import Home from "./pages/Home";
 import CardsPage from "./pages/Cards";
+import AdminUsersPage from "./pages/adminPages/Users";
 import "./style.css";
 import "./App.css";
 import { FetchLoansProvider } from "./contexts/fetchLoansContext";
@@ -14,7 +15,6 @@ import { FetchDepositsProvider } from "./contexts/fetchDepositsContext";
 import { FetchTransactionsProvider } from "./contexts/fetchTransactionsContext";
 import { FetchCardsProvider } from "./contexts/fetchCardsContext";
 import { FetchUsersProvider } from "./contexts/fetchUserContext";
-import AdminUsersPage from "./pages/adminPages/blabla";
 
 function App() {
   return (

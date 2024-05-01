@@ -7,7 +7,7 @@ import { Loan } from "../../models/loan";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
 import { JSONSchemaType } from "ajv";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
-import LoansRow from "./LoanComponents/LoansRow";
+import LoansRow from "./LoansRow";
 import { useFetchLoanContext } from "../../contexts/fetchLoansContext";
 import AuthService from "../../AuthService";
 import { useNavigate, useParams } from "react-router-dom";

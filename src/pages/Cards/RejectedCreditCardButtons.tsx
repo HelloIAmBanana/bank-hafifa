@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Modal, Typography } from "@mui/material";
-import { Card } from "../../../models/card";
+import { Card } from "../../models/card";
 import { useState } from "react";
 
 interface RejectedCreditCardButtonsProps {
