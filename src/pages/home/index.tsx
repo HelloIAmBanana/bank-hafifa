@@ -72,7 +72,7 @@ const Home: React.FC = () => {
 
   const storeArticles = async () => {
     setIsArticlesLoading(true);
-    const articles = await getArticles();
+    const articles = await getArticles(2);
     setArticles(articles);
     setIsArticlesLoading(false);
   };
