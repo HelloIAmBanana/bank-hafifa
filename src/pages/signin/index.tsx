@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import loginImage from "../../imgs/loginPage.svg";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { User } from "../../models/user";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { validateLogin } from "./login";
 import { Typography, Box, Grid, Paper } from "@mui/material";
 import { errorAlert, successAlert } from "../../utils/swalAlerts";
@@ -22,6 +22,7 @@ const schema: JSONSchemaType<User> = {
     accountType: { type: "string", enum: ["Business", "Personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
+    currency: { type: "string" },
   },
   required: ["email", "password"],
   additionalProperties: true,
@@ -33,55 +34,59 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
-const fields = [
-  {
-    id: "email",
-    label: "Email",
-    type: "email",
-    placeholder: "Enter your email",
-  },
-  {
-    id: "password",
-    label: "Password",
-    type: "password",
-    placeholder: "Password",
-  },
-  {
-    id: "rememberMe",
-    label: "Remember Me",
-    type: "checkbox",
-  },
-];
-
-function storeCurrentAuthToken(userID: string, rememberMe: boolean) {
+function successfulSignIn(userID: string, rememberMe: boolean) {
   if (rememberMe) {
     localStorage.setItem("rememberedAuthToken", userID);
   } else {
     sessionStorage.setItem("currentAuthToken", userID);
   }
+  successAlert("Signing in!");
 }
 
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+
+  const { state } = location;
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   const login = async (data: Record<string, any>) => {
-      setIsLoading(true);
+    setIsSigningIn(true);
+    const validUser = await validateLogin(data.email, data.password);
 
-      const validUser = await validateLogin(data.email,data.password);
+    if (!validUser) {
+      errorAlert("Wrong Credentials!");
+      setIsSigningIn(false);
+      return;
+    }
 
-      if (!validUser) {
-        errorAlert("Wrong Credentials!");
-        setIsLoading(false);
-        return;
-      }
-      
-      storeCurrentAuthToken(validUser.id, data.rememberMe);
-      successAlert("Signing in!");
-      navigate("/home");
+    successfulSignIn(validUser.id, data.rememberMe);
+    navigate("/home");
   };
 
   document.title = "Sign In";
+
+  const fields = [
+    {
+      id: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "Enter your email",
+      initValue: state ? state.email : "",
+    },
+    {
+      id: "password",
+      label: "Password",
+      type: "password",
+      placeholder: "Enter your password",
+      initValue: state ? state.password : "",
+    },
+    {
+      id: "rememberMe",
+      label: "Remember Me",
+      type: "checkbox",
+    },
+  ];
 
   return (
     <Box sx={{ display: "flex", backgroundColor: "white" }}>
@@ -127,18 +132,11 @@ const SignInPage: React.FC = () => {
                 onSubmit={login}
                 submitButtonLabel="Sign In"
                 schema={schema}
-                isLoading={isLoading}
+                isLoading={isSigningIn}
               />
             </Grid>
-            <Grid container justifyContent="flex-start">
-              <Grid
-                item
-                sx={{
-                  marginLeft: "auto",
-                  fontFamily: "Poppins",
-                  textDecoration: "none",
-                }}
-              >
+            <Grid container direction="row" justifyContent="space-between" alignItems="center">
+              <Grid item>
                 <NavLink
                   to="/signup"
                   style={{
@@ -150,6 +148,21 @@ const SignInPage: React.FC = () => {
                   }}
                 >
                   First time? Join us here!
+                </NavLink>
+              </Grid>
+              <Grid item>
+                <NavLink
+                  to="/forgot-password"
+                  style={{
+                    padding: "20px",
+                    textDecoration: "none",
+                    fontFamily: "Poppins",
+                    color: "#181818",
+                    fontSize: "18px",
+                    marginTop: "25px",
+                  }}
+                >
+                  Forgot Your Password?
                 </NavLink>
               </Grid>
             </Grid>

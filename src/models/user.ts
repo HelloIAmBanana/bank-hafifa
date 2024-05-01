@@ -10,4 +10,5 @@ export type User = {
   accountType: "Business" | "Personal";
   role: "customer" | "admin";
   balance: number;
+  currency: string;
 };

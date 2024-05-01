@@ -7,17 +7,18 @@ import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-mod
 import { Box, Typography } from "@mui/material";
 import transactionIcon from "../../imgs/icons/Transaction.png";
 import { TrendingDown, TrendingUp } from "@mui/icons-material";
-import { formatIsoStringToDate } from "../../utils/utils";
+import { formatIsoStringToDate, formatMoney } from "../../utils/utils";
 import { Transaction } from "../../models/transactions";
+import { User } from "../../models/user";
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
 interface TransactionsTableProps {
   transactions: Transaction[];
-  userID: string;
+  user: User;
 }
 
-const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, userID }) => {
+const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, user }) => {
   const colDefs = useMemo(
     () => [
       {
@@ -34,7 +35,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, use
         cellRenderer: (params: any): JSX.Element => (
           <Box>
             <Typography fontWeight={"Bold"} fontFamily={"Poppins"}>
-              {params.data.senderID === userID ? `To ${params.data.receiverName}` : `From ${params.data.senderName}`}
+              {params.data.senderID === user.id ? `To ${params.data.receiverName}` : `From ${params.data.senderName}`}
             </Typography>
             <Typography fontFamily={"Poppins"}>{`At ${formatIsoStringToDate(params.data.date, "HH:mm")}`}</Typography>
           </Box>
@@ -55,7 +56,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, use
         suppressHeaderMenuButton: true,
         suppressHeaderContextMenu: true,
         cellRenderer: (params: any): JSX.Element => {
-          if (params.data.senderID === userID) {
+          if (params.data.senderID === user.id) {
             return <TrendingDown sx={{ color: "red" }} />;
           } else {
             return <TrendingUp sx={{ color: "green" }} />;
@@ -67,16 +68,16 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, use
         minWidth: 150,
         flex:1,
         cellRenderer: (params: any): string => {
-          if (params.data.senderID === userID) {
-            return `${-params.data.amount}$`;
+          if (params.data.senderID === user.id) {
+            return `-${formatMoney(user.currency,params.data.amount)}`;
           } else {
-            return `+${params.data.amount}$`;
+            return `+${formatMoney(user.currency,params.data.amount)}`;
           }
         },
       },
       { field: "reason", minWidth: 400,flex: 1},
     ],
-    [userID]
+    [user]
   );
 
   const defaultColDef = useMemo<ColDef>(() => {

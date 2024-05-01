@@ -4,6 +4,6 @@ export type Field = {
   label?: string;
   placeholder?: string;
   checked?: boolean;
-  options?: { value: string; label: string }[];
+  options?: { value: string; label: string|JSX.Element }[];
   initValue?: string|number;
 };

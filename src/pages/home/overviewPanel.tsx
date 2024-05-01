@@ -1,7 +1,7 @@
 import { Button, Grid, Paper, Skeleton, Typography } from "@mui/material";
-import { Fragment } from "react/jsx-runtime";
-import { useContext } from "react";
-import { UserContext } from "../../UserProvider";
+import { observer } from "mobx-react-lite";
+import userStore from "../../UserStore";
+import { formatMoney } from "../../utils/utils";
 
 interface OverviewGridPanel {
   isTableLoading: boolean;
@@ -10,16 +10,22 @@ interface OverviewGridPanel {
   openPaymentModal: () => void;
 }
 
-const OverviewPanel: React.FC<OverviewGridPanel> = ({
+const OverviewPanel: React.FC<OverviewGridPanel> = observer(({
   isTableLoading,
   userOldBalance,
   isButtonLoading,
   openPaymentModal,
 }) => {
-  const [currentUser] = useContext(UserContext);
+  let currentUser = userStore.currentUser!;
 
   return (
-    <Fragment>
+    <Paper
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+      elevation={0}
+    >
       <Typography variant="h4" fontFamily={"Poppins"} fontWeight={"bold"}>
         Overview
       </Typography>
@@ -42,7 +48,7 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
             </Typography>
             {isTableLoading ? (
               <center>
-                <Skeleton height={"44.4531px"}/>
+                <Skeleton height={"44.4531px"} />
               </center>
             ) : (
               <Typography
@@ -53,7 +59,9 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
                   fontSize: 36,
                 }}
               >
-                {!isButtonLoading ? `$${Math.ceil(currentUser!.balance).toLocaleString()}` : `$${Math.ceil(userOldBalance!).toLocaleString()}`}
+                {!isButtonLoading
+                  ? `${formatMoney(currentUser.currency,currentUser!.balance)}`
+                  : `${formatMoney(currentUser.currency,userOldBalance!)}`}
               </Typography>
             )}
           </Paper>
@@ -86,13 +94,13 @@ const OverviewPanel: React.FC<OverviewGridPanel> = ({
                 fontSize: 36,
               }}
             >
-              $123,456
+              {formatMoney(currentUser.currency,123456)}
             </Typography>
           </Paper>
         </Grid>
       </Grid>
-    </Fragment>
+    </Paper>
   );
-};
+});
 
 export default OverviewPanel;

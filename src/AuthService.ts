@@ -1,5 +1,7 @@
 import { User } from "./models/user";
 import CRUDLocalStorage from "./CRUDLocalStorage";
+import { errorAlert } from "./utils/swalAlerts";
+import { redirect } from "react-router-dom";
 
 export default class AuthService {
   static getRememberedToken() {
@@ -29,5 +31,15 @@ export default class AuthService {
     const sessionToken = sessionStorage.getItem("currentAuthToken");
     const user = rememberedUser ?? sessionToken;
     return user;
+  }
+
+  static async isSpectatedUserReal(userID: string | undefined) {
+    if (userID) {
+      const spectatedUser = await CRUDLocalStorage.getItemInList<User>("users", userID);
+      if (!spectatedUser) {
+        errorAlert("ID ISNT REAL");
+        redirect("/admin/users");
+      }
+    }
   }
 }

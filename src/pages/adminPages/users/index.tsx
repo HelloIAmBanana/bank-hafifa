@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import { Grid, Box, Container, Typography, Button, Modal } from "@mui/material";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
-import { useFetchUsersContext } from "../../../contexts/fetchUserContext";
-import UsersTable from "./UserManangementComponents/UsersTable";
 import GenericForm from "../../../components/GenericForm/GenericForm";
 import { JSONSchemaType } from "ajv";
 import { User } from "../../../models/user";
 import { doesUserExist, exportToExcel, generateUniqueId } from "../../../utils/utils";
 import { errorAlert, successAlert } from "../../../utils/swalAlerts";
 import CRUDLocalStorage from "../../../CRUDLocalStorage";
-import { userFields } from "./UserManangementComponents/UserFields";
+import { userFields } from "./UserManangement/UserFields";
+import UsersTable from "./UserManangement/UsersTable";
+import { useLoaderData } from "react-router-dom";
+import { UsersLoaderData } from "./usersLoader";
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -26,6 +27,8 @@ const schema: JSONSchemaType<User> = {
     accountType: { type: "string", enum: ["Business", "Personal"], minLength: 1 },
     role: { type: "string", enum: ["admin", "customer"], minLength: 1 },
     balance: { type: "number" },
+    currency: { type: "string" },
+
   },
   required: ["birthDate", "email", "firstName", "lastName", "password", "gender", "accountType", "role", "balance"],
   additionalProperties: true,
@@ -44,10 +47,11 @@ const schema: JSONSchemaType<User> = {
   },
 };
 const AdminUsersPage: React.FC = () => {
-  const { fetchUsers, users } = useFetchUsersContext();
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isUserCreationModalOpen, setIsUserCreationModalOpen] = useState(false);
 
+  const data = useLoaderData() as UsersLoaderData;
+  
   const closeUserCreationModal = () => {
     if (isCreatingUser) return;
     setIsUserCreationModalOpen(false);
@@ -62,7 +66,7 @@ const AdminUsersPage: React.FC = () => {
 
     setIsCreatingUser(true);
 
-    const isDuplicatedUser = await doesUserExist(newUser.email);
+    const isDuplicatedUser = Boolean(await doesUserExist(newUser.email));
 
     if (isDuplicatedUser) {
       errorAlert("User already exists!");
@@ -71,7 +75,6 @@ const AdminUsersPage: React.FC = () => {
     }
 
     await CRUDLocalStorage.addItemToList<User>("users", newUser);
-    await fetchUsers();
     setIsCreatingUser(false);
     successAlert("Account Created!");
     closeUserCreationModal();
@@ -81,9 +84,9 @@ const AdminUsersPage: React.FC = () => {
     setIsUserCreationModalOpen(true);
   };
 
-  const onExportButtonClick=()=>{
-    exportToExcel<User>("users", users)
-  }
+  const onExportButtonClick = async () => {
+    exportToExcel<User>("users", await data.users);
+  };
 
   document.title = "Users Management";
 
@@ -130,18 +133,17 @@ const AdminUsersPage: React.FC = () => {
         onClose={closeUserCreationModal}
         sx={{
           display: "flex",
-          alignItems: "center",
           justifyContent: "center",
-          overflowY: "auto",
+          mt: 2,
         }}
       >
         <Box
           sx={{
-            width: 360,
             bgcolor: "white",
             borderRadius: 5,
             paddingLeft: 5,
             paddingRight: 5,
+            overflowY: "auto",
           }}
         >
           <center>

@@ -1,13 +1,39 @@
-import React, { useState, useContext, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { User } from "../../models/user";
 import { successAlert } from "../../utils/swalAlerts";
-import { Grid } from "@mui/material";
-import { UserContext } from "../../UserProvider";
+import { Grid, Typography } from "@mui/material";
+import { observer } from "mobx-react-lite";
+import userStore from "../../UserStore";
 import CRUDLocalStorage from "../../CRUDLocalStorage";
 import * as _ from "lodash";
 import GenericForm from "../../components/GenericForm/GenericForm";
 import { JSONSchemaType } from "ajv";
+import USD from "../../imgs/icons/currencies/USD.svg";
+import ILS from "../../imgs/icons/currencies/ILS.svg";
+import BTC from "../../imgs/icons/currencies/BTC.svg";
+import EUR from "../../imgs/icons/currencies/EUR.svg";
+import AED from "../../imgs/icons/currencies/AED.svg";
+import JPY from "../../imgs/icons/currencies/JPY.svg";
+import GBP from "../../imgs/icons/currencies/GBP.svg";
 
+const getCurrencyIcon = (currency: string) => {
+  switch (currency) {
+    case "GBP":
+      return GBP;
+    case "ILS":
+      return ILS;
+    case "BTC":
+      return BTC;
+    case "EUR":
+      return EUR;
+    case "AED":
+      return AED;
+    case "JPY":
+      return JPY;
+    default:
+      return USD;
+  }
+};
 
 const schema: JSONSchemaType<User> = {
   type: "object",
@@ -23,6 +49,7 @@ const schema: JSONSchemaType<User> = {
     accountType: { type: "string", enum: ["Business", "Personal"] },
     role: { type: "string", enum: ["admin", "customer"] },
     balance: { type: "number" },
+    currency: { type: "string" },
   },
   required: [],
   additionalProperties: true,
@@ -36,10 +63,32 @@ const schema: JSONSchemaType<User> = {
   },
 };
 
+const currencyList = () => {
+  const currencies = localStorage.getItem("currencies")!;
+  const currencyObject = JSON.parse(currencies!);
 
-const ProfileSettingsPage: React.FC = () => {
-  const [currentUser, setCurrentUser] = useContext(UserContext);
+  return Object.keys(currencyObject).map((key) => ({
+    value: key,
+    label: (
+      <span>
+        <img
+          style={{ marginRight: 10, marginLeft: 10, marginTop: -4 }}
+          width="30rem"
+          height="30rem"
+          src={`${getCurrencyIcon(key)}`}
+          alt="Currency Icon"
+        />
+        <Typography sx={{ fontFamily: "Poppins", fontSize: "15px", fontWeight: "bold" }} marginLeft={10} marginTop={-4}>
+          {key}
+        </Typography>
+      </span>
+    ),
+  }));
+};
+
+const ProfileSettingsPage: React.FC = observer(() => {
   const [isFormLoading, setIsFormLoading] = useState(false);
+  const user = userStore.currentUser!;
 
   const fields = useMemo(() => {
     return [
@@ -47,29 +96,36 @@ const ProfileSettingsPage: React.FC = () => {
         id: "firstName",
         label: "First Name",
         type: "text",
-        initValue: `${currentUser?.firstName}`,
+        initValue: `${user.firstName}`,
       },
       {
         id: "lastName",
         label: "Last Name",
         type: "text",
-        initValue: `${currentUser?.lastName}`,
+        initValue: `${user.lastName}`,
       },
       {
         id: "birthDate",
         label: "Date Of Birth",
         type: "date",
-        initValue: `${currentUser?.birthDate}`,
+        initValue: `${user.birthDate}`,
       },
       {
         id: "gender",
         label: "Gender",
         type: "select",
-        initValue: `${currentUser?.gender}`,
+        initValue: `${user.gender}`,
         options: [
           { value: "Male", label: "Male" },
           { value: "Female", label: "Female" },
         ],
+      },
+      {
+        id: "currency",
+        label: "Currency",
+        type: "select",
+        initValue: `${user.currency}`,
+        options: currencyList(),
       },
       {
         id: "avatarUrl",
@@ -77,36 +133,39 @@ const ProfileSettingsPage: React.FC = () => {
         type: "file",
       },
     ];
-  }, [currentUser]);
-
-
+  }, [user]);
+  currencyList();
   const handleSubmitProfileInfo = async (data: any) => {
     setIsFormLoading(true);
-      const updatedUser: User = {
-        ...currentUser!,
-        ...data,
-      };
-      if (!_.isEqual(updatedUser, currentUser)) {
-        await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
-        setCurrentUser(updatedUser);
-        successAlert(`Updated User!`);
-      }
+    const updatedUser: User = {
+      ...user!,
+      ...data,
+    };
+    if (!_.isEqual(updatedUser, user)) {
+      await CRUDLocalStorage.updateItemInList<User>("users", updatedUser);
+      userStore.currentUser = updatedUser;
+      successAlert(`Updated User!`);
+    }
     setIsFormLoading(false);
   };
 
   document.title = "Account Settings";
 
+  useEffect(() => {
+    userStore.storeCurrentUser();
+  }, []);
+
   return (
-      <Grid container direction="column" justifyContent="flex-start" alignItems="center" marginTop={5} mr={15}>
-          <GenericForm
-            fields={fields}
-            onSubmit={handleSubmitProfileInfo}
-            submitButtonLabel="Update"
-            schema={schema}
-            isLoading={isFormLoading}
-          />
-      </Grid>
+    <Grid container direction="column" justifyContent="flex-start" alignItems="center" marginTop={5} mr={15}>
+      <GenericForm
+        fields={fields}
+        onSubmit={handleSubmitProfileInfo}
+        submitButtonLabel="Update"
+        schema={schema}
+        isLoading={isFormLoading}
+      />
+    </Grid>
   );
-};
+});
 
 export default ProfileSettingsPage;
