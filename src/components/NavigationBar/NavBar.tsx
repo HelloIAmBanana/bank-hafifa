@@ -4,9 +4,19 @@ import { getUserFullName } from "../../utils/utils";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserProvider";
 import NavBarItem from "./NavBarItem";
-import { GiPayMoney, GiSwipeCard, GiHouse, GiPiggyBank, GiGears, GiExitDoor, GiSmart } from "react-icons/gi";
+import {
+  GiPayMoney,
+  GiSwipeCard,
+  GiHouse,
+  GiPiggyBank,
+  GiGears,
+  GiExitDoor,
+  GiSmart,
+  GiAbstract024,
+} from "react-icons/gi";
 
 import AuthService from "../../AuthService";
+import { fortuneAlert } from "../../utils/swalAlerts";
 
 const getNavBarIcon = (item: string) => {
   switch (item) {
@@ -71,7 +81,6 @@ export default function NavBar() {
     return ["Home", "Loans", "Cards", "Deposits", "Settings"];
   }, [currentUser]);
 
-
   return (
     <Box sx={{ display: "flex" }}>
       {!userName ? (
@@ -84,7 +93,7 @@ export default function NavBar() {
             [`& .MuiDrawer-paper`]: {
               display: "flex",
               height: "100vh",
-              maxWidth:"240px",
+              maxWidth: "240px",
               fontFamily: "Poppins",
               borderTopLeftRadius: 16,
               borderLeftRadius: 16,
@@ -115,6 +124,7 @@ export default function NavBar() {
                 <NavBarItem label={text} icon={getNavBarIcon(text)} onClick={() => getRoutePath(text)} />
               ))}
               <NavBarItem label={"Logout"} icon={<GiExitDoor />} onClick={logUserOut} />
+              <NavBarItem label={"Fortune"} icon={<GiAbstract024 />} onClick={() => fortuneAlert()} />
             </List>
           </Box>
         </Drawer>
