@@ -13,6 +13,7 @@ import {
   GiExitDoor,
   GiSmart,
   GiAbstract024,
+  GiDiceFire,
 } from "react-icons/gi";
 
 import AuthService from "../../AuthService";
@@ -43,7 +44,7 @@ const getNavBarIcon = (item: string) => {
 export default function NavBar() {
   const navigate = useNavigate();
   const [currentUser] = useContext(UserContext);
-
+  
   function logUserOut() {
     sessionStorage.clear();
     localStorage.removeItem("rememberedAuthToken");
@@ -71,6 +72,10 @@ export default function NavBar() {
 
   const avatarIMG = useMemo(() => {
     return currentUser!.avatarUrl;
+  }, [currentUser]);
+
+  const isGambler = useMemo(() => {
+    return Boolean(getUserFullName(currentUser!)==="Hola User");
   }, [currentUser]);
 
   const userRoutes = useMemo(() => {
@@ -123,8 +128,9 @@ export default function NavBar() {
               {userRoutes.map((text) => (
                 <NavBarItem label={text} icon={getNavBarIcon(text)} onClick={() => getRoutePath(text)} />
               ))}
-              <NavBarItem label={"Logout"} icon={<GiExitDoor />} onClick={logUserOut} />
-              <NavBarItem label={"Fortune"} icon={<GiAbstract024 />} onClick={() => fortuneAlert()} />
+              <NavBarItem label="Logout" icon={<GiExitDoor />} onClick={logUserOut} />
+              <NavBarItem label="Fortune" icon={<GiAbstract024 />} onClick={() => fortuneAlert()} />
+              {isGambler&& <NavBarItem label="Gambling" icon={<GiDiceFire />} onClick={()=>navigate(`/gambling`)}/>}
             </List>
           </Box>
         </Drawer>

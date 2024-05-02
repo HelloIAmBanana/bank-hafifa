@@ -15,6 +15,7 @@ import { FetchDepositsProvider } from "./contexts/fetchDepositsContext";
 import { FetchTransactionsProvider } from "./contexts/fetchTransactionsContext";
 import { FetchCardsProvider } from "./contexts/fetchCardsContext";
 import { FetchUsersProvider } from "./contexts/fetchUserContext";
+import GamblingPage from "./pages/Gambling";
 
 function App() {
   return (
@@ -28,7 +29,8 @@ function App() {
             {/* User Routes */}
             <Route path="/settings" element={<ProfileSettingsPage />} />
             <Route path="/home" element={<FetchTransactionsProvider><Home /></FetchTransactionsProvider>} />
-            
+            <Route path="/gambling" element={<GamblingPage/>} />
+
             {/* Customer Routes */}
             <Route path="/cards" element={<FetchCardsProvider><CardsPage /></FetchCardsProvider>} />
             <Route path="/loans" element={<FetchLoansProvider><LoansPage /></FetchLoansProvider>} />

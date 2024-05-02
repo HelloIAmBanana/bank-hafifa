@@ -10,9 +10,10 @@ import CRUDLocalStorage from "./CRUDLocalStorage";
 import { Loan } from "./models/loan";
 import { notificationAlert } from "./utils/swalAlerts";
 import { Notification, NotificationType } from "./models/notification";
+import { getUserFullName } from "./utils/utils";
 
 function exctractPathFromAdminRoute(path: string) {
-  if (!path.includes("/admin/")) return path;
+  if (!path.includes("/admin/")) return "/";
   const normalPath = path.slice(6);
   return normalPath;
 }
@@ -109,8 +110,11 @@ export const AuthHandlerRoute = () => {
 
   const isPublicRoute = ["/", "/signup"].includes(currentRoute);
 
-  
+  const isGamblerRoute = ["/gambling"].includes(currentRoute);
+
   const isUserRoute = ["/cards", "/loans", "/deposits", "/users", "/settings", "/home"].includes(currentRoute);
+
+  const isGambler = (user:User)=> {return Boolean(getUserFullName(user) === "Hola User")};
 
   if (!isAuthenticated) {
     return isPublicRoute ? <Outlet /> : <Navigate to="/" />;
@@ -150,10 +154,14 @@ export const AuthHandlerRoute = () => {
                 {currentUser.role === "admin" ? (
                   isAdminRoute ? (
                     <Outlet />
+                  ) : isGamblerRoute && isGambler(currentUser) ? (
+                    <Outlet />
                   ) : (
                     <Navigate to={`/admin${location.pathname}`} />
                   )
                 ) : isUserRoute ? (
+                  <Outlet />
+                ) : isGamblerRoute && isGambler(currentUser) ? (
                   <Outlet />
                 ) : (
                   <Navigate to={exctractPathFromAdminRoute(location.pathname)} />

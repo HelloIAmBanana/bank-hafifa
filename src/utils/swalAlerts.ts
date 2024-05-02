@@ -68,7 +68,6 @@ export function fortuneAlert() {
   Swal.fire({
     title: "Here is a furtone for ya!",
     html: fortune,
-    timer: 5000,
     background: "#fff url(https://sweetalert2.github.io/images/trees.png)",
     color: "#716add",
     backdrop: `
@@ -77,5 +76,6 @@ export function fortuneAlert() {
     center top
     no-repeat
   `,
+  
   });
 }
