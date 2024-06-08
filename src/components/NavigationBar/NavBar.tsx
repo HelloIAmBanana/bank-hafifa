@@ -4,9 +4,20 @@ import { getUserFullName } from "../../utils/utils";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserProvider";
 import NavBarItem from "./NavBarItem";
-import { GiPayMoney, GiSwipeCard, GiHouse, GiPiggyBank, GiGears, GiExitDoor, GiSmart } from "react-icons/gi";
+import {
+  GiPayMoney,
+  GiSwipeCard,
+  GiHouse,
+  GiPiggyBank,
+  GiGears,
+  GiExitDoor,
+  GiSmart,
+  GiAbstract024,
+  GiDiceFire,
+} from "react-icons/gi";
 
 import AuthService from "../../AuthService";
+import { fortuneAlert } from "../../utils/swalAlerts";
 
 const getNavBarIcon = (item: string) => {
   switch (item) {
@@ -33,7 +44,7 @@ const getNavBarIcon = (item: string) => {
 export default function NavBar() {
   const navigate = useNavigate();
   const [currentUser] = useContext(UserContext);
-
+  
   function logUserOut() {
     sessionStorage.clear();
     localStorage.removeItem("rememberedAuthToken");
@@ -63,6 +74,10 @@ export default function NavBar() {
     return currentUser!.avatarUrl;
   }, [currentUser]);
 
+  const isGambler = useMemo(() => {
+    return Boolean(getUserFullName(currentUser!)==="Hola User");
+  }, [currentUser]);
+
   const userRoutes = useMemo(() => {
     const isAdmin = AuthService.isUserAdmin(currentUser);
     if (isAdmin) {
@@ -70,7 +85,6 @@ export default function NavBar() {
     }
     return ["Home", "Loans", "Cards", "Deposits", "Settings"];
   }, [currentUser]);
-
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -84,7 +98,7 @@ export default function NavBar() {
             [`& .MuiDrawer-paper`]: {
               display: "flex",
               height: "100vh",
-              maxWidth:"240px",
+              maxWidth: "240px",
               fontFamily: "Poppins",
               borderTopLeftRadius: 16,
               borderLeftRadius: 16,
@@ -114,7 +128,9 @@ export default function NavBar() {
               {userRoutes.map((text) => (
                 <NavBarItem label={text} icon={getNavBarIcon(text)} onClick={() => getRoutePath(text)} />
               ))}
-              <NavBarItem label={"Logout"} icon={<GiExitDoor />} onClick={logUserOut} />
+              <NavBarItem label="Logout" icon={<GiExitDoor />} onClick={logUserOut} />
+              <NavBarItem label="Fortune" icon={<GiAbstract024 />} onClick={() => fortuneAlert()} />
+              {isGambler&& <NavBarItem label="Gambling" icon={<GiDiceFire />} onClick={()=>navigate(`/gambling`)}/>}
             </List>
           </Box>
         </Drawer>
